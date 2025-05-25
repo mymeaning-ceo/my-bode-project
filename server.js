@@ -45,8 +45,6 @@ app.get('/write', (요청, 응답)=>{
 
 app.post('/add', async (요청, 응답) => {
   console.log(요청.body)
-
-
   try {
     if (요청.body.title == '') {
       응답.send('제목안적었는데')
@@ -60,7 +58,19 @@ app.post('/add', async (요청, 응답) => {
   }
 
 })
-app.get('/detail/:aaaa', (요청, 응답) => {
-  응답.render('detail.ejs')
-})
+app.get('/detail/:id', async (요청, 응답) => {
+  try {
+    const result = await db.collection('post').findOne({
+      _id: new ObjectId(요청.params.id)
+    });
 
+    if (!result) {
+      return 응답.status(404).send('게시물을 찾을 수 없습니다.');
+    }
+
+    응답.render('detail.ejs', { 글 : result });
+  } catch (e) {
+    console.log(e);
+    응답.status(404).send('URL 오류');
+  }
+});
