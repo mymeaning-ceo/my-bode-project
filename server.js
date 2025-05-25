@@ -74,3 +74,9 @@ app.get('/detail/:id', async (요청, 응답) => {
     응답.status(404).send('URL 오류');
   }
 });
+
+
+app.get('/edit/:id', async (요청, 응답) => {
+  // await db.collection('post').findOne({_id : 1})
+  응답.render('edit.ejs')
+})
