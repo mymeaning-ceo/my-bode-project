@@ -11,20 +11,33 @@
   <%- include('nav.ejs') %>
 
   <div class="white-bg">
-    <% for (var i = 0; i < 글목록.length; i++){ %>
-
+    <% for (var i = 0; i < 글목록.length; i++) { %>
       <div class="white-box">
         <div class="list-box">
- 
-        <h4><a href="/detail/<%= 글목록[i]._id %>">
-          <%= 글목록[i].title %>
-        </a>
-        <a href="/edit">✏️</a>
-      </h4>
-        <p><%= 글목록[i].content %></p>
+          <h4>
+            <a href="/detail/<%= 글목록[i]._id %>">
+              <%= 글목록[i].title %>
+            </a>
+            <a href="/edit/<%= 글목록[i]._id %>">✏️</a>
+            <span class="delete">🗑</span>
+          </h4>
+          <p><%= 글목록[i].content %></p>
+        </div>
       </div>
-    
-    <% } %> 
+  <% } %>
+</div>
 
+<script>
+  document.querySelectorAll('.delete')[0]
+    .addEventListener('click', function () {
+      fetch('/abc', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ a: 1 })
+      });
+    });
+</script>
 </body>
 </html>

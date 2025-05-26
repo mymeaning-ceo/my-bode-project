@@ -1,11 +1,16 @@
 const express = require('express')
 const app = express()
+const { MongoClient, ObjectId } = require('mongodb')
+const methodOverride = require('method-override')
+
+
 app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs') 
 app.use(express.json())
 app.use(express.urlencoded({extended:true})) 
+app.use(methodOverride('_method')) 
 
-const { MongoClient, ObjectId } = require('mongodb')
+
 
 let db
 const url = 'mongodb+srv://andro3817:qwer1234@cluster0.2whurql.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
@@ -78,5 +83,31 @@ app.get('/detail/:id', async (요청, 응답) => {
 
 app.get('/edit/:id', async (요청, 응답) => {
   // await db.collection('post').findOne({_id : 1})
-  응답.render('edit.ejs')
+  let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id)})
+  console.log(result)
+  응답.render('edit.ejs', {result : result})
+})
+
+app.put('/edit', async (요청, 응답) => {
+  try {
+    await db.collection('post').updateOne(
+      { _id: new ObjectId(요청.body.id) },
+      {
+        $set: {
+          title: 요청.body.title,
+          content: 요청.body.content
+        }
+      }
+    );
+    응답.redirect('/list');
+  } catch (e) {
+    console.error('수정 중 오류 발생:', e);
+    응답.status(500).send('❌ 수정 실패');
+  }
+});
+
+app.post('/abc', async (요청, 응답) => {
+
+  console.log('안녕')
+  console.log(요청.body)
 })
