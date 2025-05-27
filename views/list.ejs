@@ -19,7 +19,7 @@
               <%= 글목록[i].title %>
             </a>
             <a href="/edit/<%= 글목록[i]._id %>">✏️</a>
-            <span class="delete">🗑</span>
+            <span class="delete" data-id="<%= 글목록[i]._id %>">🗑</span>
           </h4>
           <p><%= 글목록[i].content %></p>
         </div>
@@ -28,16 +28,32 @@
 </div>
 
 <script>
-  document.querySelectorAll('.delete')[0]
-    .addEventListener('click', function () {
-      fetch('/abc', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ a: 1 })
+  document.querySelectorAll('.delete').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const id = btn.dataset.id;
+
+      fetch('/delete?docid=' + encodeURIComponent(id), {
+        method: 'DELETE'
+      })
+      .then(응답 => {
+        if (응답.ok) {
+          alert('삭제 성공');
+          location.reload();
+        } else {
+          alert('삭제 실패');
+        }
+      })
+      .catch(오류 => {
+        console.error(오류);
+        alert('서버 오류');
       });
     });
+  });
 </script>
+
+
+
+
 </body>
 </html>

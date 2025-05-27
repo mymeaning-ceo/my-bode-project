@@ -106,8 +106,22 @@ app.put('/edit', async (요청, 응답) => {
   }
 });
 
-app.post('/abc', async (요청, 응답) => {
+app.delete('/delete', async (요청, 응답) => {
+  const id = 요청.query.docid;
 
-  console.log('안녕')
-  console.log(요청.body)
-})
+  // ❗ 잘못된 ID 방지
+  if (!ObjectId.isValid(id)) {
+    return 응답.status(400).send('잘못된 ID 형식입니다.');
+  }
+
+  try {
+    await db.collection('post').deleteOne({
+      _id: new ObjectId(id)
+    });
+    응답.send('삭제 완료');
+  } catch (e) {
+    console.log(e);
+    응답.status(500).send('삭제 실패');
+  }
+});
+
