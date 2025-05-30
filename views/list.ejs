@@ -15,17 +15,26 @@
       <div class="white-box">
         <div class="list-box">
           <h4>
-            <a href="/detail/<%= 글목록[i]._id %>">
-              <%= 글목록[i].title %>
-            </a>
+            <a href="/detail/<%= 글목록[i]._id %>"><%= 글목록[i].title %></a>
             <a href="/edit/<%= 글목록[i]._id %>">✏️</a>
             <span class="delete" data-id="<%= 글목록[i]._id %>">🗑</span>
           </h4>
           <p><%= 글목록[i].content %></p>
         </div>
       </div>
-  <% } %>
-</div>
+    <% } %>
+  </div>
+  
+  <div class="pagination">
+    <% for (let i = 1; i <= 전체페이지; i++) { %>
+      <% if (i === 현재페이지) { %>
+        <strong>[<%= i %>]</strong>
+      <% } else { %>
+        <a href="/list/<%= i %>">[<%= i %>]</a>
+      <% } %>
+    <% } %>
+  </div>
+  
 
 <script>
   document.querySelectorAll('.delete').forEach(function (btn) {
