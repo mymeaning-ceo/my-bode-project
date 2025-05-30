@@ -2,4 +2,11 @@
     <a class="logo" href="/">AppleForum</a>
     <a href="/list">list</a>
     <a href="/write">write</a>
-</div>
+  
+    <% if (유저) { %>
+      <a href="/mypage" style="position:absolute; top:10px; right:10px;">마이페이지</a>
+    <% } else { %>
+      <a href="/login" style="position:absolute; top:10px; right:10px;">로그인</a>
+    <% } %>
+  </div>
+  

@@ -9,6 +9,24 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 
+const session = require('express-session')
+const passport = require('passport')
+const LocalStrategy = require('passport-local')
+
+app.use(passport.initialize())
+app.use(session({
+  secret: '암호화에 쓸 비번',
+  resave : false,
+  saveUninitialized : false,
+  cookie : { maxAge : 60 * 60 * 1000}
+}))
+
+app.use(passport.session()) 
+app.use((요청, 응답, next) => {
+  응답.locals.유저 = 요청.user;  // 모든 ejs에서 유저 변수 사용 가능
+  next();
+});
+
 let db
 const url = 'mongodb+srv://andro3817:qwer1234@cluster0.2whurql.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 
@@ -31,9 +49,19 @@ app.get('/news', (요청, 응답) => {
 })
 
 app.get('/list', async (요청, 응답) => {
-  let result = await db.collection('post').find().toArray()
-  응답.render('list.ejs', { 글목록: result })
-})
+  const limit = 5;
+  const page = 1;
+  const total = await db.collection('post').countDocuments();
+  const totalPage = Math.ceil(total / limit);
+  const result = await db.collection('post').find().skip(0).limit(limit).toArray();
+
+  응답.render('list.ejs', {
+    글목록: result,
+    현재페이지: page,
+    전체페이지: totalPage
+  });
+});
+
 
 app.get('/time', (요청, 응답) => {
   응답.render('time.ejs', { data: new Date() })
@@ -117,19 +145,79 @@ app.delete('/delete', async (요청, 응답) => {
 })
 
 app.get(['/list', '/list/:page'], async (요청, 응답) => {
-  const page = parseInt(요청.params.page || '1')
-  const limit = 5
-  const skip = (page - 1) * limit
+  const page = parseInt(요청.params.page || '1');
+  const limit = 5;
+  const skip = (page - 1) * limit;
 
-  const total = await db.collection('post').countDocuments()
-  const totalPage = Math.ceil(total / limit)
+  const total = await db.collection('post').countDocuments();
+  const totalPage = Math.ceil(total / limit);
 
   const result = await db.collection('post')
-    .find().skip(skip).limit(limit).toArray()
+    .find().skip(skip).limit(limit).toArray();
 
   응답.render('list.ejs', {
     글목록: result,
     현재페이지: page,
     전체페이지: totalPage
+  });
+});
+
+passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) => {
+  let result = await db.collection('user').findOne({ username : 입력한아이디})
+  if (!result) {
+    return cb(null, false, { message: '아이디 DB에 없음' })
+  }
+  if (result.password == 입력한비번) {
+    return cb(null, result)
+  } else {
+    return cb(null, false, { message: '비번불일치' });
+  }
+}))
+
+passport.serializeUser((user, done) => {
+  console.log(user)
+  process.nextTick(() => {
+    done(null, { id: user._id, username: user.username })
   })
 })
+
+passport.deserializeUser(async (user, done) => {
+  let result = await db.collection('user').findOne({_id : new ObjectId(user.id)})
+  delete result.password
+  process.nextTick(() => {
+   done(null, result)
+  })
+})
+
+
+
+app.get('/login', async (요청, 응답) => {
+  console.log(요청.user)
+  응답.render('login.ejs')
+})
+
+app.post('/login', async (요청, 응답, next) => {
+
+  passport.authenticate('local', (error, user, info) => {
+      if (error) return 응답.status(500).json(error)
+      if (!user) return 응답.status(401).json(info.message)
+      요청.logIn(user, (err) => {
+        if (err) return next(err)
+        응답.redirect('/')
+      })
+  })(요청, 응답, next)
+
+}) 
+
+function 로그인했니(요청, 응답, next) {
+  if (요청.isAuthenticated()) {
+    return next();
+  } else {
+    응답.redirect('/login');
+  }
+}
+
+app.get('/mypage', 로그인했니, (요청, 응답) => {
+  응답.render('mypage.ejs', { 유저: 요청.user });
+});
+
