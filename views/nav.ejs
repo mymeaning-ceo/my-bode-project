@@ -1,12 +1,13 @@
 <div class="nav">
-    <a class="logo" href="/">AppleForum</a>
-    <a href="/list">list</a>
+  <a class="logo" href="/">AppleForum</a>
+  <a href="/list">list</a>
+
+  <% if (유저) { %>
     <a href="/write">write</a>
-  
-    <% if (유저) { %>
-      <a href="/mypage" style="position:absolute; top:10px; right:10px;">마이페이지</a>
-    <% } else { %>
-      <a href="/login" style="position:absolute; top:10px; right:10px;">로그인</a>
-    <% } %>
-  </div>
-  
+    <a href="/mypage" style="position:absolute; top:10px; right:100px;">마이페이지</a>
+    <a href="/logout" style="position:absolute; top:10px; right:10px;">로그아웃</a>
+  <% } else { %>
+    <a href="/register" style="position:absolute; top:10px; right:100px;">회원가입</a>
+    <a href="/login" style="position:absolute; top:10px; right:10px;">로그인</a>
+  <% } %>
+</div>
