@@ -33,25 +33,7 @@ app.use(passport.initialize())
 app.use(passport.session()) 
 
 const { S3Client } = require('@aws-sdk/client-s3')
-const multer = require('multer')
-const multerS3 = require('multer-s3')
-const s3 = new S3Client({
-  region : 'ap-northeast-2',
-  credentials : {
-      accessKeyId : process.env.S3_KEY,
-      secretAccessKey : process.env.S3_SECRET,
-  }
-})
-
-const upload = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: 'wonhochoi1',
-    key: function (요청, file, cb) {
-      cb(null, Date.now().toString()) //업로드시 파일명 변경가능
-    }
-  })
-})
+const upload = require('./upload.js'); // post.js 등에서
 
 
 app.use((요청, 응답, next) => {
@@ -59,9 +41,10 @@ app.use((요청, 응답, next) => {
   next();
 });
 
+let connectDB = require('./database.js')
+
 let db
-const url = process.env.DB_URL;
-new MongoClient(url).connect().then((client) => {
+connectDB.then((client)=>{
   console.log('DB연결성공')
   db = client.db('forum')
   const PORT = process.env.PORT || 8080;
@@ -73,13 +56,11 @@ new MongoClient(url).connect().then((client) => {
 })
 
 
-function 로그인했니(요청, 응답, next) {
-  if (요청.isAuthenticated()) {
-    return next();
-  } else {
-    응답.redirect('/login');
-  }
-}
+const { checkLogin } = require('./middlewares/auth');
+app.get('/secure', checkLogin, (요청, 응답) => {
+  응답.send('로그인 사용자') 
+
+})
 
 
 app.get('/', function (요청, 응답) {
@@ -109,90 +90,7 @@ app.get('/time', (요청, 응답) => {
   응답.render('time.ejs', { data: new Date() })
 })
 
-app.get('/write', 로그인했니, (요청, 응답) => {
-  응답.render('write.ejs')
-})
-
-app.post('/add', upload.single('img1'), 로그인했니, async (요청, 응답) => {
-  console.log('파일:', 요청.file.location); // undefined이면 upload.single 문제
-  console.log('본문:', 요청.body);
-  await db.collection('post').insertOne({
-    title : 요청.body.title,
-    content : 요청.body.content,
-    img : 요청.file.location
-  })
-
-//   try {
-//     if (요청.body.title == '') {
-//       응답.send('제목안적었는데')
-//     } else {
-//       await db.collection('post').insertOne({
-//         title: 요청.body.title,
-//         content: 요청.body.content
-//       })
-//       응답.redirect('/list')
-//     }
-//   } catch (e) {
-//     console.log(e)
-//     응답.status(500).send('서버에러남')
-//   }
-})
-
-app.get('/detail/:id', async (요청, 응답) => {
-  try {
-    const result = await db.collection('post').findOne({
-      _id: new ObjectId(요청.params.id)
-    })
-
-    if (!result) {
-      return 응답.status(404).send('게시물을 찾을 수 없습니다.')
-    }
-
-    응답.render('detail.ejs', { 글: result })
-  } catch (e) {
-    console.log(e)
-    응답.status(404).send('URL 오류')
-  }
-})
-
-app.get('/edit/:id', async (요청, 응답) => {
-  let result = await db.collection('post').findOne({ _id: new ObjectId(요청.params.id) })
-  응답.render('edit.ejs', { result: result })
-})
-
-app.put('/edit', async (요청, 응답) => {
-  try {
-    await db.collection('post').updateOne(
-      { _id: new ObjectId(요청.body.id) },
-      {
-        $set: {
-          title: 요청.body.title,
-          content: 요청.body.content
-        }
-      }
-    )
-    응답.redirect('/list')
-  } catch (e) {
-    console.error('수정 중 오류 발생:', e)
-    응답.status(500).send('❌ 수정 실패')
-  }
-})
-
-app.delete('/delete', async (요청, 응답) => {
-  const id = 요청.query.docid
-
-  if (!ObjectId.isValid(id)) {
-    return 응답.status(400).send('잘못된 ID 형식입니다.')
-  }
-
-  try {
-    await db.collection('post').deleteOne({ _id: new ObjectId(id) })
-    응답.send('삭제 완료')
-  } catch (e) {
-    console.log(e)
-    응답.status(500).send('삭제 실패')
-  }
-})
+app.use('/', require('./routes/post.js'))
 
 app.get(['/list', '/list/:page'], async (요청, 응답) => {
   const page = parseInt(요청.params.page || '1');
@@ -259,7 +157,7 @@ app.post('/login', (요청, 응답, next) => {
 
 
 
-app.get('/mypage', 로그인했니, (요청, 응답) => {
+app.get('/mypage', checkLogin, (요청, 응답) => {
   응답.render('mypage.ejs', { 유저: 요청.user });
 });
 
@@ -299,4 +197,6 @@ app.get('/logout', (요청, 응답) => {
   });
 });
 
+app.use('/shop', require('./routes/shop.js') )
 
+app.use('/board/sub', require('./routes/board.js') )
