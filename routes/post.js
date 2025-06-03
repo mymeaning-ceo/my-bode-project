@@ -1,88 +1,118 @@
-const express = require('express')
-const router = express.Router()
-const { ObjectId } = require('mongodb')
-const { checkLogin } = require('../middlewares/auth')
-
-let db
-const connectDB = require('../database')
-connectDB.then((client) => {
-  db = client.db('forum')
-})
-
+const express = require('express');
+const router = express.Router();
+const { ObjectId } = require('mongodb');
+const { checkLogin } = require('../middlewares/auth');
 const upload = require('../upload.js');
 
-router.get('/write', checkLogin, (요청, 응답) => {
-    응답.render('write.ejs')
-  })
-  
-  router.post('/add', upload.single('img1'), checkLogin, async (요청, 응답) => {
-    console.log('파일:', 요청.file.location); // undefined이면 upload.single 문제
-    console.log('본문:', 요청.body);
+let db;
+const connectDB = require('../database');
+connectDB.then(client => db = client.db('forum'));
+
+// 글쓰기 페이지
+router.get('/write', checkLogin, (req, res) => {
+  res.render('write.ejs');
+});
+
+// 글 등록
+router.post('/add', upload.single('img1'), checkLogin, async (req, res) => {
+  try {
+    const imgLocation = req.file ? req.file.location : '';
     await db.collection('post').insertOne({
-      title : 요청.body.title,
-      content : 요청.body.content,
-      img : 요청.file.location
-    })
-  })
-  
-  router.get('/detail/:id', async (요청, 응답) => {
-    try {
-      const result = await db.collection('post').findOne({
-        _id: new ObjectId(요청.params.id)
-      })
-  
-      if (!result) {
-        return 응답.status(404).send('게시물을 찾을 수 없습니다.')
-      }
-  
-      응답.render('detail.ejs', { 글: result })
-    } catch (e) {
-      console.log(e)
-      응답.status(404).send('URL 오류')
-      console.log('요청 ID:', 요청.params.id);
-      console.log('조회 결과:', result);
+      title: req.body.title,
+      content: req.body.content,
+      img: imgLocation,
+      user: req.user._id,
+      username: req.user.username,
+      createdAt: new Date()
+    });
     
-    }
-  })
+    res.redirect('/list');
+  } catch (e) {
+    console.error('📌 게시글 등록 오류:', e);
+    res.status(500).send('서버 오류');
+  }
+});
 
+// 글 상세 페이지
+router.get('/detail/:id', async (req, res) => {
+  try {
+    const result = await db.collection('post').findOne({
+      _id: new ObjectId(req.params.id)
+    });
 
-  router.get('/edit/:id', async (요청, 응답) => {
-    let result = await db.collection('post').findOne({ _id: new ObjectId(요청.params.id) })
-    응답.render('edit.ejs', { result: result })
-  })
-  
-  router.put('/edit', async (요청, 응답) => {
-    try {
-      await db.collection('post').updateOne(
-        { _id: new ObjectId(요청.body.id) },
-        {
-          $set: {
-            title: 요청.body.title,
-            content: 요청.body.content
-          }
+    if (!result) return res.status(404).send('게시물을 찾을 수 없습니다.');
+    res.render('detail.ejs', { 글: result });
+  } catch (e) {
+    console.error('❌ 상세 페이지 오류:', e);
+    res.status(404).send('URL 오류');
+  }
+});
+
+// 글 수정 페이지
+router.get('/edit/:id', checkLogin, async (req, res) => {
+  try {
+    const result = await db.collection('post').findOne({
+      _id: new ObjectId(req.params.id),
+      user: req.user._id
+    });
+
+    if (!result) return res.status(403).send('수정 권한이 없습니다.');
+    res.render('edit.ejs', { result });
+  } catch (e) {
+    console.error('❌ 수정 페이지 오류:', e);
+    res.status(500).send('서버 오류');
+  }
+});
+
+// 글 수정 처리
+router.put('/edit', checkLogin, async (req, res) => {
+  try {
+    const 수정결과 = await db.collection('post').updateOne(
+      {
+        _id: new ObjectId(req.body.id),
+        user: new ObjectId(req.user._id)
+      },
+      {
+        $set: {
+          title: req.body.title,
+          content: req.body.content
         }
-      )
-      응답.redirect('/list')
-    } catch (e) {
-      console.error('수정 중 오류 발생:', e)
-      응답.status(500).send('❌ 수정 실패')
-    }
-  })
-  
-  router.delete('/delete', async (요청, 응답) => {
-    const id = 요청.query.docid
-  
-    if (!ObjectId.isValid(id)) {
-      return 응답.status(400).send('잘못된 ID 형식입니다.')
-    }
-  
-    try {
-      await db.collection('post').deleteOne({ _id: new ObjectId(id) })
-      응답.send('삭제 완료')
-    } catch (e) {
-      console.log(e)
-      응답.status(500).send('삭제 실패')
-    }
-  })
+      }
+    );
 
-  module.exports = router
+    if (수정결과.matchedCount === 0) {
+      return res.status(403).send('수정 권한이 없습니다.');
+    }
+
+    res.redirect('/list');
+  } catch (e) {
+    console.error('❌ 수정 중 오류 발생:', e);
+    res.status(500).send('수정 실패');
+  }
+});
+
+// 글 삭제
+router.delete('/delete', checkLogin, async (req, res) => {
+  try {
+    const postId = req.query.docid;
+    if (!ObjectId.isValid(postId)) {
+      return res.status(400).send('유효하지 않은 ID입니다.');
+    }
+
+    const result = await db.collection('post').deleteOne({
+      _id: new ObjectId(postId),
+      user: new ObjectId(req.user._id)
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(403).send('삭제 권한이 없거나 게시글이 존재하지 않습니다.');
+    }
+
+    res.status(200).send('삭제 성공');
+  } catch (err) {
+    console.error('❌ 삭제 오류:', err);
+    res.status(500).send('서버 오류');
+  }
+});
+
+module.exports = router;

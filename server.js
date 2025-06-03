@@ -17,6 +17,12 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const MongoStore = require('connect-mongo')
 
+// 로그인된 사용자 정보를 EJS에서 사용 가능하도록 설정
+app.use((req, res, next) => {
+  res.locals.유저 = req.user;
+  next();
+});
+
 
 app.use(session({
   resave : false,
@@ -41,6 +47,8 @@ app.use((요청, 응답, next) => {
   next();
 });
 
+
+
 let connectDB = require('./database.js')
 
 let db
@@ -63,9 +71,19 @@ app.get('/secure', checkLogin, (요청, 응답) => {
 })
 
 
-app.get('/', function (요청, 응답) {
-  응답.sendFile(__dirname + '/index.html')
-})
+const path = require('path');
+
+app.get('/', (req, res) => {
+  if (req.isAuthenticated()) {
+    // 로그인된 유저 → public/dashboard.html
+    return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  } else {
+    // 비로그인 유저 → public/index.html
+    return res.sendFile(path.join(__dirname, 'index.html'));
+  }
+});
+
+
 
 app.get('/news', (요청, 응답) => {
   db.collection('post').insertOne({ title: '어쩌구' })
@@ -146,14 +164,15 @@ app.get('/login', (요청, 응답) => {
 
 app.post('/login', (요청, 응답, next) => {
   passport.authenticate('local', (error, user, info) => {
-    if (error) return 응답.status(500).json(error)
-    if (!user) return 응답.status(401).json(info.message)
+    if (error) return 응답.status(500).json(error);
+    if (!user) return 응답.status(401).json(info.message);
+
     요청.logIn(user, (err) => {
-      if (err) return next(err)
-      응답.redirect(요청.body.redirectTo || '/')
-    })
-  })(요청, 응답, next)
-})
+      if (err) return next(err);
+      응답.redirect('/dashboard.html');  // ✅ 로그인 후 이동할 페이지
+    });
+  })(요청, 응답, next);
+});
 
 
 
@@ -197,6 +216,9 @@ app.get('/logout', (요청, 응답) => {
   });
 });
 
-app.use('/shop', require('./routes/shop.js') )
 
+app.use('/shop', require('./routes/shop.js') )
 app.use('/board/sub', require('./routes/board.js') )
+app.use('/search', require('./routes/search.js'));
+app.use('/stock', require('./routes/stock.js'));
+app.use('/', require('./routes/auth.js'));

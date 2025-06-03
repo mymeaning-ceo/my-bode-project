@@ -1,13 +1,43 @@
-<div class="nav">
-  <a class="logo" href="/">AppleForum</a>
-  <a href="/list">list</a>
+<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm px-4">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold text-dark" href="/">🩲 내의미</a>
 
-  <% if (유저) { %>
-    <a href="/write">write</a>
-    <a href="/mypage" style="position:absolute; top:10px; right:100px;">마이페이지</a>
-    <a href="/logout" style="position:absolute; top:10px; right:10px;">로그아웃</a>
-  <% } else { %>
-    <a href="/register" style="position:absolute; top:10px; right:100px;">회원가입</a>
-    <a href="/login" style="position:absolute; top:10px; right:10px;">로그인</a>
-  <% } %>
-</div>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <% if (유저) { %>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/list">📋 목록</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/stock">📦 재고관리</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/write">✍ 작성</a>
+          </li>
+        <% } %>
+      </ul>
+
+      <ul class="navbar-nav mb-2 mb-lg-0">
+        <% if (유저) { %>
+          <li class="nav-item">
+            <span class="nav-link text-muted">👤 <%= 유저.username %></span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-danger" href="/logout">🚪 로그아웃</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/register">📝 회원가입</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/login">🔐 로그인</a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
