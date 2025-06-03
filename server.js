@@ -25,18 +25,18 @@ app.use((req, res, next) => {
 
 
 app.use(session({
-  resave : false,
-  saveUninitialized : false,
-  secret: '세션 암호화 비번~~',
-  cookie : {maxAge : 60 * 60 * 1000},
+  secret: '비밀키',
+  resave: false,
+  saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl : process.env.DB_URL,
-    dbName: 'forum',
-  })
-})) 
+    mongoUrl: process.env.DB_URL,
+    dbName: 'forum'
+  }),
+  cookie: { maxAge: 60 * 60 * 1000 }  // 1시간
+}));
 
-app.use(passport.initialize())
-app.use(passport.session()) 
+app.use(passport.initialize());
+app.use(passport.session());
 
 const { S3Client } = require('@aws-sdk/client-s3')
 const upload = require('./upload.js'); // post.js 등에서
@@ -210,9 +210,10 @@ app.post('/register', async (요청, 응답) => {
 });
 
 
-app.get('/logout', (요청, 응답) => {
-  요청.logout(() => {
-    응답.redirect('/');
+app.get('/logout', (req, res, next) => {
+  req.logout(err => {
+    if (err) return next(err);
+    res.redirect('/login');
   });
 });
 

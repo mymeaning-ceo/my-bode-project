@@ -11,4 +11,8 @@ router.get('/sports', checkLogin, (요청, 응답) => {
     응답.send('게임 게시판')
  })
  
+ router.get('/list', checkLogin, (요청, 응답) => {
+   응답.send('/')
+})
+
  module.exports = router 

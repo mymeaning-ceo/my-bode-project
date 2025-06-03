@@ -8,12 +8,25 @@ let db;
 const connectDB = require('../database');
 connectDB.then(client => db = client.db('forum'));
 
-// 글쓰기 페이지
-router.get('/write', checkLogin, (req, res) => {
-  res.render('write.ejs');
+
+// 🔹 글 목록 (로그인 필요)
+router.get('/list', checkLogin, async (req, res) => {
+  try {
+    const result = await db.collection('post').find().sort({ createdAt: -1 }).toArray();
+    res.render('list.ejs', { 글목록: result, 유저: req.user });
+  } catch (e) {
+    console.error('❌ 목록 오류:', e);
+    res.status(500).send('서버 오류');
+  }
 });
 
-// 글 등록
+
+// 🔹 글쓰기 페이지 (로그인 필요)
+router.get('/write', checkLogin, (req, res) => {
+  res.render('write.ejs', { 유저: req.user });
+});
+
+// 🔹 글 등록 처리 (로그인 필요 + 이미지 업로드)
 router.post('/add', upload.single('img1'), checkLogin, async (req, res) => {
   try {
     const imgLocation = req.file ? req.file.location : '';
@@ -25,7 +38,7 @@ router.post('/add', upload.single('img1'), checkLogin, async (req, res) => {
       username: req.user.username,
       createdAt: new Date()
     });
-    
+
     res.redirect('/list');
   } catch (e) {
     console.error('📌 게시글 등록 오류:', e);
@@ -33,22 +46,24 @@ router.post('/add', upload.single('img1'), checkLogin, async (req, res) => {
   }
 });
 
-// 글 상세 페이지
-router.get('/detail/:id', async (req, res) => {
+
+// 🔹 글 상세 보기 (로그인 필요)
+router.get('/detail/:id', checkLogin, async (req, res) => {
   try {
     const result = await db.collection('post').findOne({
       _id: new ObjectId(req.params.id)
     });
 
     if (!result) return res.status(404).send('게시물을 찾을 수 없습니다.');
-    res.render('detail.ejs', { 글: result });
+    res.render('detail.ejs', { 게시물: result, 유저: req.user });
   } catch (e) {
     console.error('❌ 상세 페이지 오류:', e);
     res.status(404).send('URL 오류');
   }
 });
 
-// 글 수정 페이지
+
+// 🔹 글 수정 페이지 (로그인 필요)
 router.get('/edit/:id', checkLogin, async (req, res) => {
   try {
     const result = await db.collection('post').findOne({
@@ -64,7 +79,7 @@ router.get('/edit/:id', checkLogin, async (req, res) => {
   }
 });
 
-// 글 수정 처리
+// 🔹 글 수정 처리 (로그인 필요)
 router.put('/edit', checkLogin, async (req, res) => {
   try {
     const 수정결과 = await db.collection('post').updateOne(
@@ -91,7 +106,7 @@ router.put('/edit', checkLogin, async (req, res) => {
   }
 });
 
-// 글 삭제
+// 🔹 글 삭제 (로그인 필요)
 router.delete('/delete', checkLogin, async (req, res) => {
   try {
     const postId = req.query.docid;
@@ -114,5 +129,10 @@ router.delete('/delete', checkLogin, async (req, res) => {
     res.status(500).send('서버 오류');
   }
 });
+
+router.get('/list', checkLogin, (요청, 응답) => {
+  응답.send('/')
+})
+
 
 module.exports = router;
