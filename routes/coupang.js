@@ -42,9 +42,32 @@ const COUPANG_ADD_COLUMNS = process.env.COUPANG_ADD_COLUMNS
 // default inventory page
 router.get('/', async (req, res) => {
   try {
-    const result = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
-    const fields = COUPANG_COLUMNS || (result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : []);
-    res.render('coupang.ejs', { 결과: result, 필드: fields, 성공메시지: null });
+    const result = await db
+      .collection('coupang')
+      .find()
+      .sort({ 'Product name': 1 })
+      .toArray();
+
+    const allFields = result[0]
+      ? Object.keys(result[0]).filter(k => k !== '_id')
+      : [];
+
+    let selected = req.query.fields;
+    if (selected) {
+      if (!Array.isArray(selected)) selected = selected.split(',');
+      selected = selected.map(f => f.trim()).filter(f => allFields.includes(f));
+    }
+
+    const fields = selected && selected.length > 0
+      ? selected
+      : (COUPANG_COLUMNS || allFields);
+
+    res.render('coupang.ejs', {
+      결과: result,
+      필드: fields,
+      전체필드: allFields,
+      성공메시지: null
+    });
   } catch (err) {
     console.error('목록 조회 오류:', err);
     res.status(500).send('❌ 재고 목록 불러오기 실패');
@@ -95,11 +118,20 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
       if (err) console.error('파일 삭제 실패:', err);
     });
 
-    const resultArray = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
-    const fields = COUPANG_COLUMNS || (resultArray[0] ? Object.keys(resultArray[0]).filter(k => k !== '_id') : []);
+    const resultArray = await db
+      .collection('coupang')
+      .find()
+      .sort({ 'Product name': 1 })
+      .toArray();
+    const allFields = resultArray[0]
+      ? Object.keys(resultArray[0]).filter(k => k !== '_id')
+      : [];
+    const fields = COUPANG_COLUMNS || allFields;
+
     res.render('coupang.ejs', {
       결과: resultArray,
       필드: fields,
+      전체필드: allFields,
       성공메시지: '✅ 엑셀 업로드가 완료되었습니다!'
     });
   } catch (err) {
@@ -122,8 +154,24 @@ router.get('/search', async (req, res) => {
       ]
     }).toArray();
 
-    const fields = COUPANG_COLUMNS || (result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : []);
-    res.render('coupang.ejs', { 결과: result, 필드: fields, 성공메시지: null });
+    const allFields = result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : [];
+
+    let selected = req.query.fields;
+    if (selected) {
+      if (!Array.isArray(selected)) selected = selected.split(',');
+      selected = selected.map(f => f.trim()).filter(f => allFields.includes(f));
+    }
+
+    const fields = selected && selected.length > 0
+      ? selected
+      : (COUPANG_COLUMNS || allFields);
+
+    res.render('coupang.ejs', {
+      결과: result,
+      필드: fields,
+      전체필드: allFields,
+      성공메시지: null
+    });
   } catch (err) {
     console.error('검색 오류:', err);
     res.status(500).send('❌ 검색 실패');
