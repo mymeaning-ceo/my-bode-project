@@ -14,22 +14,34 @@
 
     <div class="collapse navbar-collapse" id="navbarContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <% if (유저) { %>
+        <% if (유저) { 
+             const isSuper = 유저.username === 'admin';
+             const perms = navPerms || []; %>
+          <% if (!perms.length || isSuper || perms.includes('/list')) { %>
           <li class="nav-item">
             <a class="nav-link text-dark" href="/list">📋 게시판</a>
           </li>
+          <% } %>
+          <% if (!perms.length || isSuper || perms.includes('/stock')) { %>
           <li class="nav-item">
             <a class="nav-link text-dark" href="/stock">📦 재고관리</a>
           </li>
+          <% } %>
+          <% if (!perms.length || isSuper || perms.includes('/coupang')) { %>
           <li class="nav-item">
             <a class="nav-link text-dark" href="/coupang">🛒 쿠팡재고</a>
           </li>
+          <% } %>
+          <% if (!perms.length || isSuper || perms.includes('/write')) { %>
           <li class="nav-item">
             <a class="nav-link text-dark" href="/write">✍ 글작성</a>
           </li>
+          <% } %>
+          <% if (isSuper || perms.includes('/admin')) { %>
           <li class="nav-item">
             <a class="nav-link text-dark" href="/admin">🛠 관리자</a>
           </li>
+          <% } %>
         <% } %>
       </ul>
 

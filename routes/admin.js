@@ -63,4 +63,44 @@ router.post('/permissions', checkAdmin, async (req, res) => {
   res.redirect('/admin/permissions');
 });
 
+// ===== 네비게이션 권한 설정 =====
+const navItems = ['/list', '/stock', '/coupang', '/write', '/admin'];
+
+router.get('/nav', checkAdmin, async (req, res) => {
+  const docs = await db.collection('navPermissions').find().toArray();
+  const perms = {};
+  docs.forEach(d => { perms[d.username] = d.items || []; });
+  res.render('admin/nav-permissions.ejs', { navItems, perms });
+});
+
+router.post('/nav', checkAdmin, async (req, res) => {
+  const { username } = req.body;
+  const selected = req.body.navItem || [];
+  const arr = Array.isArray(selected) ? selected : [selected];
+  await db.collection('navPermissions').updateOne(
+    { username },
+    { $set: { username, items: arr } },
+    { upsert: true }
+  );
+  if (global.loadNavPermissions) await global.loadNavPermissions();
+  res.redirect('/admin/nav');
+});
+
+// ===== 대시보드 메시지 설정 =====
+router.get('/dashboard-settings', checkAdmin, async (req, res) => {
+  const doc = await db.collection('homepage').findOne({ key: 'dashboardMessage' });
+  res.render('admin/dashboard-settings.ejs', { message: doc?.text || '' });
+});
+
+router.post('/dashboard-settings', checkAdmin, async (req, res) => {
+  const text = req.body.message || '';
+  await db.collection('homepage').updateOne(
+    { key: 'dashboardMessage' },
+    { $set: { text, updatedAt: new Date() } },
+    { upsert: true }
+  );
+  if (global.loadDashboardMessage) await global.loadDashboardMessage();
+  res.redirect('/admin/dashboard-settings');
+});
+
 module.exports = router;
