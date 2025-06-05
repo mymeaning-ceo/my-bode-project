@@ -10,10 +10,28 @@ connectDB.then(client => db = client.db('forum'));
 
 
 // 🔹 글 목록 (로그인 필요)
-router.get('/list', checkLogin, async (req, res) => {
+router.get(['/list', '/list/:page'], checkLogin, async (req, res) => {
   try {
-    const result = await db.collection('post').find().sort({ createdAt: -1 }).toArray();
-    res.render('list.ejs', { 글목록: result, 유저: req.user });
+    const page = parseInt(req.params.page || '1');
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const total = await db.collection('post').countDocuments();
+    const totalPage = Math.ceil(total / limit);
+
+    const result = await db.collection('post')
+      .find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    res.render('list.ejs', {
+      글목록: result,
+      유저: req.user,
+      현재페이지: page,
+      전체페이지: totalPage
+    });
   } catch (e) {
     console.error('❌ 목록 오류:', e);
     res.status(500).send('서버 오류');

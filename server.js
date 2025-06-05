@@ -128,19 +128,6 @@ app.get('/news', (요청, 응답) => {
   db.collection('post').insertOne({ title: '어쩌구' })
 })
 
-app.get('/list', async (요청, 응답) => {
-  const limit = 5;
-  const page = 1;
-  const total = await db.collection('post').countDocuments();
-  const totalPage = Math.ceil(total / limit);
-  const result = await db.collection('post').find().skip(0).limit(limit).toArray();
-
-  응답.render('list.ejs', {
-    글목록: result,
-    현재페이지: page,
-    전체페이지: totalPage
-  });
-});
 
 
 app.get('/time', (요청, 응답) => {
@@ -153,14 +140,18 @@ app.use('/admin', require('./routes/admin.js'))
 
 app.get(['/list', '/list/:page'], async (요청, 응답) => {
   const page = parseInt(요청.params.page || '1');
-  const limit = 5;
+  const limit = 10;
   const skip = (page - 1) * limit;
 
   const total = await db.collection('post').countDocuments();
   const totalPage = Math.ceil(total / limit);
 
   const result = await db.collection('post')
-    .find().skip(skip).limit(limit).toArray();
+    .find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .toArray();
 
   응답.render('list.ejs', {
     글목록: result,
@@ -304,5 +295,6 @@ app.use('/board/sub', require('./routes/board.js') )
 app.use('/search', require('./routes/search.js'));
 app.use('/stock', require('./routes/stock.js'));
 app.use('/coupang', require('./routes/coupang.js'));
+app.use('/coupang/add', require('./routes/coupangAdd.js'));
 app.use('/', require('./routes/auth.js'));
 
