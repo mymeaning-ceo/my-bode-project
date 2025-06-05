@@ -26,6 +26,23 @@ async function loadPermissions() {
 }
 global.loadPermissions = loadPermissions
 
+let navPermissions = {}
+async function loadNavPermissions() {
+  if (!db) return
+  const docs = await db.collection('navPermissions').find().toArray()
+  navPermissions = {}
+  docs.forEach(d => { navPermissions[d.username] = d.items || [] })
+}
+global.loadNavPermissions = loadNavPermissions
+
+let dashboardMessage = ''
+async function loadDashboardMessage() {
+  if (!db) return
+  const doc = await db.collection('homepage').findOne({ key: 'dashboardMessage' })
+  dashboardMessage = doc?.text || ''
+}
+global.loadDashboardMessage = loadDashboardMessage
+
 
 app.use(session({
   secret: '비밀키',
@@ -72,6 +89,17 @@ app.use(async (req, res, next) => {
   next();
 });
 
+// 네비게이션 권한과 대시보드 메시지
+app.use((req, res, next) => {
+  if (req.user) {
+    res.locals.navPerms = navPermissions[req.user.username] || [];
+  } else {
+    res.locals.navPerms = [];
+  }
+  res.locals.dashboardMessage = dashboardMessage;
+  next();
+});
+
 
 
 let connectDB = require('./database.js')
@@ -81,6 +109,8 @@ connectDB.then((client)=>{
   console.log('DB연결성공')
   db = client.db('forum')
   loadPermissions();
+  loadNavPermissions();
+  loadDashboardMessage();
   const PORT = process.env.PORT || 8080;
   app.listen(PORT, () => {
     console.log(`http://localhost:${PORT} 에서 서버 실행중`);
@@ -101,11 +131,11 @@ const path = require('path');
 app.get('/', async (req, res) => {
 
   if (req.isAuthenticated()) {
-    // 로그인된 유저 → public/dashboard.html
-    return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+    // 로그인된 유저 → 대시보드 페이지 렌더링
+    return res.render('dashboard.ejs');
   } else {
-    // 비로그인 유저 → index 페이지 렌더링
-     return res.render('index.ejs', { hero: res.locals.logo });
+    // 비로그인 유저 → 메인 페이지 렌더링
+    return res.render('index.ejs', { hero: res.locals.logo });
   }
 })
 
@@ -135,6 +165,11 @@ app.get('/time', (요청, 응답) => {
 app.use('/', require('./routes/post.js'))
 
 app.use('/admin', require('./routes/admin.js'))
+
+// 대시보드 페이지
+app.get('/dashboard', checkLogin, (req, res) => {
+  res.render('dashboard.ejs');
+})
 
 app.get(['/list', '/list/:page'], async (요청, 응답) => {
   const page = parseInt(요청.params.page || '1');
@@ -195,7 +230,7 @@ app.post('/login', (요청, 응답, next) => {
 
     요청.logIn(user, (err) => {
       if (err) return next(err);
-      응답.redirect('/dashboard.html');  // ✅ 로그인 후 이동할 페이지
+      응답.redirect('/dashboard');  // ✅ 로그인 후 이동할 페이지
     });
   })(요청, 응답, next);
 });
