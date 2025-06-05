@@ -32,11 +32,16 @@ const 한글 = {
 
 const DEFAULT_COLUMNS = Object.keys(한글);
 
+// 공통 필드 추출 함수 (중복 제거)
+function getAllFields(resultArray) {
+  return resultArray[0] ? Object.keys(resultArray[0]).filter(k => k !== '_id') : [];
+}
+
 // 기본 목록 페이지
 router.get('/', async (req, res) => {
   try {
     const result = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
-    const allFields = result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : [];
+    const allFields = getAllFields(result);
     let selected = req.query.fields;
     if (selected && !Array.isArray(selected)) selected = selected.split(',');
     const fields = selected && selected.length > 0
@@ -57,8 +62,8 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
-    const headerRow = sheetData[1]; // 두 번째 행 기준
-    const dataRows = sheetData.slice(2);
+    const headerRow = sheetData[0]; // 첫 번째 행을 헤더로 사용
+    const dataRows = sheetData.slice(1);
 
     const indexMap = {};
     DEFAULT_COLUMNS.forEach(key => {
@@ -86,8 +91,8 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     fs.unlink(filePath, () => {});
 
     const resultArray = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
-    const allFields = resultArray[0] ? Object.keys(resultArray[0]).filter(k => k !== '_id') : [];
-    res.render('coupang.ejs', { 결과: resultArray, 필드: DEFAULT_COLUMNS, 전체필드: allFields, 성공메시지: '✅ 업로드 완료', 한글 });
+    const allFields = getAllFields(resultArray);
+    res.render('coupang.ejs', { 결과: resultArray, 필드: allFields, 전체필드: allFields, 성공메시지: '✅ 업로드 완료', 한글 });
   } catch (err) {
     console.error(err);
     res.status(500).send('❌ 업로드 실패');
@@ -106,9 +111,10 @@ router.get('/search', async (req, res) => {
         { 'Option ID': regex }
       ]
     }).toArray();
-    const allFields = result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : [];
-    const selected = req.query.fields?.split(',') || DEFAULT_COLUMNS;
-    res.render('coupang.ejs', { 결과: result, 필드: selected, 전체필드: allFields, 성공메시지: null, 한글 });
+    const allFields = getAllFields(result);
+    const selected = req.query.fields ? (Array.isArray(req.query.fields) ? req.query.fields : req.query.fields.split(',')) : DEFAULT_COLUMNS;
+    const fields = selected.filter(f => allFields.includes(f));
+    res.render('coupang.ejs', { 결과: result, 필드: fields.length ? fields : allFields, 전체필드: allFields, 성공메시지: null, 한글 });
   } catch (err) {
     console.error(err);
     res.status(500).send('❌ 검색 실패');
