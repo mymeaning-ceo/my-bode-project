@@ -49,13 +49,11 @@
     <div class="table-responsive">
       <table class="table table-bordered table-hover bg-white align-middle">
         <thead class="table-light text-center">
-          <% if (결과 && 결과.length > 0) { %>
+          <% if (필드 && 필드.length > 0) { %>
             <tr>
-              <% for (const key in 결과[0]) { %>
-                <% if (key !== '_id') { %>
-                  <th class="text-uppercase"><%= key %></th>
-                <% } %>
-              <% } %>
+              <% 필드.forEach(key => { %>
+                <th class="text-uppercase"><%= key %></th>
+              <% }) %>
             </tr>
           <% } else { %>
             <tr><th>📂 No Data</th></tr>
@@ -65,13 +63,11 @@
           <% if (결과 && 결과.length > 0) { %>
             <% 결과.forEach(행 => { %>
               <tr>
-                <% for (const key in 행) { %>
-                  <% if (key !== '_id') { %>
-                    <td>
-                      <%= typeof 행[key] === 'number' ? 행[key].toLocaleString('ko-KR') : 행[key] %>
-                    </td>
-                  <% } %>
-                <% } %>
+                <% 필드.forEach(key => { %>
+                  <td>
+                    <%= typeof 행[key] === 'number' ? 행[key].toLocaleString('ko-KR') : 행[key] %>
+                  </td>
+                <% }) %>
               </tr>
             <% }) %>
           <% } else { %>
