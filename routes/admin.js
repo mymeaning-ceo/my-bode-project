@@ -28,6 +28,12 @@ router.post('/hero', checkAdmin, upload.single('hero'), async (req, res) => {
   res.redirect('/admin');
 });
 
+// 메인 배너 이미지 삭제
+router.post('/delete-all', checkAdmin, async (req, res) => {
+  await db.collection('homepage').deleteOne({ key: 'hero' });
+  res.redirect('/admin');
+});
+
 router.post('/logo', checkAdmin, upload.single('logo'), async (req, res) => {
   const imgLocation = req.file ? req.file.location : '';
   await db.collection('homepage').updateOne(
@@ -35,6 +41,12 @@ router.post('/logo', checkAdmin, upload.single('logo'), async (req, res) => {
     { $set: { img: imgLocation, updatedAt: new Date() } },
     { upsert: true }
   );
+  res.redirect('/admin');
+});
+
+// 로고 이미지 삭제
+router.post('/logo/delete', checkAdmin, async (req, res) => {
+  await db.collection('homepage').deleteOne({ key: 'logo' });
   res.redirect('/admin');
 });
 

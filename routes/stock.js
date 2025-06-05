@@ -6,6 +6,12 @@ const fs = require('fs');
 const path = require('path');
 const { checkLogin } = require('../middlewares/auth');
 
+// 커스텀 엑셀 파싱 설정
+const STOCK_START_ROW = parseInt(process.env.STOCK_START_ROW || '0');
+const STOCK_COLUMNS = process.env.STOCK_COLUMNS
+  ? process.env.STOCK_COLUMNS.split(',').map(v => v.trim())
+  : null; // null이면 모든 컬럼 사용
+
 let db;
 const connectDB = require('../database');
 connectDB.then(client => {
@@ -27,7 +33,8 @@ const upload = multer({ dest: uploadsDir });
 router.get('/', async (req, res) => {
   try {
     const result = await db.collection('stock').find().sort({ 상품명: 1 }).toArray();
-    res.render('stock.ejs', { 결과: result, 성공메시지: null });
+    const fields = STOCK_COLUMNS || (result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : []);
+    res.render('stock.ejs', { 결과: result, 필드: fields, 성공메시지: null });
   } catch (err) {
     console.error('목록 조회 오류:', err);
     res.status(500).send('❌ 재고 목록 불러오기 실패');
@@ -46,7 +53,20 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const filePath = req.file.path;
     const workbook = xlsx.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
-    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    let data = xlsx.utils.sheet_to_json(
+      workbook.Sheets[sheetName],
+      { range: STOCK_START_ROW }
+    );
+
+    if (STOCK_COLUMNS && STOCK_COLUMNS.length > 0) {
+      data = data.map(row => {
+        const obj = {};
+        STOCK_COLUMNS.forEach(col => {
+          obj[col] = row[col];
+        });
+        return obj;
+      });
+    }
 
     if (data.length === 0) {
       return res.status(400).send('❌ 엑셀 파일이 비어 있습니다.');
@@ -60,8 +80,10 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
 
     // 업로드 후 재고 목록 + 메시지 전달
     const resultArray = await db.collection('stock').find().sort({ 상품명: 1 }).toArray();
+    const fields = STOCK_COLUMNS || (resultArray[0] ? Object.keys(resultArray[0]).filter(k => k !== '_id') : []);
     res.render('stock.ejs', {
       결과: resultArray,
+      필드: fields,
       성공메시지: '✅ 엑셀 업로드가 완료되었습니다!'
     });
 
@@ -86,7 +108,8 @@ router.get('/search', async (req, res) => {
       ]
     }).toArray();
 
-    res.render('stock.ejs', { 결과: result, 성공메시지: null });
+    const fields = STOCK_COLUMNS || (result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : []);
+    res.render('stock.ejs', { 결과: result, 필드: fields, 성공메시지: null });
   } catch (err) {
     console.error('검색 오류:', err);
     res.status(500).send('❌ 검색 실패');
