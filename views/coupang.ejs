@@ -41,6 +41,20 @@
       <button class="btn btn-outline-primary" type="submit">검색</button>
     </form>
 
+    <% if (전체필드 && 전체필드.length > 0) { %>
+      <form action="/coupang" method="GET" class="mb-4">
+        <div class="d-flex flex-wrap gap-2">
+          <% 전체필드.forEach(key => { %>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="fields" value="<%= key %>" id="fld-<%= key.replace(/\s+/g,'-') %>" <%= 필드.includes(key) ? 'checked' : '' %>>
+              <label class="form-check-label" for="fld-<%= key.replace(/\s+/g,'-') %>"><%= 한글[key] || key %></label>
+            </div>
+          <% }) %>
+          <button type="submit" class="btn btn-outline-primary">선택 적용</button>
+        </div>
+      </form>
+    <% } %>
+
     <% if (결과 && 결과.length > 0) { %>
       <p class="text-muted">🔎 총 <strong><%= 결과.length %></strong>건의 결과가 있습니다.</p>
     <% } %>
@@ -52,20 +66,20 @@
       'Option name': '옵션명',
       'Orderable quantity (real-time)': '주문 가능 수량(실시간)',
       'Recent sales (Excluding bundle sales) Last 30 days': '최근 30일 판매금액',
-      'Recent sales quantity Last 30 days': '최근 30일 판매량'
+      'Recent sales quantity Last 30 days': '최근 30일 판매량',
+      '매출금액': '매출금액',
+      '광고비용 소진금액': '광고비용 소진금액'
     }; %>
 
     <div class="table-responsive">
       <table class="table table-bordered table-hover bg-white align-middle">
         <thead class="table-light text-center">
-          <% if (결과 && 결과.length > 0) { %>
+          <% if (필드 && 필드.length > 0) { %>
             <tr>
               <th>번호</th>
-              <% for (const key in 결과[0]) { %>
-                <% if (key !== '_id') { %>
-                  <th><%= 한글[key] || key %></th>
-                <% } %>
-              <% } %>
+              <% 필드.forEach(key => { %>
+                <th><%= 한글[key] || key %></th>
+              <% }) %>
             </tr>
           <% } else { %>
             <tr><th>📂 No Data</th></tr>
@@ -76,13 +90,11 @@
             <% 결과.forEach((행, index) => { %>
               <tr>
                 <td class="text-center"><%= index + 1 %></td>
-                <% for (const key in 행) { %>
-                  <% if (key !== '_id') { %>
-                    <td>
-                      <%= typeof 행[key] === 'number' ? 행[key].toLocaleString('ko-KR') : 행[key] %>
-                    </td>
-                  <% } %>
-                <% } %>
+                <% 필드.forEach(key => { %>
+                  <td>
+                    <%= typeof 행[key] === 'number' ? 행[key].toLocaleString('ko-KR') : 행[key] %>
+                  </td>
+                <% }) %>
               </tr>
             <% }) %>
           <% } else { %>

@@ -75,11 +75,14 @@ app.use((요청, 응답, next) => {
 app.use(async (req, res, next) => {
   if (!db) return next();
   try {
-    const config = await db.collection('homepage').findOne({ key: 'logo' });
-    res.locals.logo = config?.img || '';
+    const logoConfig = await db.collection('homepage').findOne({ key: 'logo' });
+    res.locals.logo = logoConfig?.img || '';
+    const heroConfig = await db.collection('homepage').findOne({ key: 'hero' });
+    res.locals.hero = heroConfig?.img || '';
   } catch (err) {
     console.error(err);
     res.locals.logo = '';
+    res.locals.hero = '';
   }
   next();
 });
@@ -112,13 +115,12 @@ const path = require('path');
 
 app.get('/', async (req, res) => {
 
-  if (req.isAuthenticated()) {
-    // 로그인된 유저 → public/dashboard.html
+  if (req.isAuthenticated() && req.user?.username !== 'admin') {
+    // 로그인된 일반 유저 → dashboard
     return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-  } else {
-    // 비로그인 유저 → index 페이지 렌더링
-     return res.render('index.ejs', { hero: res.locals.logo });
   }
+  // 비로그인 사용자 또는 관리자
+  return res.render('index.ejs', { hero: res.locals.hero });
 })
 
 app.get('/news', (요청, 응답) => {
@@ -230,6 +232,30 @@ app.post('/mypage/password', checkLogin, async (req, res) => {
   )
   res.send('<script>alert("비밀번호가 변경되었습니다.");location.href="/mypage";</script>')
 })
+
+app.get('/profile', checkLogin, (req, res) => {
+  res.render('profile.ejs', { 유저: req.user });
+});
+
+app.post('/profile', checkLogin, async (req, res) => {
+  const { password, password2, email, phone } = req.body;
+  const update = {};
+  if (password) {
+    if (password !== password2) {
+      return res.status(400).send('비밀번호가 일치하지 않습니다.');
+    }
+    update.password = await bcrypt.hash(password, 10);
+  }
+  if (typeof email !== 'undefined') update.email = email;
+  if (typeof phone !== 'undefined') update.phone = phone;
+  if (Object.keys(update).length > 0) {
+    await db.collection('user').updateOne(
+      { _id: new ObjectId(req.user._id) },
+      { $set: update }
+    );
+  }
+  res.send('<script>alert("정보가 수정되었습니다.");location.href="/profile";</script>');
+});
 
 
 app.get('/register', (요청, 응답) => {
