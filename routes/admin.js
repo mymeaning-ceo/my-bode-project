@@ -44,8 +44,16 @@ const managedViews = ['/stock', '/coupang', '/list', '/write'];
 router.get('/permissions', checkAdmin, async (req, res) => {
   const docs = await db.collection('permissions').find().toArray();
   const permissions = {};
-  docs.forEach(d => { permissions[d.view] = d.loginRequired; });
-  res.render('admin/permissions.ejs', { views: managedViews, permissions });
+  docs.forEach(d => {
+    permissions[d.view] = {
+      loginRequired: d.loginRequired,
+      allowedUsers: d.allowedUsers || []
+    }
+  });
+
+  const users = await db.collection('user').find({}, { projection: { username: 1 } }).toArray();
+  res.render('admin/permissions.ejs', { views: managedViews, permissions, users });
+
 });
 
 router.post('/permissions', checkAdmin, async (req, res) => {
@@ -53,9 +61,11 @@ router.post('/permissions', checkAdmin, async (req, res) => {
   const arr = Array.isArray(selected) ? selected : [selected];
   await Promise.all(managedViews.map(v => {
     const loginRequired = arr.includes(v);
+    const users = req.body['user_' + v];
+    const allowedUsers = Array.isArray(users) ? users : users ? [users] : [];
     return db.collection('permissions').updateOne(
       { view: v },
-      { $set: { view: v, loginRequired } },
+      { $set: { view: v, loginRequired, allowedUsers } },
       { upsert: true }
     );
   }));

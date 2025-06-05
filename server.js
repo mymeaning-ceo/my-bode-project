@@ -22,7 +22,12 @@ async function loadPermissions() {
   if (!db) return
   const docs = await db.collection('permissions').find().toArray()
   permissions = {}
-  docs.forEach(d => { permissions[d.view] = d.loginRequired })
+  docs.forEach(d => {
+    permissions[d.view] = {
+      loginRequired: d.loginRequired,
+      allowedUsers: d.allowedUsers || []
+    }
+  })
 }
 global.loadPermissions = loadPermissions
 
@@ -43,9 +48,16 @@ app.use(passport.session());
 
 // 페이지 접근 권한 체크
 app.use(async (req, res, next) => {
-  const loginRequired = permissions[req.path]
-  if (loginRequired && !req.isAuthenticated()) {
+  const config = permissions[req.path]
+  if (!config) return next()
+
+  if (config.loginRequired && !req.isAuthenticated()) {
     return res.redirect('/login?redirect=' + req.path)
+  }
+  if (config.allowedUsers && config.allowedUsers.length > 0) {
+    if (!req.isAuthenticated() || !config.allowedUsers.includes(String(req.user._id))) {
+      return res.status(403).send('권한이 없습니다.')
+    }
   }
   next()
 })

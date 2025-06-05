@@ -11,12 +11,32 @@
   <div class="container my-4">
     <h1 class="mb-3">뷰 접근 권한</h1>
     <form action="/admin/permissions" method="post">
-      <% views.forEach(function(v) { %>
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" name="view" value="<%= v %>" id="v_<%= v %>" <%= permissions[v] ? 'checked' : '' %>>
-          <label class="form-check-label" for="v_<%= v %>"><%= v %> 로그인 필요</label>
-        </div>
-      <% }) %>
+           <table class="table">
+        <thead>
+          <tr>
+            <th>View</th>
+            <th>Login Required</th>
+            <th>Allowed Users</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% views.forEach(function(v) { const perm = permissions[v] || {}; %>
+            <tr>
+              <td><%= v %></td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="view" value="<%= v %>" id="v_<%= v %>" <%= perm.loginRequired ? 'checked' : '' %>>
+              </td>
+              <td>
+                <select name="user_<%= v %>" multiple class="form-select">
+                  <% users.forEach(function(u) { %>
+                    <option value="<%= u._id %>" <%= (perm.allowedUsers || []).includes(String(u._id)) ? 'selected' : '' %>><%= u.username %></option>
+                  <% }) %>
+                </select>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
       <button class="btn btn-primary mt-3">저장</button>
     </form>
   </div>
