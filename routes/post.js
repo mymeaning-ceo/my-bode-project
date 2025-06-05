@@ -22,12 +22,12 @@ router.get('/list', checkLogin, async (req, res) => {
 
 
 // 🔹 글쓰기 페이지 (로그인 필요)
-router.get('/write', checkLogin, (req, res) => {
+  router.get(['/write', '/list/write'], checkLogin, (req, res) => {
   res.render('write.ejs', { 유저: req.user });
 });
 
 // 🔹 글 등록 처리 (로그인 필요 + 이미지 업로드)
-router.post('/add', upload.single('img1'), checkLogin, async (req, res) => {
+router.post(['/add', '/list/add'], upload.single('img1'), checkLogin, async (req, res) => {
   try {
     const imgLocation = req.file ? req.file.location : '';
     await db.collection('post').insertOne({
@@ -129,10 +129,5 @@ router.delete('/delete', checkLogin, async (req, res) => {
     res.status(500).send('서버 오류');
   }
 });
-
-router.get('/list', checkLogin, (요청, 응답) => {
-  응답.send('/')
-})
-
 
 module.exports = router;

@@ -47,6 +47,19 @@ app.use((요청, 응답, next) => {
   next();
 });
 
+// 로고 정보를 모든 템플릿에서 사용
+app.use(async (req, res, next) => {
+  if (!db) return next();
+  try {
+    const config = await db.collection('homepage').findOne({ key: 'logo' });
+    res.locals.logo = config?.img || '';
+  } catch (err) {
+    console.error(err);
+    res.locals.logo = '';
+  }
+  next();
+});
+
 
 
 let connectDB = require('./database.js')
@@ -73,17 +86,16 @@ app.get('/secure', checkLogin, (요청, 응답) => {
 
 const path = require('path');
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+
   if (req.isAuthenticated()) {
     // 로그인된 유저 → public/dashboard.html
     return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-  } else {
-    // 비로그인 유저 → public/index.html
-    return res.sendFile(path.join(__dirname, 'index.html'));
+  
+    const config = await db.collection('homepage').findOne({ key: 'hero' });
+    return res.render('index.ejs', { hero: config?.img || '' });
   }
-});
-
-
+})
 
 app.get('/news', (요청, 응답) => {
   db.collection('post').insertOne({ title: '어쩌구' })
@@ -109,6 +121,8 @@ app.get('/time', (요청, 응답) => {
 })
 
 app.use('/', require('./routes/post.js'))
+
+app.use('/admin', require('./routes/admin.js'))
 
 app.get(['/list', '/list/:page'], async (요청, 응답) => {
   const page = parseInt(요청.params.page || '1');
