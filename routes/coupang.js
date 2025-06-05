@@ -53,7 +53,15 @@ router.get('/', async (req, res) => {
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
     const filePath = req.file.path;
-    const workbook = xlsx.readFile(filePath);
+    let workbook;
+    try {
+      const buffer = fs.readFileSync(filePath);
+      workbook = xlsx.read(buffer, { type: 'buffer' });
+    } catch (err) {
+      console.error('❌ Excel parsing error:', err);
+      fs.unlink(filePath, () => {});
+      return res.status(400).send('❌ 엑셀 파일을 읽는 중 오류가 발생했습니다.');
+    }
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
