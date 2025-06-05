@@ -30,7 +30,6 @@
 
   <!-- 게시글 목록 -->
   <div class="container">
-    <% 글목록.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); %>
     <% 글목록.forEach(function(item) { %>
       <div class="card mb-3 shadow-sm">
         <div class="card-body">
