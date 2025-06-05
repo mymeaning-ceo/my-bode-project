@@ -17,11 +17,14 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const MongoStore = require('connect-mongo')
 
-// 로그인된 사용자 정보를 EJS에서 사용 가능하도록 설정
-app.use((req, res, next) => {
-  res.locals.유저 = req.user;
-  next();
-});
+let permissions = {}
+async function loadPermissions() {
+  if (!db) return
+  const docs = await db.collection('permissions').find().toArray()
+  permissions = {}
+  docs.forEach(d => { permissions[d.view] = d.loginRequired })
+}
+global.loadPermissions = loadPermissions
 
 
 app.use(session({
@@ -37,6 +40,15 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+// 페이지 접근 권한 체크
+app.use(async (req, res, next) => {
+  const loginRequired = permissions[req.path]
+  if (loginRequired && !req.isAuthenticated()) {
+    return res.redirect('/login?redirect=' + req.path)
+  }
+  next()
+})
 
 const { S3Client } = require('@aws-sdk/client-s3')
 const upload = require('./upload.js'); // post.js 등에서
@@ -68,6 +80,7 @@ let db
 connectDB.then((client)=>{
   console.log('DB연결성공')
   db = client.db('forum')
+  loadPermissions();
   const PORT = process.env.PORT || 8080;
   app.listen(PORT, () => {
     console.log(`http://localhost:${PORT} 에서 서버 실행중`);
@@ -76,8 +89,7 @@ connectDB.then((client)=>{
   console.log(err)
 })
 
-
-const { checkLogin } = require('./middlewares/auth');
+const { checkLogin, checkAdmin } = require('./middlewares/auth');
 app.get('/secure', checkLogin, (요청, 응답) => {
   응답.send('로그인 사용자') 
 
@@ -91,9 +103,9 @@ app.get('/', async (req, res) => {
   if (req.isAuthenticated()) {
     // 로그인된 유저 → public/dashboard.html
     return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-  
-    const config = await db.collection('homepage').findOne({ key: 'hero' });
-    return res.render('index.ejs', { hero: config?.img || '' });
+  } else {
+    // 비로그인 유저 → index 페이지 렌더링
+     return res.render('index.ejs', { hero: res.locals.logo });
   }
 })
 
@@ -193,6 +205,19 @@ app.post('/login', (요청, 응답, next) => {
 app.get('/mypage', checkLogin, (요청, 응답) => {
   응답.render('mypage.ejs', { 유저: 요청.user });
 });
+
+app.post('/mypage/password', checkLogin, async (req, res) => {
+  const { password, password2 } = req.body
+  if (password !== password2) {
+    return res.status(400).send('비밀번호가 일치하지 않습니다.')
+  }
+  const hash = await bcrypt.hash(password, 10)
+  await db.collection('user').updateOne(
+    { _id: new ObjectId(req.user._id) },
+    { $set: { password: hash } }
+  )
+  res.send('<script>alert("비밀번호가 변경되었습니다.");location.href="/mypage";</script>')
+})
 
 
 app.get('/register', (요청, 응답) => {
