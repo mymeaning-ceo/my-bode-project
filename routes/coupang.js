@@ -1,55 +1,65 @@
-// routes/coupang.js
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
-const { checkLogin } = require('../middlewares/auth');
+const { checkLogin } = require('../middlewares/auth'); // 경로 반드시 확인!
 
 let db;
-const connectDB = require('../database');
+const connectDB = require('../database'); // 경로 반드시 확인!
 connectDB.then(client => {
-  db = client.db('forum');
+  db = client.db('forum'); // 'forum' DB명 확인
 });
 
-// 업로드 디렉토리 준비
+// 업로드 디렉토리
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 const upload = multer({ dest: uploadsDir });
 
-// 한글 매핑
+// 한글 매핑 및 순서
 const 한글 = {
   'Option ID': '옵션ID',
   'Product name': '상품명',
   'Option name': '옵션명',
   'Orderable quantity (real-time)': '주문 가능 수량(실시간)',
-  'Recent sales (Excluding bundle sales) Last 30 days': '최근 30일 판매금액',
-  'Recent sales quantity Last 30 days': '최근 30일 판매량',
-  'Ad spend (30d)': '광고비용 소진금액',
+  'Sales amount on the last 30 days': '30일 판매금액',
+  'Sales in the last 30 days': '30일 판매량',
   'Expected stock': '예상 입고 수량'
 };
+const DEFAULT_COLUMNS = [
+  'Option ID',
+  'Product name',
+  'Option name',
+  'Orderable quantity (real-time)',
+  'Sales amount on the last 30 days',
+  'Sales in the last 30 days',
+  'Expected stock'
+];
 
-const DEFAULT_COLUMNS = Object.keys(한글);
-
-// 공통 필드 추출 함수 (중복 제거)
+// 공통 필드 추출
 function getAllFields(resultArray) {
   return resultArray[0] ? Object.keys(resultArray[0]).filter(k => k !== '_id') : [];
 }
 
-// 기본 목록 페이지
+// 목록
 router.get('/', async (req, res) => {
   try {
     const result = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
-    const allFields = getAllFields(result);
     let selected = req.query.fields;
     if (selected && !Array.isArray(selected)) selected = selected.split(',');
-    const fields = selected && selected.length > 0
-      ? selected.filter(f => allFields.includes(f))
-      : (DEFAULT_COLUMNS || allFields);
-    res.render('coupang.ejs', { 결과: result, 필드: fields, 전체필드: allFields, 성공메시지: null, 한글 });
+    const fields = (selected && selected.length > 0)
+      ? DEFAULT_COLUMNS.filter(col => selected.includes(col))
+      : DEFAULT_COLUMNS;
+    res.render('coupang.ejs', {
+      결과: result,
+      필드: fields,
+      전체필드: DEFAULT_COLUMNS,
+      성공메시지: null,
+      한글
+    });
   } catch (err) {
-    console.error(err);
+    console.error('GET /coupang 오류:', err);
     res.status(500).send('❌ 재고 목록 불러오기 실패');
   }
 });
@@ -62,9 +72,11 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
-    const headerRow = sheetData[0]; // 첫 번째 행을 헤더로 사용
+    // ✅ 헤더는 1행, 데이터는 2행부터
+    const headerRow = sheetData[0];
     const dataRows = sheetData.slice(1);
 
+    // 매핑
     const indexMap = {};
     DEFAULT_COLUMNS.forEach(key => {
       const idx = headerRow.findIndex(col => col && col.trim() === key);
@@ -91,13 +103,19 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     fs.unlink(filePath, () => {});
 
     const resultArray = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
-    const allFields = getAllFields(resultArray);
-    res.render('coupang.ejs', { 결과: resultArray, 필드: allFields, 전체필드: allFields, 성공메시지: '✅ 업로드 완료', 한글 });
+    res.render('coupang.ejs', {
+      결과: resultArray,
+      필드: DEFAULT_COLUMNS,
+      전체필드: DEFAULT_COLUMNS,
+      성공메시지: '✅ 업로드 완료',
+      한글
+    });
   } catch (err) {
-    console.error(err);
+    console.error('POST /coupang/upload 오류:', err);
     res.status(500).send('❌ 업로드 실패');
   }
 });
+
 
 // 검색
 router.get('/search', async (req, res) => {
@@ -111,12 +129,20 @@ router.get('/search', async (req, res) => {
         { 'Option ID': regex }
       ]
     }).toArray();
-    const allFields = getAllFields(result);
-    const selected = req.query.fields ? (Array.isArray(req.query.fields) ? req.query.fields : req.query.fields.split(',')) : DEFAULT_COLUMNS;
-    const fields = selected.filter(f => allFields.includes(f));
-    res.render('coupang.ejs', { 결과: result, 필드: fields.length ? fields : allFields, 전체필드: allFields, 성공메시지: null, 한글 });
+    let selected = req.query.fields;
+    if (selected && !Array.isArray(selected)) selected = selected.split(',');
+    const fields = (selected && selected.length > 0)
+      ? DEFAULT_COLUMNS.filter(col => selected.includes(col))
+      : DEFAULT_COLUMNS;
+    res.render('coupang.ejs', {
+      결과: result,
+      필드: fields,
+      전체필드: DEFAULT_COLUMNS,
+      성공메시지: null,
+      한글
+    });
   } catch (err) {
-    console.error(err);
+    console.error('GET /coupang/search 오류:', err);
     res.status(500).send('❌ 검색 실패');
   }
 });
@@ -127,7 +153,7 @@ router.post('/delete-all', checkLogin, async (req, res) => {
     await db.collection('coupang').deleteMany({});
     res.redirect('/coupang');
   } catch (err) {
-    console.error(err);
+    console.error('POST /coupang/delete-all 오류:', err);
     res.status(500).send('❌ 삭제 실패');
   }
 });
