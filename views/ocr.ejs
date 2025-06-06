@@ -17,11 +17,6 @@
       <button type="submit" class="btn btn-primary">추출</button>
     </form>
 
-    <% if (logs && logs.length > 0) { %>
-      <h5 class="mb-3">OCR 로그</h5>
-      <pre class="p-3 bg-white border rounded"><%= logs.join('\n') %></pre>
-    <% } %>
-
     <% if (text) { %>
       <h5 class="mt-4 mb-3">추출된 텍스트</h5>
       <pre class="p-3 bg-white border rounded"><%= text %></pre>

@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
   // 새로운 필드명에 맞춰 총액을 계산한다.
   const total = list.reduce((acc, v) => acc + (v['매출금액'] || 0), 0);
   res.render('voucher.ejs', { list, total, logs: null });
-
+})
 
 router.post('/upload', upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).send('전표 이미지를 업로드해주세요.');
