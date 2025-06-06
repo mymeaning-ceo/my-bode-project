@@ -78,15 +78,23 @@ app.use(async (req, res, next) => {
     const logoConfig = await db.collection('homepage').findOne({ key: 'logo' });
     res.locals.logo = logoConfig?.img || '';
     const banners = [];
+    const notices = [];
     for (let i = 1; i <= 4; i++) {
       const doc = await db.collection('homepage').findOne({ key: 'banner' + i });
-      if (doc?.img) banners.push(doc.img);
+      if (!doc) continue;
+      if (i <= 2) {
+        if (doc.text) notices.push(doc.text);
+      } else {
+        if (doc.img) banners.push(doc.img);
+      }
     }
     res.locals.banners = banners;
+    res.locals.notices = notices;
   } catch (err) {
     console.error(err);
     res.locals.logo = '';
     res.locals.banners = [];
+    res.locals.notices = [];
   }
   next();
 });
@@ -119,11 +127,11 @@ const path = require('path');
 
 app.get('/', async (req, res) => {
   // 로그인 여부와 상관없이 동일한 메인 페이지
-  res.render('index.ejs', { banners: res.locals.banners });
+  res.render('index.ejs', { banners: res.locals.banners, notices: res.locals.notices });
 });
 
 app.get('/dashboard', checkLogin, (req, res) => {
-  res.render('dashboard.ejs', { banners: res.locals.banners });
+  res.render('dashboard.ejs', { banners: res.locals.banners, notices: res.locals.notices });
 });
 
 app.get('/news', (요청, 응답) => {

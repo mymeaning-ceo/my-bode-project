@@ -13,7 +13,7 @@ router.get('/', checkAdmin, async (req, res) => {
   const banners = [];
   for (let i = 1; i <= 4; i++) {
     const doc = await db.collection('homepage').findOne({ key: 'banner' + i });
-    banners.push(doc?.img || '');
+    banners.push({ text: doc?.text || '', img: doc?.img || '' });
   }
   res.render('admin/index.ejs', {
     banners,
@@ -23,13 +23,22 @@ router.get('/', checkAdmin, async (req, res) => {
 
 // 배너 이미지 업로드
 router.post('/banner/:idx', checkAdmin, upload.single('banner'), async (req, res) => {
-  const imgLocation = req.file ? req.file.location : '';
   const idx = req.params.idx;
-  await db.collection('homepage').updateOne(
-    { key: 'banner' + idx },
-    { $set: { img: imgLocation, updatedAt: new Date() } },
-    { upsert: true }
-  );
+  if (idx === '1' || idx === '2') {
+    const text = req.body.text || '';
+    await db.collection('homepage').updateOne(
+      { key: 'banner' + idx },
+      { $set: { text, updatedAt: new Date() }, $unset: { img: '' } },
+      { upsert: true }
+    );
+  } else {
+    const imgLocation = req.file ? req.file.location : '';
+    await db.collection('homepage').updateOne(
+      { key: 'banner' + idx },
+      { $set: { img: imgLocation, updatedAt: new Date() }, $unset: { text: '' } },
+      { upsert: true }
+    );
+  }
   res.redirect('/admin');
 });
 
