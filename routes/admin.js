@@ -9,28 +9,34 @@ connectDB.then(client => db = client.db('forum'));
 
 // 관리자 페이지 화면
 router.get('/', checkAdmin, async (req, res) => {
-  const hero = await db.collection('homepage').findOne({ key: 'hero' });
   const logo = await db.collection('homepage').findOne({ key: 'logo' });
+  const banners = [];
+  for (let i = 1; i <= 4; i++) {
+    const doc = await db.collection('homepage').findOne({ key: 'banner' + i });
+    banners.push(doc?.img || '');
+  }
   res.render('admin/index.ejs', {
-    hero: hero?.img || '',
+    banners,
     logo: logo?.img || ''
   });
 });
 
-// 메인 이미지 업로드
-router.post('/hero', checkAdmin, upload.single('hero'), async (req, res) => {
+// 배너 이미지 업로드
+router.post('/banner/:idx', checkAdmin, upload.single('banner'), async (req, res) => {
   const imgLocation = req.file ? req.file.location : '';
+  const idx = req.params.idx;
   await db.collection('homepage').updateOne(
-    { key: 'hero' },
+    { key: 'banner' + idx },
     { $set: { img: imgLocation, updatedAt: new Date() } },
     { upsert: true }
   );
   res.redirect('/admin');
 });
 
-// 메인 배너 이미지 삭제
-router.post('/delete-all', checkAdmin, async (req, res) => {
-  await db.collection('homepage').deleteOne({ key: 'hero' });
+// 배너 이미지 삭제
+router.post('/banner/:idx/delete', checkAdmin, async (req, res) => {
+  const idx = req.params.idx;
+  await db.collection('homepage').deleteOne({ key: 'banner' + idx });
   res.redirect('/admin');
 });
 
