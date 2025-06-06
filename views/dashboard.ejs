@@ -12,11 +12,10 @@
 
   <div class="container my-4">
     <% if (banners && banners.length > 0) { %>
-      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-4">
+      <!-- 대시보드 배너도 같은 2x2 형식 -->
+      <div class="banner-grid mb-4">
         <% banners.forEach(img => { %>
-          <div class="col text-center">
-            <img src="<%= img %>" class="img-fluid rounded shadow" alt="banner">
-          </div>
+          <img src="<%= img %>" alt="banner">
         <% }) %>
       </div>
     <% } %>

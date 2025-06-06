@@ -30,7 +30,7 @@
               <% } else { %>
                 <p class="text-muted">현재 이미지가 없습니다.</p>
               <% } %>
-              <form action="/admin/banner/<%= i %>" method="post" enctype="multipart/form-data" class="banner-form d-flex gap-2 mb-2">
+              <form action="/admin/banner/<%= i %>" method="post" enctype="multipart/form-data" class="banner-form d-flex flex-nowrap gap-2 mb-2">
                 <input type="file" name="banner" accept="image/*" class="form-control" id="bannerInput<%= i %>">
                 <button type="submit" class="btn btn-primary">업로드</button>
               </form>
