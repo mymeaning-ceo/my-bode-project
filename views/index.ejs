@@ -16,11 +16,10 @@
     <h1 class="mb-4 fw-bold text-center">🩲 내의미 재고관리 시스템</h1>
 
     <% if (banners && banners.length > 0) { %>
-      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-4">
+      <!-- 메인 배너는 4등분 그리드로 표시 -->
+      <div class="banner-grid mb-4">
         <% banners.forEach(img => { %>
-          <div class="col text-center">
-            <img src="<%= img %>" class="img-fluid rounded shadow" alt="banner">
-          </div>
+          <img src="<%= img %>" alt="banner">
         <% }) %>
       </div>
     <% } %>
