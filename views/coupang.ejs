@@ -60,9 +60,10 @@
     <% } %>
 
     <div class="table-responsive">
-      <table class="table table-bordered table-hover bg-white align-middle">
+      <table class="table table-bordered table-hover bg-white align-middle auto-width">
         <thead class="table-light text-center">
           <% if (필드 && 필드.length > 0) { %>
+            <!-- 정렬용 셀렉트 박스 -->
             <tr id="sortRow">
               <th>정렬</th>
               <% 필드.forEach((key, idx) => { %>
