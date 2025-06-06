@@ -11,6 +11,14 @@
   <%- include('nav.ejs') %>
 
   <div class="container my-4">
+    <% if (notices && notices.length > 0) { %>
+      <div class="alert alert-info mb-4">
+        <% notices.forEach(text => { %>
+          <div><%= text %></div>
+        <% }) %>
+      </div>
+    <% } %>
+
     <% if (banners && banners.length > 0) { %>
       <!-- 대시보드 배너도 같은 2x2 형식 -->
       <div class="banner-grid mb-4">
