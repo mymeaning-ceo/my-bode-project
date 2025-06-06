@@ -35,13 +35,16 @@
         <div class="card-body">
           <h5 class="card-title mb-2">
             <a href="/detail/<%= item._id %>" class="text-decoration-none"><%= item.title %></a>
-            <a href="/edit/<%= item._id %>" class="ms-2 text-warning">✏️</a>
-            <span class="text-danger delete" data-id="<%= item._id %>">🗑</span>
+            <% if (유저 && String(유저._id) === String(item.user)) { %>
+              <a href="/edit/<%= item._id %>" class="ms-2 text-warning">✏️</a>
+              <span class="text-danger delete" data-id="<%= item._id %>">🗑</span>
+            <% } %>
           </h5>
           <p class="card-text text-muted mb-0"><%= item.content %></p>
           <small class="text-muted">
+            작성자: <%= item.username %> |
             작성일: <%= new Date(item.createdAt).toLocaleString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
-          </small>          
+          </small>        
         </div>
       </div>
     <% }); %>

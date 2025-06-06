@@ -73,7 +73,18 @@ router.get('/detail/:id', checkLogin, async (req, res) => {
     });
 
     if (!result) return res.status(404).send('게시물을 찾을 수 없습니다.');
-    res.render('detail.ejs', { 게시물: result, 유저: req.user });
+
+    const comments = await db
+      .collection('comment')
+      .find({ postId: result._id })
+      .sort({ createdAt: 1 })
+      .toArray();
+
+    res.render('detail.ejs', {
+      게시물: result,
+      유저: req.user,
+      댓글: comments
+    });
   } catch (e) {
     console.error('❌ 상세 페이지 오류:', e);
     res.status(404).send('URL 오류');
@@ -144,6 +155,55 @@ router.delete('/delete', checkLogin, async (req, res) => {
     res.status(200).send('삭제 성공');
   } catch (err) {
     console.error('❌ 삭제 오류:', err);
+    res.status(500).send('서버 오류');
+  }
+});
+
+// 🔹 댓글 작성
+router.post('/comment/add', checkLogin, async (req, res) => {
+  try {
+    await db.collection('comment').insertOne({
+      postId: new ObjectId(req.body.postId),
+      content: req.body.content,
+      user: req.user._id,
+      username: req.user.username,
+      createdAt: new Date()
+    });
+    res.redirect('/detail/' + req.body.postId);
+  } catch (e) {
+    console.error('❌ 댓글 등록 오류:', e);
+    res.status(500).send('서버 오류');
+  }
+});
+
+// 🔹 댓글 수정
+router.put('/comment/edit', checkLogin, async (req, res) => {
+  try {
+    const result = await db.collection('comment').updateOne(
+      { _id: new ObjectId(req.body.id), user: req.user._id },
+      { $set: { content: req.body.content } }
+    );
+    if (result.matchedCount === 0)
+      return res.status(403).send('수정 권한이 없습니다.');
+    res.sendStatus(200);
+  } catch (e) {
+    console.error('❌ 댓글 수정 오류:', e);
+    res.status(500).send('서버 오류');
+  }
+});
+
+// 🔹 댓글 삭제
+router.delete('/comment/delete', checkLogin, async (req, res) => {
+  try {
+    const result = await db.collection('comment').deleteOne({
+      _id: new ObjectId(req.query.id),
+      user: req.user._id
+    });
+    if (result.deletedCount === 0)
+      return res.status(403).send('삭제 권한이 없습니다.');
+    res.sendStatus(200);
+  } catch (e) {
+    console.error('❌ 댓글 삭제 오류:', e);
     res.status(500).send('서버 오류');
   }
 });
