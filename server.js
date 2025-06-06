@@ -71,18 +71,22 @@ app.use((요청, 응답, next) => {
   next();
 });
 
-// 로고 정보를 모든 템플릿에서 사용
+// 로고 및 배너 정보를 모든 템플릿에서 사용
 app.use(async (req, res, next) => {
   if (!db) return next();
   try {
     const logoConfig = await db.collection('homepage').findOne({ key: 'logo' });
     res.locals.logo = logoConfig?.img || '';
-    const heroConfig = await db.collection('homepage').findOne({ key: 'hero' });
-    res.locals.hero = heroConfig?.img || '';
+    const banners = [];
+    for (let i = 1; i <= 4; i++) {
+      const doc = await db.collection('homepage').findOne({ key: 'banner' + i });
+      if (doc?.img) banners.push(doc.img);
+    }
+    res.locals.banners = banners;
   } catch (err) {
     console.error(err);
     res.locals.logo = '';
-    res.locals.hero = '';
+    res.locals.banners = [];
   }
   next();
 });
@@ -114,15 +118,13 @@ app.get('/secure', checkLogin, (요청, 응답) => {
 const path = require('path');
 
 app.get('/', async (req, res) => {
+  // 로그인 여부와 상관없이 동일한 메인 페이지
+  res.render('index.ejs', { banners: res.locals.banners });
+});
 
-  if (req.isAuthenticated()) {
-    // 로그인된 유저 → public/dashboard.html
-    return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-  } else {
-    // 비로그인 유저 → index 페이지 렌더링
-    return res.render('index.ejs', { hero: res.locals.hero });
-  }
-})
+app.get('/dashboard', checkLogin, (req, res) => {
+  res.render('dashboard.ejs', { banners: res.locals.banners });
+});
 
 app.get('/news', (요청, 응답) => {
   db.collection('post').insertOne({ title: '어쩌구' })
@@ -201,7 +203,7 @@ app.post('/login', (요청, 응답, next) => {
 
     요청.logIn(user, (err) => {
       if (err) return next(err);
-      응답.redirect('/dashboard.html');  // ✅ 로그인 후 이동할 페이지
+      응답.redirect('/dashboard');  // ✅ 로그인 후 이동할 페이지
     });
   })(요청, 응답, next);
 });
@@ -296,5 +298,6 @@ app.use('/search', require('./routes/search.js'));
 app.use('/stock', require('./routes/stock.js'));
 app.use('/coupang', require('./routes/coupang.js'));
 app.use('/coupang/add', require('./routes/coupangAdd.js'));
+app.use('/help', require('./routes/help.js'));
 app.use('/', require('./routes/auth.js'));
 
