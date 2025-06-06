@@ -1,6 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
+const connectDB = require('../database');  // 데이터베이스 연결 모듈 경로 확인
+let db;
+connectDB.then(client => {
+  db = client.db('forum');  // DB 이름 확인
+});
+
 router.get('/', async (req, res) => {
   const val = req.query.val?.trim();
   if (!val) return res.redirect('/list');
