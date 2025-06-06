@@ -54,7 +54,7 @@
               <tr>
                 <% 필드.forEach(key => { %>
                   <td>
-                    <%= typeof row[key] === 'number' ? row[key].toLocaleString('ko-KR') : row[key] %>
+                    <%= typeof row[key] === 'number' ? (row[key] === 0 ? '-' : row[key].toLocaleString('ko-KR')) : row[key] %>
                   </td>
                 <% }) %>
               </tr>

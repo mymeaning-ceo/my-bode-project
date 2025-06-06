@@ -3,7 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const Tesseract = require('tesseract.js'); // 최신 방식!
+const vision = require('@google-cloud/vision');
+const visionClient = new vision.ImageAnnotatorClient();
 const connectDB = require('../database');
 
 let db;
@@ -19,16 +20,20 @@ router.get('/', (req, res) => {
 
 router.post('/', upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).send('이미지를 업로드해주세요.');
+
   try {
-    const { data: { text } } = await Tesseract.recognize(req.file.path, 'kor+eng', {
-      logger: m => console.log(m)
-    });
+    // 구글 비전 OCR 호출
+    const [result] = await visionClient.textDetection(req.file.path);
+    const text = result.fullTextAnnotation ? result.fullTextAnnotation.text : '';
+
+    // 업로드된 이미지 파일 삭제
     fs.unlink(req.file.path, () => {});
 
+    // DB 저장
     let insertedId = null;
     if (db) {
-      const result = await db.collection('ocrtexts').insertOne({ text, createdAt: new Date() });
-      insertedId = result.insertedId;
+      const insertResult = await db.collection('ocrtexts').insertOne({ text, createdAt: new Date() });
+      insertedId = insertResult.insertedId;
     }
 
     res.render('ocr.ejs', { text, id: insertedId });

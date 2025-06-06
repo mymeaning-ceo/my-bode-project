@@ -95,3 +95,43 @@ th.sortable {
   width: auto !important;
   table-layout: auto !important;
 }
+
+/* 로그인 버튼 높이를 파일 선택 높이와 동일하게 조절 */
+button.btn.btn-primary, button.btn.btn-outline-primary {
+  height: calc(1.5em + 0.75rem + 2px); /* Bootstrap 기본 input 높이 기준 계산 */
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem; /* 텍스트 크기 */
+  white-space: normal; /* 텍스트 줄바꿈 허용 */
+  line-height: 1.2; /* 라인 높이 조금 줄여서 텍스트 맞춤 */
+}
+
+/* 파일 선택 버튼 기본 스타일 유지 및 높이 맞춤 */
+input[type="file"] {
+  height: calc(1.5em + 0.75rem + 2px);
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+/* 크롬, 사파리 Webkit 파일 선택 버튼 텍스트 크기 조절 */
+input[type="file"]::-webkit-file-upload-button {
+  font-size: 1rem;
+  padding: 0.375rem 0.75rem;
+  line-height: 1.2;
+}
+
+
+.banner-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.banner-form input[type="file"] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.banner-form button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
