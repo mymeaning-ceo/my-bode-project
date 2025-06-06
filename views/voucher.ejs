@@ -15,37 +15,29 @@
       <input type="file" name="image" accept="image/*" class="form-control" required>
       <button type="submit" class="btn btn-primary">업로드</button>
     </form>
+
+    <% if (logs && logs.length > 0) { %>
+      <h5 class="mb-3">OCR 로그</h5>
+      <pre class="p-3 bg-white border rounded"><%= logs.join('\n') %></pre>
+    <% } %>
+
     <% if (list && list.length > 0) { %>
       <p class="text-muted">총 <strong><%= list.length %></strong>건, 합계: <strong><%= total.toLocaleString('ko-KR') %></strong>원</p>
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover bg-white align-middle auto-width">
-          <thead class="table-light text-center">
-            <tr>
-              <th>전표 매출일</th>
-              <th>공급 세액</th>
-              <th>세함가</th>
-              <th>상품명</th>
-              <th>품명</th>
-              <th>출고수량</th>
-              <th>매출단가</th>
-              <th>매출금액</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% list.forEach(row => { %>
-              <tr>
-                <td><%= row['전표 매출일'] %></td>
-                <td class="text-end"><%= Number(row['공급 세액'] || 0).toLocaleString('ko-KR') %></td>
-                <td class="text-end"><%= Number(row['세함가'] || 0).toLocaleString('ko-KR') %></td>
-                <td><%= row['상품명'] %></td>
-                <td><%= row['품명'] %></td>
-                <td class="text-end"><%= row['출고수량'] %></td>
-                <td class="text-end"><%= Number(row['매출단가'] || 0).toLocaleString('ko-KR') %></td>
-                <td class="text-end"><%= Number(row['매출금액'] || 0).toLocaleString('ko-KR') %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+      <div class="list-group">
+        <% list.forEach(row => { %>
+          <div class="list-group-item">
+            <div class="fw-bold mb-1">
+              <%= row.createdAt ? new Date(row.createdAt).toLocaleString('ko-KR') : '' %> -
+              전표 매출일: <%= row['전표 매출일'] %>, 세함가: <%= Number(row['세함가'] || 0).toLocaleString('ko-KR') %>
+            </div>
+            <div>
+              상품번: <%= row['상품명'] %> / 품명: <%= row['품명'] %> /
+              출고수량: <%= row['출고수량'] %> /
+              매출금액: <%= Number(row['매출금액'] || 0).toLocaleString('ko-KR') %>
+            </div>
+          </div>
+        <% }) %>
+
       </div>
     <% } else { %>
       <p class="text-muted">전표 데이터가 없습니다.</p>
