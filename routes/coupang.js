@@ -48,6 +48,7 @@ function getAllFields(resultArray) {
 
 // 목록
 router.get('/', async (req, res) => {
+  const keyword = '';
   try {
     const result = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
     let selected = req.query.fields;
