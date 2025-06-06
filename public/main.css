@@ -56,3 +56,20 @@ body {
 .brand-logo {
   height: 40px;
 }
+
+/* 테이블 헤더 */
+th {
+  font-size: calc(12px + 0.2vw);
+  white-space: pre-wrap;
+  word-break: keep-all;
+}
+th.sortable {
+  cursor: pointer;
+}
+.sort-indicator {
+  margin-left: 4px;
+  font-size: 0.8em;
+}
+.sort-select {
+  min-width: 70px;
+}

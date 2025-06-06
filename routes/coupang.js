@@ -22,10 +22,9 @@ const 한글 = {
   'Option ID': '옵션ID',
   'Product name': '상품명',
   'Option name': '옵션명',
-  'Orderable quantity (real-time)': '주문 가능 수량(실시간)',
+  'Orderable quantity (real-time)': '재고량',
   'Sales amount on the last 30 days': '30일 판매금액',
-  'Sales in the last 30 days': '30일 판매량',
-  'Expected stock': '예상 입고 수량'
+  'Sales in the last 30 days': '30일 판매량'
 };
 const DEFAULT_COLUMNS = [
   'Option ID',
@@ -33,8 +32,13 @@ const DEFAULT_COLUMNS = [
   'Option name',
   'Orderable quantity (real-time)',
   'Sales amount on the last 30 days',
-  'Sales in the last 30 days',
-  'Expected stock'
+  'Sales in the last 30 days'
+];
+
+const NUMERIC_COLUMNS = [
+  'Orderable quantity (real-time)',
+  'Sales amount on the last 30 days',
+  'Sales in the last 30 days'
 ];
 
 // 공통 필드 추출
@@ -56,7 +60,8 @@ router.get('/', async (req, res) => {
       필드: fields,
       전체필드: DEFAULT_COLUMNS,
       성공메시지: null,
-      한글
+      한글,
+      keyword
     });
   } catch (err) {
     console.error('GET /coupang 오류:', err);
@@ -86,7 +91,13 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const data = dataRows.map(row => {
       const obj = {};
       for (const col of DEFAULT_COLUMNS) {
-        obj[col] = row[indexMap[col]] ?? '';
+        let val = row[indexMap[col]] ?? '';
+        if (NUMERIC_COLUMNS.includes(col)) {
+          const num = Number(String(val).replace(/,/g, ''));
+          obj[col] = isNaN(num) ? 0 : num;
+        } else {
+          obj[col] = val;
+        }
       }
       return obj;
     });
@@ -139,7 +150,8 @@ router.get('/search', async (req, res) => {
       필드: fields,
       전체필드: DEFAULT_COLUMNS,
       성공메시지: null,
-      한글
+      한글,
+      keyword
     });
   } catch (err) {
     console.error('GET /coupang/search 오류:', err);
