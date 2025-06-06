@@ -3,9 +3,11 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+
 // Tesseract.js를 이용해 Tesseract OCR 엔진을 사용한다
 const { createWorker } = require('tesseract.js');
 const { ObjectId } = require('mongodb');
+
 const connectDB = require('../database');
 let db;
 connectDB.then(client => { db = client.db('forum'); });
@@ -16,16 +18,18 @@ const upload = multer({ dest: uploadsDir });
 
 // 전표 목록을 조회한다. 저장된 필드 중 "매출금액"의 합계를 계산하여 화면에 전달한다.
 router.get('/', async (req, res) => {
+
   const list = db
     ? await db.collection('vouchers').find().sort({ createdAt: -1 }).toArray()
     : [];
   // 새로운 필드명에 맞춰 총액을 계산한다.
   const total = list.reduce((acc, v) => acc + (v['매출금액'] || 0), 0);
   res.render('voucher.ejs', { list, total, logs: null });
-});
+
 
 router.post('/upload', upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).send('전표 이미지를 업로드해주세요.');
+
   const logs = [];
   const worker = createWorker({
     logger: m => {
@@ -83,6 +87,7 @@ router.post('/import/:id', async (req, res) => {
   } catch (err) {
     console.error('Voucher import error:', err);
     res.status(500).send('전표 변환 실패');
+
   }
 });
 

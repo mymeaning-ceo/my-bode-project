@@ -3,11 +3,13 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+
 // Tesseract.js를 이용해 Tesseract OCR 엔진을 사용한다
 const { createWorker } = require('tesseract.js');
 const connectDB = require('../database');
 let db;
 connectDB.then(client => { db = client.db('forum'); });
+
 
 // 임시 업로드 폴더 보장
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -16,12 +18,15 @@ const upload = multer({ dest: uploadsDir });
 
 // OCR 입력 폼
 router.get('/', (req, res) => {
+
   res.render('ocr.ejs', { text: null, id: null, logs: null });
+
 });
 
 // 이미지에서 텍스트 추출
 router.post('/', upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).send('이미지를 업로드해주세요.');
+
 
   const logs = [];
   const worker = createWorker({
@@ -60,6 +65,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     fs.unlink(req.file.path, () => {});
     logs.push('❌ OCR 실패');
     res.render('ocr.ejs', { text: null, id: null, logs });
+
   }
 });
 

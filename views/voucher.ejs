@@ -15,6 +15,7 @@
       <input type="file" name="image" accept="image/*" class="form-control" required>
       <button type="submit" class="btn btn-primary">업로드</button>
     </form>
+
     <% if (logs && logs.length > 0) { %>
       <h5 class="mb-3">OCR 로그</h5>
       <pre class="p-3 bg-white border rounded"><%= logs.join('\n') %></pre>
@@ -36,6 +37,7 @@
             </div>
           </div>
         <% }) %>
+
       </div>
     <% } else { %>
       <p class="text-muted">전표 데이터가 없습니다.</p>

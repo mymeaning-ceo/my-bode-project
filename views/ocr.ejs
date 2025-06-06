@@ -16,6 +16,7 @@
       <input type="file" name="image" accept="image/*" class="form-control" required>
       <button type="submit" class="btn btn-primary">추출</button>
     </form>
+
     <% if (logs && logs.length > 0) { %>
       <h5 class="mb-3">OCR 로그</h5>
       <pre class="p-3 bg-white border rounded"><%= logs.join('\n') %></pre>
@@ -29,6 +30,7 @@
           <button type="submit" class="btn btn-success">전표에 저장</button>
         </form>
       <% } %>
+
     <% } %>
   </div>
 
