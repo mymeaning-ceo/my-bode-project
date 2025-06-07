@@ -7,3 +7,7 @@ http://localhost:8080 에서 서버 실행중
   username: 'admin',
   password: '$2b$10$jPA/hIKko04kwJ0pcbpcWua0dOVhSkJfU2b8c4cm7ttZY6NaWaIaW'
 }
+✅ MongoDB 연결 성공
+DB연결성공
+DB연결성공
+http://localhost:8080 에서 서버 실행중

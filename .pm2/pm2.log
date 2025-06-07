@@ -17,3 +17,8 @@
 2025-06-07T06:28:34: PM2 log: ===============================================================================
 2025-06-07T06:28:34: PM2 log: App [server:0] starting in -fork mode-
 2025-06-07T06:28:34: PM2 log: App [server:0] online
+2025-06-07T07:29:06: PM2 log: Stopping app:server id:0
+2025-06-07T07:29:06: PM2 log: App [server:0] exited with code [0] via signal [SIGINT]
+2025-06-07T07:29:06: PM2 log: pid=71391 msg=process killed
+2025-06-07T07:29:06: PM2 log: App [server:0] starting in -fork mode-
+2025-06-07T07:29:06: PM2 log: App [server:0] online
