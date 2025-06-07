@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 require('dotenv').config();
 const express = require('express')
 const app = express()
@@ -304,7 +303,6 @@ app.use('/ocr', require('./routes/ocr.js'));
 app.use('/help', require('./routes/help.js'));
 app.use('/', require('./routes/auth.js'));
 
-=======
 require('dotenv').config();
 const express = require('express')
 const app = express()
@@ -610,4 +608,3 @@ app.use('/ocr', require('./routes/ocr.js'));
 app.use('/help', require('./routes/help.js'));
 app.use('/', require('./routes/auth.js'));
 
->>>>>>> e64b824c86d54036124f4af898c95dcecdd5cd57
