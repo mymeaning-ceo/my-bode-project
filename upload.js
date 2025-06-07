@@ -11,10 +11,15 @@ const s3 = new S3Client({
   }
 });
 
+const bucketName = process.env.S3_BUCKET_NAME;
+if (!bucketName) {
+  throw new Error('S3_BUCKET_NAME environment variable is not set');
+}
+
 const upload = multer({
   storage: multerS3({
     s3: s3,
-    bucket: 'wonhochoi',
+    bucket: bucketName,
     key: function (req, file, cb) {
       cb(null, Date.now().toString());
     }
