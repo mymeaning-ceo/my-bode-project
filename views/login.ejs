@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -72,3 +73,79 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>내의미 업무페이지</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+</head>
+<body class="bg-light">
+
+  <!-- 네비게이션 -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
+    <a class="navbar-brand fw-bold text-dark" href="/">
+      <% if (logo) { %>
+        <img src="<%= logo %>" alt="logo" class="brand-logo">
+      <% } else { %>
+        🩲 내의미
+      <% } %>
+    </a>
+    <div class="ms-auto">
+      <% if (!유저) { %>
+        <a href="/login" class="btn btn-primary">로그인</a>
+      <% } else { %>
+        <span class="me-3">안녕하세요, <strong><%= 유저.username %></strong>님</span>
+        <a href="/logout" class="btn btn-danger">로그아웃</a>
+      <% } %>
+    </div>
+  </nav>
+
+  <!-- 메인 콘텐츠 -->
+  <div class="container mt-5">
+    <h1 class="mb-4">반갑습니다 👋</h1>
+
+    <% if (!유저) { %>
+      <!-- 로그인 폼 -->
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title mb-4 text-center">🔐 로그인</h5>
+              <form action="/login" method="POST">
+                <div class="mb-3">
+                  <label for="username" class="form-label">아이디</label>
+                  <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">비밀번호</label>
+                  <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                  <label class="form-check-label" for="remember">로그인 유지</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">로그인</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } else { %>
+      <!-- 로그인된 사용자용 업무 메뉴 -->
+      <p class="lead">여기는 <strong>내의미</strong> 업무용 홈페이지입니다.</p>
+      <div class="d-flex flex-wrap gap-3 mt-4">
+        <a href="/stock" class="btn btn-outline-primary">📦 재고관리</a>
+        <a href="/list" class="btn btn-outline-success">🗂 목록</a>
+        <a href="/write" class="btn btn-outline-warning">✍ 작성</a>
+      </div>
+    <% } %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+>>>>>>> e64b824c86d54036124f4af898c95dcecdd5cd57

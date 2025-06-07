@@ -1,0 +1,507 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@10.8.2
+2 info using node@v18.20.8
+3 silly config load:file:/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/home/ec2-user/my-bode-project/my-bode-project/.npmrc
+5 silly config load:file:/home/ec2-user/.npmrc
+6 silly config load:file:/usr/etc/npmrc
+7 verbose title npm install
+8 verbose argv "install"
+9 verbose logfile logs-max:10 dir:/home/ec2-user/.npm/_logs/2025-06-07T03_58_40_771Z-
+10 verbose logfile /home/ec2-user/.npm/_logs/2025-06-07T03_58_40_771Z-debug-0.log
+11 silly packumentCache heap:510394368 maxSize:127598592 maxEntrySize:63799296
+12 silly logfile done cleaning log files
+13 silly idealTree buildDeps
+14 verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: node_modules
+15 silly reify moves {}
+16 silly audit bulk request {
+16 silly audit   '@aws-crypto/crc32': [ '5.2.0' ],
+16 silly audit   '@aws-crypto/crc32c': [ '5.2.0' ],
+16 silly audit   '@aws-crypto/sha1-browser': [ '5.2.0' ],
+16 silly audit   '@smithy/is-array-buffer': [ '2.2.0', '4.0.0' ],
+16 silly audit   '@smithy/util-buffer-from': [ '2.2.0', '4.0.0' ],
+16 silly audit   '@smithy/util-utf8': [ '2.3.0', '4.0.0' ],
+16 silly audit   '@aws-crypto/sha256-browser': [ '5.2.0' ],
+16 silly audit   '@aws-crypto/sha256-js': [ '5.2.0' ],
+16 silly audit   '@aws-crypto/supports-web-crypto': [ '5.2.0' ],
+16 silly audit   '@aws-crypto/util': [ '5.2.0' ],
+16 silly audit   '@aws-sdk/client-s3': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/client-sso': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/core': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/credential-provider-env': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/credential-provider-http': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/credential-provider-ini': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/credential-provider-node': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/credential-provider-process': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/credential-provider-sso': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/credential-provider-web-identity': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/lib-storage': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-bucket-endpoint': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-expect-continue': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-flexible-checksums': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-host-header': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-location-constraint': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-logger': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-recursion-detection': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-sdk-s3': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-ssec': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/middleware-user-agent': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/nested-clients': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/region-config-resolver': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/signature-v4-multi-region': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/token-providers': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/types': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/util-arn-parser': [ '3.804.0' ],
+16 silly audit   '@aws-sdk/util-endpoints': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/util-locate-window': [ '3.804.0' ],
+16 silly audit   '@aws-sdk/util-user-agent-browser': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/util-user-agent-node': [ '3.821.0' ],
+16 silly audit   '@aws-sdk/xml-builder': [ '3.821.0' ],
+16 silly audit   '@google-cloud/promisify': [ '4.1.0' ],
+16 silly audit   '@google-cloud/vision': [ '4.3.3' ],
+16 silly audit   '@grpc/grpc-js': [ '1.13.4' ],
+16 silly audit   '@grpc/proto-loader': [ '0.7.15' ],
+16 silly audit   '@js-sdsl/ordered-map': [ '4.4.2' ],
+16 silly audit   '@mongodb-js/saslprep': [ '1.2.2' ],
+16 silly audit   '@protobufjs/aspromise': [ '1.1.2' ],
+16 silly audit   '@protobufjs/base64': [ '1.1.2' ],
+16 silly audit   '@protobufjs/codegen': [ '2.0.4' ],
+16 silly audit   '@protobufjs/eventemitter': [ '1.1.0' ],
+16 silly audit   '@protobufjs/fetch': [ '1.1.0' ],
+16 silly audit   '@protobufjs/float': [ '1.0.2' ],
+16 silly audit   '@protobufjs/inquire': [ '1.1.0' ],
+16 silly audit   '@protobufjs/path': [ '1.1.2' ],
+16 silly audit   '@protobufjs/pool': [ '1.1.0' ],
+16 silly audit   '@protobufjs/utf8': [ '1.1.0' ],
+16 silly audit   '@smithy/abort-controller': [ '4.0.4' ],
+16 silly audit   '@smithy/chunked-blob-reader': [ '5.0.0' ],
+16 silly audit   '@smithy/chunked-blob-reader-native': [ '4.0.0' ],
+16 silly audit   '@smithy/config-resolver': [ '4.1.4' ],
+16 silly audit   '@smithy/core': [ '3.5.1' ],
+16 silly audit   '@smithy/credential-provider-imds': [ '4.0.6' ],
+16 silly audit   '@smithy/eventstream-codec': [ '4.0.4' ],
+16 silly audit   '@smithy/eventstream-serde-browser': [ '4.0.4' ],
+16 silly audit   '@smithy/eventstream-serde-config-resolver': [ '4.1.2' ],
+16 silly audit   '@smithy/eventstream-serde-node': [ '4.0.4' ],
+16 silly audit   '@smithy/eventstream-serde-universal': [ '4.0.4' ],
+16 silly audit   '@smithy/fetch-http-handler': [ '5.0.4' ],
+16 silly audit   '@smithy/hash-blob-browser': [ '4.0.4' ],
+16 silly audit   '@smithy/hash-node': [ '4.0.4' ],
+16 silly audit   '@smithy/hash-stream-node': [ '4.0.4' ],
+16 silly audit   '@smithy/invalid-dependency': [ '4.0.4' ],
+16 silly audit   '@smithy/md5-js': [ '4.0.4' ],
+16 silly audit   '@smithy/middleware-content-length': [ '4.0.4' ],
+16 silly audit   '@smithy/middleware-endpoint': [ '4.1.9' ],
+16 silly audit   '@smithy/middleware-retry': [ '4.1.10' ],
+16 silly audit   '@smithy/middleware-serde': [ '4.0.8' ],
+16 silly audit   '@smithy/middleware-stack': [ '4.0.4' ],
+16 silly audit   '@smithy/node-config-provider': [ '4.1.3' ],
+16 silly audit   '@smithy/node-http-handler': [ '4.0.6' ],
+16 silly audit   '@smithy/property-provider': [ '4.0.4' ],
+16 silly audit   '@smithy/protocol-http': [ '5.1.2' ],
+16 silly audit   '@smithy/querystring-builder': [ '4.0.4' ],
+16 silly audit   '@smithy/querystring-parser': [ '4.0.4' ],
+16 silly audit   '@smithy/service-error-classification': [ '4.0.5' ],
+16 silly audit   '@smithy/shared-ini-file-loader': [ '4.0.4' ],
+16 silly audit   '@smithy/signature-v4': [ '5.1.2' ],
+16 silly audit   '@smithy/smithy-client': [ '4.4.1' ],
+16 silly audit   '@smithy/types': [ '4.3.1' ],
+16 silly audit   '@smithy/url-parser': [ '4.0.4' ],
+16 silly audit   '@smithy/util-base64': [ '4.0.0' ],
+16 silly audit   '@smithy/util-body-length-browser': [ '4.0.0' ],
+16 silly audit   '@smithy/util-body-length-node': [ '4.0.0' ],
+16 silly audit   '@smithy/util-config-provider': [ '4.0.0' ],
+16 silly audit   '@smithy/util-defaults-mode-browser': [ '4.0.17' ],
+16 silly audit   '@smithy/util-defaults-mode-node': [ '4.0.17' ],
+16 silly audit   '@smithy/util-endpoints': [ '3.0.6' ],
+16 silly audit   '@smithy/util-hex-encoding': [ '4.0.0' ],
+16 silly audit   '@smithy/util-middleware': [ '4.0.4' ],
+16 silly audit   '@smithy/util-retry': [ '4.0.5' ],
+16 silly audit   '@smithy/util-stream': [ '4.2.2' ],
+16 silly audit   '@smithy/util-uri-escape': [ '4.0.0' ],
+16 silly audit   '@smithy/util-waiter': [ '4.0.5' ],
+16 silly audit   '@tootallnate/once': [ '2.0.0' ],
+16 silly audit   '@types/caseless': [ '0.12.5' ],
+16 silly audit   '@types/long': [ '4.0.2' ],
+16 silly audit   '@types/node': [ '22.15.18' ],
+16 silly audit   '@types/request': [ '2.48.12' ],
+16 silly audit   '@types/tough-cookie': [ '4.0.5' ],
+16 silly audit   '@types/webidl-conversions': [ '7.0.3' ],
+16 silly audit   '@types/whatwg-url': [ '8.2.2' ],
+16 silly audit   'abort-controller': [ '3.0.0' ],
+16 silly audit   accepts: [ '2.0.0' ],
+16 silly audit   'adler-32': [ '1.3.1' ],
+16 silly audit   'agent-base': [ '7.1.3', '6.0.2' ],
+16 silly audit   'ansi-regex': [ '5.0.1' ],
+16 silly audit   'ansi-styles': [ '4.3.0' ],
+16 silly audit   anymatch: [ '3.1.3' ],
+16 silly audit   'append-field': [ '1.0.0' ],
+16 silly audit   'asn1.js': [ '5.4.1' ],
+16 silly audit   async: [ '3.2.6' ],
+16 silly audit   asynckit: [ '0.4.0' ],
+16 silly audit   'balanced-match': [ '1.0.2' ],
+16 silly audit   'base64-js': [ '1.5.1' ],
+16 silly audit   bcrypt: [ '6.0.0' ],
+16 silly audit   'bignumber.js': [ '9.3.0' ],
+16 silly audit   'binary-extensions': [ '2.3.0' ],
+16 silly audit   'bmp-js': [ '0.1.0' ],
+16 silly audit   'bn.js': [ '4.12.2' ],
+16 silly audit   'body-parser': [ '2.2.0' ],
+16 silly audit   bowser: [ '2.11.0' ],
+16 silly audit   'brace-expansion': [ '1.1.11', '2.0.1' ],
+16 silly audit   braces: [ '3.0.3' ],
+16 silly audit   bson: [ '5.5.1' ],
+16 silly audit   buffer: [ '5.6.0' ],
+16 silly audit   'buffer-equal-constant-time': [ '1.0.1' ],
+16 silly audit   'buffer-from': [ '1.1.2' ],
+16 silly audit   busboy: [ '1.6.0' ],
+16 silly audit   bytes: [ '3.1.2' ],
+16 silly audit   'call-bind-apply-helpers': [ '1.0.2' ],
+16 silly audit   'call-bound': [ '1.0.4' ],
+16 silly audit   cfb: [ '1.2.2' ],
+16 silly audit   chalk: [ '4.1.2' ],
+16 silly audit   chokidar: [ '3.6.0' ],
+16 silly audit   cliui: [ '8.0.1' ],
+16 silly audit   codepage: [ '1.15.0' ],
+16 silly audit   'color-convert': [ '2.0.1' ],
+16 silly audit   'color-name': [ '1.1.4' ],
+16 silly audit   'combined-stream': [ '1.0.8' ],
+16 silly audit   'concat-map': [ '0.0.1' ],
+16 silly audit   'concat-stream': [ '2.0.0' ],
+16 silly audit   'connect-mongo': [ '5.1.0' ],
+16 silly audit   'content-disposition': [ '1.0.0' ],
+16 silly audit   'content-type': [ '1.0.5' ],
+16 silly audit   cookie: [ '0.7.2' ],
+16 silly audit   'cookie-signature': [ '1.2.2', '1.0.7' ],
+16 silly audit   'crc-32': [ '1.2.2' ],
+16 silly audit   debug: [ '4.4.1', '2.6.9', '3.1.0' ],
+16 silly audit   'delayed-stream': [ '1.0.0' ],
+16 silly audit   depd: [ '2.0.0' ],
+16 silly audit   dotenv: [ '16.5.0' ],
+16 silly audit   'dunder-proto': [ '1.0.1' ],
+16 silly audit   duplexify: [ '4.1.3' ],
+16 silly audit   'ecdsa-sig-formatter': [ '1.0.11' ],
+16 silly audit   'ee-first': [ '1.1.1' ],
+16 silly audit   ejs: [ '3.1.10' ],
+16 silly audit   'emoji-regex': [ '8.0.0' ],
+16 silly audit   encodeurl: [ '2.0.0' ],
+16 silly audit   'end-of-stream': [ '1.4.4' ],
+16 silly audit   'es-define-property': [ '1.0.1' ],
+16 silly audit   'es-errors': [ '1.3.0' ],
+16 silly audit   'es-object-atoms': [ '1.1.1' ],
+16 silly audit   'es-set-tostringtag': [ '2.1.0' ],
+16 silly audit   escalade: [ '3.2.0' ],
+16 silly audit   'escape-html': [ '1.0.3' ],
+16 silly audit   etag: [ '1.8.1' ],
+16 silly audit   'event-target-shim': [ '5.0.1' ],
+16 silly audit   events: [ '3.3.0' ],
+16 silly audit   express: [ '5.1.0' ],
+16 silly audit   'express-session': [ '1.18.1' ],
+16 silly audit   ms: [ '2.0.0', '2.1.3' ],
+16 silly audit   extend: [ '3.0.2' ],
+16 silly audit   'fast-xml-parser': [ '4.4.1' ],
+16 silly audit   'file-type': [ '3.9.0' ],
+16 silly audit   filelist: [ '1.0.4' ],
+16 silly audit   minimatch: [ '5.1.6', '3.1.2' ],
+16 silly audit   'fill-range': [ '7.1.1' ],
+16 silly audit   finalhandler: [ '2.1.0' ],
+16 silly audit   'form-data': [ '2.5.3' ],
+16 silly audit   'mime-db': [ '1.52.0', '1.54.0' ],
+16 silly audit   'mime-types': [ '2.1.35', '3.0.1' ],
+16 silly audit   forwarded: [ '0.2.0' ],
+16 silly audit   frac: [ '1.1.2' ],
+16 silly audit   fresh: [ '2.0.0' ],
+16 silly audit   fsevents: [ '2.3.3' ],
+16 silly audit   'function-bind': [ '1.1.2' ],
+16 silly audit   gaxios: [ '6.7.1' ],
+16 silly audit   'gcp-metadata': [ '6.1.1' ],
+16 silly audit   'get-caller-file': [ '2.0.5' ],
+16 silly audit   'get-intrinsic': [ '1.3.0' ],
+16 silly audit   'get-proto': [ '1.0.1' ],
+16 silly audit   'glob-parent': [ '5.1.2' ],
+16 silly audit   'google-auth-library': [ '9.15.1' ],
+16 silly audit   jwa: [ '2.0.1', '1.4.2' ],
+16 silly audit   jws: [ '4.0.0', '3.2.2' ],
+16 silly audit   'google-gax': [ '4.6.1' ],
+16 silly audit   'google-logging-utils': [ '0.0.2' ],
+16 silly audit   gopd: [ '1.2.0' ],
+16 silly audit   gtoken: [ '7.1.0' ],
+16 silly audit   'has-flag': [ '4.0.0', '3.0.0' ],
+16 silly audit   'has-symbols': [ '1.1.0' ],
+16 silly audit   'has-tostringtag': [ '1.0.2' ],
+16 silly audit   hasown: [ '2.0.2' ],
+16 silly audit   'html-comment-regex': [ '1.1.2' ],
+16 silly audit   'http-errors': [ '2.0.0' ],
+16 silly audit   'http-proxy-agent': [ '5.0.0' ],
+16 silly audit   'https-proxy-agent': [ '7.0.6', '5.0.1' ],
+16 silly audit   'iconv-lite': [ '0.6.3' ],
+16 silly audit   'idb-keyval': [ '6.2.2' ],
+16 silly audit   ieee754: [ '1.2.1' ],
+16 silly audit   'ignore-by-default': [ '1.0.1' ],
+16 silly audit   inherits: [ '2.0.4' ],
+16 silly audit   'ip-address': [ '9.0.5' ],
+16 silly audit   'ipaddr.js': [ '1.9.1' ],
+16 silly audit   is: [ '3.3.0' ],
+16 silly audit   'is-binary-path': [ '2.1.0' ],
+16 silly audit   'is-electron': [ '2.2.2' ],
+16 silly audit   'is-extglob': [ '2.1.1' ],
+16 silly audit   'is-fullwidth-code-point': [ '3.0.0' ],
+16 silly audit   'is-glob': [ '4.0.3' ],
+16 silly audit   'is-number': [ '7.0.0' ],
+16 silly audit   'is-promise': [ '4.0.0' ],
+16 silly audit   'is-stream': [ '2.0.1' ],
+16 silly audit   'is-url': [ '1.2.4' ],
+16 silly audit   jake: [ '10.9.2' ],
+16 silly audit   jsbn: [ '1.1.0' ],
+16 silly audit   'json-bigint': [ '1.0.0' ],
+16 silly audit   jsonwebtoken: [ '9.0.2' ],
+16 silly audit   kruptein: [ '3.0.7' ],
+16 silly audit   'lodash.camelcase': [ '4.3.0' ],
+16 silly audit   'lodash.includes': [ '4.3.0' ],
+16 silly audit   'lodash.isboolean': [ '3.0.3' ],
+16 silly audit   'lodash.isinteger': [ '4.0.4' ],
+16 silly audit   'lodash.isnumber': [ '3.0.3' ],
+16 silly audit   'lodash.isplainobject': [ '4.0.6' ],
+16 silly audit   'lodash.isstring': [ '4.0.1' ],
+16 silly audit   'lodash.once': [ '4.1.1' ],
+16 silly audit   long: [ '5.3.2' ],
+16 silly audit   'math-intrinsics': [ '1.1.0' ],
+16 silly audit   'media-typer': [ '1.1.0', '0.3.0' ],
+16 silly audit   'memory-pager': [ '1.5.0' ],
+16 silly audit   'merge-descriptors': [ '2.0.0' ],
+16 silly audit   'method-override': [ '3.0.0' ],
+16 silly audit   methods: [ '1.1.2' ],
+16 silly audit   'minimalistic-assert': [ '1.0.1' ],
+16 silly audit   minimist: [ '1.2.8' ],
+16 silly audit   mkdirp: [ '0.5.6' ],
+16 silly audit   mongodb: [ '5.9.2' ],
+16 silly audit   'mongodb-connection-string-url': [ '2.6.0' ],
+16 silly audit   multer: [ '2.0.1' ],
+16 silly audit   'multer-s3': [ '3.0.1' ],
+16 silly audit   'type-is': [ '1.6.18', '2.0.1' ],
+16 silly audit   negotiator: [ '1.0.0' ],
+16 silly audit   'node-addon-api': [ '8.3.1' ],
+16 silly audit   'node-fetch': [ '2.7.0' ],
+16 silly audit   tr46: [ '0.0.3', '3.0.0' ],
+16 silly audit   'webidl-conversions': [ '3.0.1', '7.0.0' ],
+16 silly audit   'whatwg-url': [ '5.0.0', '11.0.0' ],
+16 silly audit   'node-gyp-build': [ '4.8.4' ],
+16 silly audit   nodemailer: [ '7.0.3' ],
+16 silly audit   nodemon: [ '3.1.10' ],
+16 silly audit   'supports-color': [ '5.5.0', '7.2.0' ],
+16 silly audit   'normalize-path': [ '3.0.0' ],
+16 silly audit   'object-assign': [ '4.1.1' ],
+16 silly audit   'object-hash': [ '3.0.0' ],
+16 silly audit   'object-inspect': [ '1.13.4' ],
+16 silly audit   'on-finished': [ '2.4.1' ],
+16 silly audit   'on-headers': [ '1.0.2' ],
+16 silly audit   once: [ '1.4.0' ],
+16 silly audit   'opencollective-postinstall': [ '2.0.3' ],
+16 silly audit   parseurl: [ '1.3.3' ],
+16 silly audit   passport: [ '0.7.0' ],
+16 silly audit   'passport-local': [ '1.0.0' ],
+16 silly audit   'passport-strategy': [ '1.0.0' ],
+16 silly audit   'path-to-regexp': [ '8.2.0' ],
+16 silly audit   pause: [ '0.0.1' ],
+16 silly audit   picomatch: [ '2.3.1' ],
+16 silly audit   'proto3-json-serializer': [ '2.0.2' ],
+16 silly audit   protobufjs: [ '7.5.3' ],
+16 silly audit   'proxy-addr': [ '2.0.7' ],
+16 silly audit   'pstree.remy': [ '1.1.8' ],
+16 silly audit   punycode: [ '2.3.1' ],
+16 silly audit   qs: [ '6.14.0' ],
+16 silly audit   'queue-microtask': [ '1.2.3' ],
+16 silly audit   'random-bytes': [ '1.0.0' ],
+16 silly audit   'range-parser': [ '1.2.1' ],
+16 silly audit   'raw-body': [ '3.0.0' ],
+16 silly audit   'readable-stream': [ '3.6.2' ],
+16 silly audit   readdirp: [ '3.6.0' ],
+16 silly audit   'regenerator-runtime': [ '0.13.11' ],
+16 silly audit   'require-directory': [ '2.1.1' ],
+16 silly audit   'retry-request': [ '7.0.2' ],
+16 silly audit   router: [ '2.2.0' ],
+16 silly audit   'run-parallel': [ '1.2.0' ],
+16 silly audit   'safe-buffer': [ '5.2.1', '5.1.2' ],
+16 silly audit   'safer-buffer': [ '2.1.2' ],
+16 silly audit   semver: [ '7.7.2' ],
+16 silly audit   send: [ '1.2.0' ],
+16 silly audit   'serve-static': [ '2.2.0' ],
+16 silly audit   setprototypeof: [ '1.2.0' ],
+16 silly audit   'side-channel': [ '1.1.0' ],
+16 silly audit   'side-channel-list': [ '1.0.0' ],
+16 silly audit   'side-channel-map': [ '1.0.1' ],
+16 silly audit   'side-channel-weakmap': [ '1.0.2' ],
+16 silly audit   'simple-update-notifier': [ '2.0.0' ],
+16 silly audit   'smart-buffer': [ '4.2.0' ],
+16 silly audit   socks: [ '2.8.4' ],
+16 silly audit   'sparse-bitfield': [ '3.0.3' ],
+16 silly audit   'sprintf-js': [ '1.1.3' ],
+16 silly audit   ssf: [ '0.11.2' ],
+16 silly audit   statuses: [ '2.0.1' ],
+16 silly audit   'stream-browserify': [ '3.0.0' ],
+16 silly audit   'stream-events': [ '1.0.5' ],
+16 silly audit   'stream-shift': [ '1.0.3' ],
+16 silly audit   streamsearch: [ '1.1.0' ],
+16 silly audit   string_decoder: [ '1.1.1' ],
+16 silly audit   'string-width': [ '4.2.3' ],
+16 silly audit   'strip-ansi': [ '6.0.1' ],
+16 silly audit   strnum: [ '1.1.2' ],
+16 silly audit   stubs: [ '3.0.0' ],
+16 silly audit   'teeny-request': [ '9.0.0' ],
+16 silly audit   'tesseract.js': [ '4.1.4' ],
+16 silly audit   'tesseract.js-core': [ '4.0.4' ],
+16 silly audit   'to-regex-range': [ '5.0.1' ],
+16 silly audit   toidentifier: [ '1.0.1' ],
+16 silly audit   touch: [ '3.1.1' ],
+16 silly audit   tslib: [ '2.8.1' ],
+16 silly audit   typedarray: [ '0.0.6' ],
+16 silly audit   'uid-safe': [ '2.1.5' ],
+16 silly audit   undefsafe: [ '2.0.5' ],
+16 silly audit   'undici-types': [ '6.21.0' ],
+16 silly audit   unpipe: [ '1.0.0' ],
+16 silly audit   'util-deprecate': [ '1.0.2' ],
+16 silly audit   'utils-merge': [ '1.0.1' ],
+16 silly audit   uuid: [ '9.0.1' ],
+16 silly audit   vary: [ '1.1.2' ],
+16 silly audit   'wasm-feature-detect': [ '1.8.0' ],
+16 silly audit   wmf: [ '1.0.2' ],
+16 silly audit   word: [ '0.3.0' ],
+16 silly audit   'wrap-ansi': [ '7.0.0' ],
+16 silly audit   wrappy: [ '1.0.2' ],
+16 silly audit   xlsx: [ '0.18.5' ],
+16 silly audit   xtend: [ '4.0.2' ],
+16 silly audit   y18n: [ '5.0.8' ],
+16 silly audit   yargs: [ '17.7.2' ],
+16 silly audit   'yargs-parser': [ '21.1.1' ],
+16 silly audit   zlibjs: [ '0.3.1' ]
+16 silly audit }
+17 verbose reify failed optional dependency /home/ec2-user/my-bode-project/my-bode-project/node_modules/fsevents
+18 silly reify mark deleted [
+18 silly reify   '/home/ec2-user/my-bode-project/my-bode-project/node_modules/fsevents'
+18 silly reify ]
+19 silly tarball no local data for yargs-parser@https://registry.npmjs.org/yargs-parser/-/yargs-parser-21.1.1.tgz. Extracting by manifest.
+20 silly tarball no local data for yargs@https://registry.npmjs.org/yargs/-/yargs-17.7.2.tgz. Extracting by manifest.
+21 silly tarball no local data for y18n@https://registry.npmjs.org/y18n/-/y18n-5.0.8.tgz. Extracting by manifest.
+22 silly tarball no local data for tesseract.js-core@https://registry.npmjs.org/tesseract.js-core/-/tesseract.js-core-4.0.4.tgz. Extracting by manifest.
+23 silly tarball no local data for tesseract.js@https://registry.npmjs.org/tesseract.js/-/tesseract.js-4.1.4.tgz. Extracting by manifest.
+24 silly tarball no local data for teeny-request@https://registry.npmjs.org/teeny-request/-/teeny-request-9.0.0.tgz. Extracting by manifest.
+25 silly tarball no local data for stubs@https://registry.npmjs.org/stubs/-/stubs-3.0.0.tgz. Extracting by manifest.
+26 silly tarball no local data for strip-ansi@https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz. Extracting by manifest.
+27 silly tarball no local data for zlibjs@https://registry.npmjs.org/zlibjs/-/zlibjs-0.3.1.tgz. Extracting by manifest.
+28 silly tarball no local data for wrap-ansi@https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-7.0.0.tgz. Extracting by manifest.
+29 silly tarball no local data for stream-events@https://registry.npmjs.org/stream-events/-/stream-events-1.0.5.tgz. Extracting by manifest.
+30 silly tarball no local data for retry-request@https://registry.npmjs.org/retry-request/-/retry-request-7.0.2.tgz. Extracting by manifest.
+31 silly tarball no local data for wasm-feature-detect@https://registry.npmjs.org/wasm-feature-detect/-/wasm-feature-detect-1.8.0.tgz. Extracting by manifest.
+32 silly tarball no local data for string-width@https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz. Extracting by manifest.
+33 silly tarball no local data for protobufjs@https://registry.npmjs.org/protobufjs/-/protobufjs-7.5.3.tgz. Extracting by manifest.
+34 silly tarball no local data for stream-shift@https://registry.npmjs.org/stream-shift/-/stream-shift-1.0.3.tgz. Extracting by manifest.
+35 silly tarball no local data for proto3-json-serializer@https://registry.npmjs.org/proto3-json-serializer/-/proto3-json-serializer-2.0.2.tgz. Extracting by manifest.
+36 silly tarball no local data for object-hash@https://registry.npmjs.org/object-hash/-/object-hash-3.0.0.tgz. Extracting by manifest.
+37 silly tarball no local data for node-fetch@https://registry.npmjs.org/node-fetch/-/node-fetch-2.7.0.tgz. Extracting by manifest.
+38 silly tarball no local data for regenerator-runtime@https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.13.11.tgz. Extracting by manifest.
+39 silly tarball no local data for long@https://registry.npmjs.org/long/-/long-5.3.2.tgz. Extracting by manifest.
+40 silly tarball no local data for require-directory@https://registry.npmjs.org/require-directory/-/require-directory-2.1.1.tgz. Extracting by manifest.
+41 silly tarball no local data for lodash.camelcase@https://registry.npmjs.org/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz. Extracting by manifest.
+42 silly tarball no local data for json-bigint@https://registry.npmjs.org/json-bigint/-/json-bigint-1.0.0.tgz. Extracting by manifest.
+43 silly tarball no local data for opencollective-postinstall@https://registry.npmjs.org/opencollective-postinstall/-/opencollective-postinstall-2.0.3.tgz. Extracting by manifest.
+44 silly tarball no local data for is-stream@https://registry.npmjs.org/is-stream/-/is-stream-2.0.1.tgz. Extracting by manifest.
+45 silly tarball no local data for is-url@https://registry.npmjs.org/is-url/-/is-url-1.2.4.tgz. Extracting by manifest.
+46 silly tarball no local data for is@https://registry.npmjs.org/is/-/is-3.3.0.tgz. Extracting by manifest.
+47 silly tarball no local data for is-fullwidth-code-point@https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz. Extracting by manifest.
+48 silly tarball no local data for is-electron@https://registry.npmjs.org/is-electron/-/is-electron-2.2.2.tgz. Extracting by manifest.
+49 silly tarball no local data for idb-keyval@https://registry.npmjs.org/idb-keyval/-/idb-keyval-6.2.2.tgz. Extracting by manifest.
+50 silly tarball no local data for https-proxy-agent@https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-7.0.6.tgz. Extracting by manifest.
+51 silly tarball no local data for gtoken@https://registry.npmjs.org/gtoken/-/gtoken-7.1.0.tgz. Extracting by manifest.
+52 silly tarball no local data for http-proxy-agent@https://registry.npmjs.org/http-proxy-agent/-/http-proxy-agent-5.0.0.tgz. Extracting by manifest.
+53 silly tarball no local data for google-auth-library@https://registry.npmjs.org/google-auth-library/-/google-auth-library-9.15.1.tgz. Extracting by manifest.
+54 silly tarball no local data for get-caller-file@https://registry.npmjs.org/get-caller-file/-/get-caller-file-2.0.5.tgz. Extracting by manifest.
+55 silly tarball no local data for has-tostringtag@https://registry.npmjs.org/has-tostringtag/-/has-tostringtag-1.0.2.tgz. Extracting by manifest.
+56 silly tarball no local data for gaxios@https://registry.npmjs.org/gaxios/-/gaxios-6.7.1.tgz. Extracting by manifest.
+57 silly tarball no local data for form-data@https://registry.npmjs.org/form-data/-/form-data-2.5.3.tgz. Extracting by manifest.
+58 silly tarball no local data for google-logging-utils@https://registry.npmjs.org/google-logging-utils/-/google-logging-utils-0.0.2.tgz. Extracting by manifest.
+59 silly tarball no local data for event-target-shim@https://registry.npmjs.org/event-target-shim/-/event-target-shim-5.0.1.tgz. Extracting by manifest.
+60 silly tarball no local data for escalade@https://registry.npmjs.org/escalade/-/escalade-3.2.0.tgz. Extracting by manifest.
+61 silly tarball no local data for google-gax@https://registry.npmjs.org/google-gax/-/google-gax-4.6.1.tgz. Extracting by manifest.
+62 silly tarball no local data for gcp-metadata@https://registry.npmjs.org/gcp-metadata/-/gcp-metadata-6.1.1.tgz. Extracting by manifest.
+63 silly tarball no local data for extend@https://registry.npmjs.org/extend/-/extend-3.0.2.tgz. Extracting by manifest.
+64 silly tarball no local data for duplexify@https://registry.npmjs.org/duplexify/-/duplexify-4.1.3.tgz. Extracting by manifest.
+65 silly tarball no local data for delayed-stream@https://registry.npmjs.org/delayed-stream/-/delayed-stream-1.0.0.tgz. Extracting by manifest.
+66 silly tarball no local data for combined-stream@https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz. Extracting by manifest.
+67 silly tarball no local data for cliui@https://registry.npmjs.org/cliui/-/cliui-8.0.1.tgz. Extracting by manifest.
+68 silly tarball no local data for bmp-js@https://registry.npmjs.org/bmp-js/-/bmp-js-0.1.0.tgz. Extracting by manifest.
+69 silly tarball no local data for bignumber.js@https://registry.npmjs.org/bignumber.js/-/bignumber.js-9.3.0.tgz. Extracting by manifest.
+70 silly tarball no local data for asynckit@https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz. Extracting by manifest.
+71 silly tarball no local data for es-set-tostringtag@https://registry.npmjs.org/es-set-tostringtag/-/es-set-tostringtag-2.1.0.tgz. Extracting by manifest.
+72 silly tarball no local data for agent-base@https://registry.npmjs.org/agent-base/-/agent-base-7.1.3.tgz. Extracting by manifest.
+73 silly tarball no local data for abort-controller@https://registry.npmjs.org/abort-controller/-/abort-controller-3.0.0.tgz. Extracting by manifest.
+74 silly tarball no local data for end-of-stream@https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.4.4.tgz. Extracting by manifest.
+75 silly tarball no local data for emoji-regex@https://registry.npmjs.org/emoji-regex/-/emoji-regex-8.0.0.tgz. Extracting by manifest.
+76 silly tarball no local data for ansi-regex@https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.1.tgz. Extracting by manifest.
+77 silly tarball no local data for @types/tough-cookie@https://registry.npmjs.org/@types/tough-cookie/-/tough-cookie-4.0.5.tgz. Extracting by manifest.
+78 silly tarball no local data for @tootallnate/once@https://registry.npmjs.org/@tootallnate/once/-/once-2.0.0.tgz. Extracting by manifest.
+79 silly tarball no local data for @types/request@https://registry.npmjs.org/@types/request/-/request-2.48.12.tgz. Extracting by manifest.
+80 silly tarball no local data for @protobufjs/pool@https://registry.npmjs.org/@protobufjs/pool/-/pool-1.1.0.tgz. Extracting by manifest.
+81 silly tarball no local data for @protobufjs/path@https://registry.npmjs.org/@protobufjs/path/-/path-1.1.2.tgz. Extracting by manifest.
+82 silly tarball no local data for @protobufjs/inquire@https://registry.npmjs.org/@protobufjs/inquire/-/inquire-1.1.0.tgz. Extracting by manifest.
+83 silly tarball no local data for @protobufjs/float@https://registry.npmjs.org/@protobufjs/float/-/float-1.0.2.tgz. Extracting by manifest.
+84 silly tarball no local data for @protobufjs/fetch@https://registry.npmjs.org/@protobufjs/fetch/-/fetch-1.1.0.tgz. Extracting by manifest.
+85 silly tarball no local data for @protobufjs/eventemitter@https://registry.npmjs.org/@protobufjs/eventemitter/-/eventemitter-1.1.0.tgz. Extracting by manifest.
+86 silly tarball no local data for @protobufjs/codegen@https://registry.npmjs.org/@protobufjs/codegen/-/codegen-2.0.4.tgz. Extracting by manifest.
+87 silly tarball no local data for @types/long@https://registry.npmjs.org/@types/long/-/long-4.0.2.tgz. Extracting by manifest.
+88 silly tarball no local data for @protobufjs/aspromise@https://registry.npmjs.org/@protobufjs/aspromise/-/aspromise-1.1.2.tgz. Extracting by manifest.
+89 silly tarball no local data for @types/caseless@https://registry.npmjs.org/@types/caseless/-/caseless-0.12.5.tgz. Extracting by manifest.
+90 silly tarball no local data for @grpc/proto-loader@https://registry.npmjs.org/@grpc/proto-loader/-/proto-loader-0.7.15.tgz. Extracting by manifest.
+91 silly tarball no local data for @grpc/grpc-js@https://registry.npmjs.org/@grpc/grpc-js/-/grpc-js-1.13.4.tgz. Extracting by manifest.
+92 silly tarball no local data for @google-cloud/vision@https://registry.npmjs.org/@google-cloud/vision/-/vision-4.3.3.tgz. Extracting by manifest.
+93 silly tarball no local data for @protobufjs/utf8@https://registry.npmjs.org/@protobufjs/utf8/-/utf8-1.1.0.tgz. Extracting by manifest.
+94 silly tarball no local data for @protobufjs/base64@https://registry.npmjs.org/@protobufjs/base64/-/base64-1.1.2.tgz. Extracting by manifest.
+95 silly tarball no local data for @google-cloud/promisify@https://registry.npmjs.org/@google-cloud/promisify/-/promisify-4.1.0.tgz. Extracting by manifest.
+96 silly tarball no local data for @js-sdsl/ordered-map@https://registry.npmjs.org/@js-sdsl/ordered-map/-/ordered-map-4.4.2.tgz. Extracting by manifest.
+97 silly tarball no local data for https-proxy-agent@https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz. Extracting by manifest.
+98 silly tarball no local data for agent-base@https://registry.npmjs.org/agent-base/-/agent-base-6.0.2.tgz. Extracting by manifest.
+99 silly tarball no local data for whatwg-url@https://registry.npmjs.org/whatwg-url/-/whatwg-url-5.0.0.tgz. Extracting by manifest.
+100 silly tarball no local data for webidl-conversions@https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-3.0.1.tgz. Extracting by manifest.
+101 silly tarball no local data for tr46@https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz. Extracting by manifest.
+102 silly tarball no local data for agent-base@https://registry.npmjs.org/agent-base/-/agent-base-6.0.2.tgz. Extracting by manifest.
+103 silly tarball no local data for jws@https://registry.npmjs.org/jws/-/jws-4.0.0.tgz. Extracting by manifest.
+104 silly tarball no local data for jwa@https://registry.npmjs.org/jwa/-/jwa-2.0.1.tgz. Extracting by manifest.
+105 silly tarball no local data for jws@https://registry.npmjs.org/jws/-/jws-4.0.0.tgz. Extracting by manifest.
+106 silly tarball no local data for jwa@https://registry.npmjs.org/jwa/-/jwa-2.0.1.tgz. Extracting by manifest.
+107 silly tarball no local data for mime-types@https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz. Extracting by manifest.
+108 silly tarball no local data for mime-db@https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz. Extracting by manifest.
+109 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 724ms
+110 silly audit report {
+110 silly audit report   xlsx: [
+110 silly audit report     {
+110 silly audit report       id: 1094599,
+110 silly audit report       url: 'https://github.com/advisories/GHSA-4r6h-8v6p-xvw6',
+110 silly audit report       title: 'Prototype Pollution in sheetJS',
+110 silly audit report       severity: 'high',
+110 silly audit report       vulnerable_versions: '<0.19.3',
+110 silly audit report       cwe: [Array],
+110 silly audit report       cvss: [Object]
+110 silly audit report     },
+110 silly audit report     {
+110 silly audit report       id: 1096911,
+110 silly audit report       url: 'https://github.com/advisories/GHSA-5pgg-2g8v-p4x9',
+110 silly audit report       title: 'SheetJS Regular Expression Denial of Service (ReDoS)',
+110 silly audit report       severity: 'high',
+110 silly audit report       vulnerable_versions: '<0.20.2',
+110 silly audit report       cwe: [Array],
+110 silly audit report       cvss: [Object]
+110 silly audit report     }
+110 silly audit report   ]
+110 silly audit report }
+111 silly packumentCache corgi:https://registry.npmjs.org/xlsx cache-miss
+112 http fetch GET 200 https://registry.npmjs.org/stream-shift/-/stream-shift-1.0.3.tgz 1097ms (cache miss)
+113 http fetch GET 200 https://registry.npmjs.org/stubs/-/stubs-3.0.0.tgz 1244ms (cache miss)
+114 http fetch GET 200 https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-7.0.0.tgz 1243ms (cache miss)
+115 http fetch GET 200 https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz 1845ms (cache miss)
+116 http fetch GET 200 https://registry.npmjs.org/stream-events/-/stream-events-1.0.5.tgz 1882ms (cache miss)
+117 verbose cwd /home/ec2-user/my-bode-project/my-bode-project
+118 verbose os Linux 6.1.134-152.225.amzn2023.x86_64
+119 verbose node v18.20.8
+120 verbose npm  v10.8.2
+121 verbose exit 1
+122 verbose code 1
+123 error A complete log of this run can be found in: /home/ec2-user/.npm/_logs/2025-06-07T03_58_40_771Z-debug-0.log

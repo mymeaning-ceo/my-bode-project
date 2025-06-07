@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -34,3 +35,41 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>내의미 업무페이지</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/main.css">
+</head>
+<body class="bg-light">
+  <%- include('nav.ejs') %>
+
+  <div class="container my-4">
+    <% if (banners && banners.length > 0) { %>
+      <!-- 대시보드 배너도 같은 2x2 형식 -->
+      <div class="banner-grid mb-4">
+        <% banners.forEach(img => { %>
+          <img src="<%= img %>" alt="banner">
+        <% }) %>
+      </div>
+    <% } %>
+
+    <div class="text-center">
+      <h1 class="mb-4">안녕하세요 👋 <span class="text-primary">내의미</span> 업무 시스템에 오신 것을 환영합니다!</h1>
+      <p class="lead">원하는 기능을 선택하세요:</p>
+      <div class="d-flex justify-content-center gap-3 mt-4">
+        <a href="/stock" class="btn btn-outline-primary">📦 재고 관리</a>
+        <a href="/list" class="btn btn-outline-secondary">📋 게시글 목록</a>
+        <a href="/write" class="btn btn-outline-success">✍️ 글 작성</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+>>>>>>> e64b824c86d54036124f4af898c95dcecdd5cd57
