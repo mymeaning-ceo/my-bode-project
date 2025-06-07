@@ -63,7 +63,7 @@ app.use(async (req, res, next) => {
 })
 
 const { S3Client } = require('@aws-sdk/client-s3')
-const upload = require('./upload.js'); // post.js 등에서
+const upload = require('./wonhochoi'); // post.js 등에서
 
 
 app.use((요청, 응답, next) => {

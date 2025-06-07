@@ -101,7 +101,7 @@ router.get('/', async (req, res) => {
       전체필드: DEFAULT_COLUMNS,
       성공메시지: null,
       한글,
-      keyword
+      keyword:''
     });
   } catch (err) {
     console.error('GET /coupang 오류:', err);
@@ -162,7 +162,8 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
       필드: DEFAULT_COLUMNS,
       전체필드: DEFAULT_COLUMNS,
       성공메시지: '✅ 업로드 완료',
-      한글
+      한글,
+      keyword: '' // ← 반드시 추가!!
     });
   } catch (err) {
     console.error('POST /coupang/upload 오류:', err);
@@ -194,7 +195,8 @@ router.get('/search', async (req, res) => {
       전체필드: DEFAULT_COLUMNS,
       성공메시지: null,
       한글,
-      keyword
+      keyword: '' // ← 반드시 추가!!
+
     });
   } catch (err) {
     console.error('GET /coupang/search 오류:', err);

@@ -1,2 +1,19 @@
+# node_modules (라이브러리)
+node_modules/
+
+# 환경 변수 (민감 정보)
 .env
-node_modules
+
+# VS Code 서버 설정
+.vscode-server/
+
+# 학습된 데이터 파일
+*.traineddata
+
+# 파일 업로드 디렉토리
+uploads/
+
+# 로그, 캐시 등
+*.log
+.DS_Store
+.pm2/
