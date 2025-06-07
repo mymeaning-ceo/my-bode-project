@@ -1,2 +1,7 @@
 .env
 node_modules
+.vscode-server/
+git rm -r --cached node_modules uploads .env .vscode-server *.traineddata
+git commit -m "Remove ignored files from repo"
+git push origin main
+
