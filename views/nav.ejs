@@ -1,0 +1,67 @@
+<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm px-4">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold text-dark" href="/">
+      <% if (logo) { %>
+        <img src="<%= logo %>" alt="logo" class="brand-logo">
+      <% } else { %>
+        🩲 내의미
+      <% } %>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <% if (유저) { %>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/list">📋 게시판</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/stock">📦 재고관리</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/coupang">🛒 쿠팡재고</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/coupang/add">💰 매출/광고비</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/voucher">📝 전표입력</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/write">✍ 글작성</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/admin">🛠 관리자</a>
+          </li>
+        <% } %>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="/help">❓ 사용방법</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="/ocr">🖼️ OCR</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav mb-2 mb-lg-0">
+        <% if (유저) { %>
+          <li class="nav-item">
+            <a class="nav-link text-muted" href="/profile">👤 <%= 유저.username %></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-danger" href="/logout">🚪 로그아웃</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/register">📝 회원가입</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/login">🔐 로그인</a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
