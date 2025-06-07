@@ -67,8 +67,7 @@ function getAllFields(resultArray) {
 router.get('/', async (req, res) => {
   const keyword = '';
   try {
-    let  result = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
-    const resultWithShortage = addShortage(result);
+    let result = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
 
     // 숫자형 필드만 숫자 타입으로 변환 (옵션ID는 문자열 유지)
     result = result.map(row => {
@@ -87,8 +86,9 @@ router.get('/', async (req, res) => {
       });
       return newRow;
     });
-    
-    
+
+    const resultWithShortage = addShortage(result);
+
     let selected = req.query.fields;
     if (selected && !Array.isArray(selected)) selected = selected.split(',');
     const fields = (selected && selected.length > 0)
@@ -155,7 +155,20 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     if (bulkOps.length > 0) await db.collection('coupang').bulkWrite(bulkOps);
     fs.unlink(filePath, () => {});
 
-    const resultArray = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
+    let resultArray = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
+
+    resultArray = resultArray.map(row => {
+      const newRow = { ...row };
+      if (typeof newRow['Option ID'] === 'number') newRow['Option ID'] = String(newRow['Option ID']);
+      NUMERIC_COLUMNS.forEach(col => {
+        if (col !== 'Option ID' && newRow[col] !== undefined && newRow[col] !== null) {
+          const num = Number(String(newRow[col]).replace(/,/g, ''));
+          newRow[col] = isNaN(num) ? 0 : num;
+        }
+      });
+      return newRow;
+    });
+
     const resultWithShortage = addShortage(resultArray);
     res.render('coupang.ejs', {
       결과: resultWithShortage,
@@ -176,13 +189,26 @@ router.get('/search', async (req, res) => {
   try {
     const keyword = req.query.keyword || '';
     const regex = new RegExp(keyword, 'i');
-    const result = await db.collection('coupang').find({
+    let result = await db.collection('coupang').find({
       $or: [
         { 'Product name': regex },
         { 'Option name': regex },
         { 'Option ID': regex }
       ]
     }).toArray();
+
+    result = result.map(row => {
+      const newRow = { ...row };
+      if (typeof newRow['Option ID'] === 'number') newRow['Option ID'] = String(newRow['Option ID']);
+      NUMERIC_COLUMNS.forEach(col => {
+        if (col !== 'Option ID' && newRow[col] !== undefined && newRow[col] !== null) {
+          const num = Number(String(newRow[col]).replace(/,/g, ''));
+          newRow[col] = isNaN(num) ? 0 : num;
+        }
+      });
+      return newRow;
+    });
+
     const resultWithShortage = addShortage(result);
     let selected = req.query.fields;
     if (selected && !Array.isArray(selected)) selected = selected.split(',');
