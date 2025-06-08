@@ -60,6 +60,8 @@ body {
   vertical-align: middle;
 }
 
+
+
 /* 테이블 헤더 */
 th {
   font-size: calc(12px + 0.2vw);
