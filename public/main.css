@@ -141,6 +141,19 @@ input[type="file"]::-webkit-file-upload-button {
   white-space: nowrap;
 }
 
+/* 업로드 및 초기화 버튼 영역 */
+.action-form {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-upload,
+.btn-reset {
+  min-width: 130px;
+}
+
 /* 게시판 액션 아이콘 */
 .action-icon {
   font-size: 0.9rem;
