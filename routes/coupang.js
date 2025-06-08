@@ -17,6 +17,9 @@ const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 const upload = multer({ dest: uploadsDir });
 
+// 검색 가능한 브랜드 목록
+const BRANDS = ['BYC', '트라이', '제임스딘', '스페클로', '물랑루즈'];
+
 // 한글 매핑 및 순서
 const 한글 = {
   'Option ID': '옵션ID',
@@ -66,8 +69,10 @@ function getAllFields(resultArray) {
 // 목록
 router.get('/', async (req, res) => {
   const keyword = '';
+  const brand = req.query.brand || '';
   try {
-    let result = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
+    const query = brand ? { 'Product name': new RegExp(brand, 'i') } : {};
+    let result = await db.collection('coupang').find(query).sort({ 'Product name': 1 }).toArray();
 
     // 숫자형 필드만 숫자 타입으로 변환 (옵션ID는 문자열 유지)
     result = result.map(row => {
@@ -101,7 +106,9 @@ router.get('/', async (req, res) => {
       전체필드: DEFAULT_COLUMNS,
       성공메시지: null,
       한글,
-      keyword:''
+      keyword: '',
+      brand,
+      brandOptions: BRANDS
     });
   } catch (err) {
     console.error('GET /coupang 오류:', err);
@@ -176,7 +183,9 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
       전체필드: DEFAULT_COLUMNS,
       성공메시지: '✅ 업로드 완료',
       한글,
-      keyword: '' // ← 반드시 추가!!
+      keyword: '',
+      brand: '',
+      brandOptions: BRANDS
     });
   } catch (err) {
     console.error('POST /coupang/upload 오류:', err);
@@ -188,14 +197,26 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
 router.get('/search', async (req, res) => {
   try {
     const keyword = req.query.keyword || '';
-    const regex = new RegExp(keyword, 'i');
-    let result = await db.collection('coupang').find({
-      $or: [
-        { 'Product name': regex },
-        { 'Option name': regex },
-        { 'Option ID': regex }
-      ]
-    }).toArray();
+    const brand = req.query.brand || '';
+    const regex = keyword ? new RegExp(keyword, 'i') : null;
+    const brandRegex = brand ? new RegExp(brand, 'i') : null;
+
+    const conditions = [];
+    if (regex) {
+      conditions.push({
+        $or: [
+          { 'Product name': regex },
+          { 'Option name': regex },
+          { 'Option ID': regex }
+        ]
+      });
+    }
+    if (brandRegex) {
+      conditions.push({ 'Product name': brandRegex });
+    }
+
+    const query = conditions.length > 0 ? { $and: conditions } : {};
+    let result = await db.collection('coupang').find(query).sort({ 'Product name': 1 }).toArray();
 
     result = result.map(row => {
       const newRow = { ...row };
@@ -221,8 +242,9 @@ router.get('/search', async (req, res) => {
       전체필드: DEFAULT_COLUMNS,
       성공메시지: null,
       한글,
-      keyword: '' // ← 반드시 추가!!
-
+      keyword,
+      brand,
+      brandOptions: BRANDS
     });
   } catch (err) {
     console.error('GET /coupang/search 오류:', err);
