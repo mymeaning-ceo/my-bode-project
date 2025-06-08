@@ -17,6 +17,17 @@ const LocalStrategy = require('passport-local')
 const MongoStore = require('connect-mongo')
 
 let permissions = {}
+const menuLabels = {
+  '/stock': '재고 관리',
+  '/coupang': '쿠팡 재고',
+  '/coupang/add': '매출/광고비',
+  '/list': '게시판',
+  '/write': '글 작성',
+  '/list/write': '글 작성',
+  '/admin': '관리자',
+  '/ocr': 'OCR',
+  '/voucher': '전표 입력'
+}
 async function loadPermissions() {
   if (!db) return
   const docs = await db.collection('permissions').find().toArray()
@@ -68,6 +79,12 @@ app.use((요청, 응답, next) => {
   next();
 });
 
+// 현재 페이지 URL을 템플릿에서 사용해 네비게이션 활성화
+app.use((req, res, next) => {
+  res.locals.currentUrl = req.path;
+  next();
+});
+
 // 로고 및 배너 정보를 모든 템플릿에서 사용
 app.use(async (req, res, next) => {
   if (!db) return next();
@@ -115,7 +132,13 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/dashboard', checkLogin, (req, res) => {
-  res.render('dashboard.ejs', { banners: res.locals.banners });
+  const menus = Object.keys(permissions).filter(v => {
+    const p = permissions[v]
+    if (p.loginRequired && !req.isAuthenticated()) return false
+    if (p.allowedUsers && p.allowedUsers.length > 0 && (!req.isAuthenticated() || !p.allowedUsers.includes(String(req.user._id)))) return false
+    return true
+  })
+  res.render('dashboard.ejs', { banners: res.locals.banners, menus, menuLabels })
 });
 
 app.get('/news', (요청, 응답) => {
