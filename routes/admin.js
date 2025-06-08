@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const upload = require('../upload.js');
 const { checkLogin, checkAdmin } = require('../middlewares/auth');
+const { ObjectId } = require('mongodb');
 
 let db;
 const connectDB = require('../database');
@@ -89,6 +90,25 @@ router.post('/permissions', checkAdmin, async (req, res) => {
   }));
   if (global.loadPermissions) await global.loadPermissions();
   res.redirect('/admin/permissions');
+});
+
+// ===== 사용자 관리 =====
+router.get('/users', checkAdmin, async (req, res) => {
+  const q = req.query.q || '';
+  const query = q ? { username: { $regex: q, $options: 'i' } } : {};
+  const users = await db.collection('user')
+    .find(query, { projection: { password: 0 } })
+    .sort({ username: 1 })
+    .toArray();
+  res.render('admin/users.ejs', { users, q });
+});
+
+router.post('/users/delete', checkAdmin, async (req, res) => {
+  const id = req.body.userId;
+  if (id) {
+    await db.collection('user').deleteOne({ _id: new ObjectId(id) });
+  }
+  res.redirect('/admin/users');
 });
 
 module.exports = router;
