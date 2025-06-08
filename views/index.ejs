@@ -13,7 +13,12 @@
   <%- include('nav.ejs') %>
 
   <div class="container py-5">
-    <h1 class="mb-4 fw-bold text-center">🩲 내의미 재고관리 시스템</h1>
+    <div class="mb-4 text-center">
+      <% if (logo) { %>
+        <img src="<%= logo %>" alt="logo" class="brand-logo me-2 align-middle">
+      <% } %>
+      <span class="h1 fw-bold align-middle">내의미 재고관리 시스템</span>
+    </div>
 
     <% if (banners && banners.length > 0) { %>
       <!-- 메인 배너는 4등분 그리드로 표시 -->
