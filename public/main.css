@@ -54,7 +54,10 @@ body {
 
 /* 브랜드 로고 */
 .brand-logo {
-  height: 40px;
+  max-height: 40px;
+  width: auto;
+  object-fit: contain;
+  vertical-align: middle;
 }
 
 /* 테이블 헤더 */
@@ -134,4 +137,12 @@ input[type="file"]::-webkit-file-upload-button {
 .banner-form button {
   flex: 0 0 auto;
   white-space: nowrap;
+}
+
+/* 게시판 액션 아이콘 */
+.action-icon {
+  font-size: 0.9rem;
+  margin-left: 0.25rem;
+  text-decoration: none;
+  cursor: pointer;
 }

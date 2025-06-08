@@ -57,7 +57,7 @@ router.post('/logo/delete', checkAdmin, async (req, res) => {
 });
 
 // ===== 뷰 접근 권한 설정 =====
-const managedViews = ['/stock', '/coupang', '/list', '/write', '/list/write'];
+const managedViews = ['/stock', '/coupang', '/list', '/write', '/list/write', '/admin', '/ocr', '/voucher'];
 
 router.get('/permissions', checkAdmin, async (req, res) => {
   const docs = await db.collection('permissions').find().toArray();
