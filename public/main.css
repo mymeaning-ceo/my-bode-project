@@ -161,3 +161,14 @@ input[type="file"]::-webkit-file-upload-button {
   text-decoration: none;
   cursor: pointer;
 }
+
+/* 네비게이션 아이콘과 텍스트 정렬 */
+.navbar-nav {
+  align-items: center;
+}
+
+.navbar-nav .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}

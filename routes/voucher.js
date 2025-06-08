@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 
@@ -22,9 +23,12 @@ router.get('/', async (req, res) => {
   const list = db
     ? await db.collection('vouchers').find().sort({ createdAt: -1 }).toArray()
     : [];
+  const rows = db
+    ? await db.collection('voucherRecords').find().sort({ 전표일자: -1 }).toArray()
+    : [];
   // 새로운 필드명에 맞춰 총액을 계산한다.
   const total = list.reduce((acc, v) => acc + (v['매출금액'] || 0), 0);
-  res.render('voucher.ejs', { list, total, logs: null });
+  res.render('voucher.ejs', { list, rows, total, logs: null });
 })
 
 router.post('/upload', upload.single('image'), async (req, res) => {
@@ -57,8 +61,11 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     const list = db
       ? await db.collection('vouchers').find().sort({ createdAt: -1 }).toArray()
       : [];
+    const excelRows = db
+      ? await db.collection('voucherRecords').find().sort({ 전표일자: -1 }).toArray()
+      : [];
     const total = list.reduce((acc, v) => acc + (v['매출금액'] || 0), 0);
-    res.render('voucher.ejs', { list, total, logs });
+    res.render('voucher.ejs', { list, rows: excelRows, total, logs });
   } catch (err) {
     console.error('Voucher OCR error:', err);
     fs.unlink(req.file.path, () => {});
@@ -66,8 +73,57 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     const list = db
       ? await db.collection('vouchers').find().sort({ createdAt: -1 }).toArray()
       : [];
+    const excelRows = db
+      ? await db.collection('voucherRecords').find().sort({ 전표일자: -1 }).toArray()
+      : [];
     const total = list.reduce((acc, v) => acc + (v['매출금액'] || 0), 0);
-    res.render('voucher.ejs', { list, total, logs });
+    res.render('voucher.ejs', { list, rows: excelRows, total, logs });
+  }
+});
+
+router.post('/excel', upload.single('excelFile'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).send('엑셀 파일이 업로드되지 않았습니다.');
+
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const rows = data.map(row => ({
+      전표일자: row['전표일자'],
+      전표번호: row['전표번호'],
+      송장번호: row['송장번호'],
+      금액: row['금액'],
+      uploadedAt: new Date()
+    }));
+    if (rows.length > 0) await db.collection('voucherRecords').insertMany(rows);
+    fs.unlink(req.file.path, () => {});
+
+    const list = db
+      ? await db.collection('vouchers').find().sort({ createdAt: -1 }).toArray()
+      : [];
+    const excelRows = db
+      ? await db.collection('voucherRecords').find().sort({ 전표일자: -1 }).toArray()
+      : [];
+    const total = list.reduce((acc, v) => acc + (v['매출금액'] || 0), 0);
+    res.render('voucher.ejs', { list, rows: excelRows, total, logs: null });
+  } catch (err) {
+    console.error('Excel upload error:', err);
+    res.status(500).send('업로드 실패');
+  }
+});
+
+router.post('/delete-selected', async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body.ids) ? req.body.ids : [req.body.ids];
+    if (ids && ids.length > 0) {
+      await db.collection('voucherRecords').deleteMany({
+        _id: { $in: ids.map(id => new ObjectId(id)) }
+      });
+    }
+    res.redirect('/voucher');
+  } catch (err) {
+    console.error('Delete selected error:', err);
+    res.status(500).send('삭제 실패');
   }
 });
 
