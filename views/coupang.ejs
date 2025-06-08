@@ -28,21 +28,33 @@
     <% } %>
 
     <!-- 파일 업로드 + 초기화 -->
-    <div class="d-flex flex-wrap gap-2 mb-4">
-      <form action="/coupang/upload" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap gap-2">
+    <div class="action-form mb-4">
+      <form action="/coupang/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
         <input type="file" name="excelFile" accept=".xlsx, .xls" class="form-control" required>
-        <button type="submit" class="btn btn-success">엑셀 업로드</button>
+        <button type="submit" class="btn btn-success btn-upload">엑셀 업로드</button>
       </form>
 
       <form action="/coupang/delete-all" method="POST" onsubmit="return confirm('정말 모든 데이터를 삭제하시겠습니까?')">
-        <button type="submit" class="btn btn-danger">데이터 초기화</button>
+        <button type="submit" class="btn btn-danger btn-reset">데이터 초기화</button>
       </form>
     </div>
 
     <!-- 검색 -->
-    <form action="/coupang/search" method="GET" class="input-group mb-4">
-      <input type="text" name="keyword" class="form-control" placeholder="상품명, 옵션명 또는 옵션ID 입력">
-      <button class="btn btn-outline-primary" type="submit">검색</button>
+    <form action="/coupang/search" method="GET" class="row row-cols-auto g-2 mb-4">
+      <div class="col">
+        <select name="brand" class="form-select">
+          <option value="">전체 브랜드</option>
+          <% if (brandOptions) { brandOptions.forEach(b => { %>
+            <option value="<%= b %>" <%= b === brand ? 'selected' : '' %>><%= b %></option>
+          <% }) } %>
+        </select>
+      </div>
+      <div class="col flex-grow-1">
+        <input type="text" name="keyword" value="<%= keyword %>" class="form-control" placeholder="상품명, 옵션명 또는 옵션ID 입력">
+      </div>
+      <div class="col">
+        <button class="btn btn-outline-primary" type="submit">검색</button>
+      </div>
     </form>
 
     <% if (전체필드 && 전체필드.length > 0) { %>

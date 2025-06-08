@@ -21,13 +21,13 @@
       </div>
     <% } %>
 
-    <div class="d-flex flex-wrap gap-2 mb-4">
-      <form action="/coupang/add/upload" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap gap-2">
+    <div class="action-form mb-4">
+      <form action="/coupang/add/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
         <input type="file" name="excelFile" accept=".xlsx, .xls" class="form-control" required>
-        <button type="submit" class="btn btn-success">엑셀 업로드</button>
+        <button type="submit" class="btn btn-success btn-upload">엑셀 업로드</button>
       </form>
       <form action="/coupang/add/delete-all" method="POST" onsubmit="return confirm('정말 모든 데이터를 삭제하시겠습니까?')">
-        <button type="submit" class="btn btn-danger">데이터 초기화</button>
+        <button type="submit" class="btn btn-danger btn-reset">데이터 초기화</button>
       </form>
     </div>
 
