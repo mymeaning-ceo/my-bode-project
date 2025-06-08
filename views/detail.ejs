@@ -17,8 +17,8 @@
         <h4 class="card-title fw-bold mb-3">
           <%= 게시물.title %>
           <% if (유저 && String(유저._id) === String(게시물.user)) { %>
-            <a href="/edit/<%= 게시물._id %>" class="ms-2 text-warning">✏️</a>
-            <span class="text-danger delete" data-id="<%= 게시물._id %>">🗑</span>
+            <a href="/edit/<%= 게시물._id %>" class="ms-2 text-warning text-decoration-none">수정</a>
+            <a href="#" class="text-danger delete text-decoration-none" data-id="<%= 게시물._id %>">삭제</a>
           <% } %>
         </h4>
         <p class="card-text mb-4"><%= 게시물.content %></p>
