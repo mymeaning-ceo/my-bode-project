@@ -17,8 +17,8 @@
         <h4 class="card-title fw-bold mb-3">
           <%= 게시물.title %>
           <% if (유저 && String(유저._id) === String(게시물.user)) { %>
-            <a href="/edit/<%= 게시물._id %>" class="ms-2 text-warning text-decoration-none">수정</a>
-            <a href="#" class="text-danger delete text-decoration-none" data-id="<%= 게시물._id %>">삭제</a>
+            <a href="/edit/<%= 게시물._id %>" class="action-icon text-secondary" title="수정">✏️</a>
+            <a href="#" class="action-icon text-danger delete" data-id="<%= 게시물._id %>" title="삭제">🗑️</a>
           <% } %>
         </h4>
         <p class="card-text mb-4"><%= 게시물.content %></p>
@@ -74,8 +74,8 @@
             </div>
             <% if (유저 && String(유저._id) === String(c.user)) { %>
               <div>
-                <span class="text-primary edit-comment" data-id="<%= c._id %>" style="cursor:pointer">수정</span>
-                <span class="text-danger delete-comment ms-2" data-id="<%= c._id %>" style="cursor:pointer">삭제</span>
+                <span class="action-icon text-secondary edit-comment" data-id="<%= c._id %>" role="button" title="수정">✏️</span>
+                <span class="action-icon text-danger delete-comment" data-id="<%= c._id %>" role="button" title="삭제">🗑️</span>
               </div>
             <% } %>
           </div>

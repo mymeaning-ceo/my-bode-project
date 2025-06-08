@@ -1,47 +1,52 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm px-4">
   <div class="container-fluid">
-    <a class="navbar-brand fw-bold text-dark" href="/">
+    <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="/">
       <% if (logo) { %>
-        <img src="<%= logo %>" alt="logo" class="brand-logo">
+        <img src="<%= logo %>" alt="logo" class="brand-logo me-2">
       <% } else { %>
         🩲 내의미
       <% } %>
     </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#navbarOffcanvas">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="navbarOffcanvas">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Menu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <% if (유저) { %>
           <li class="nav-item">
-            <a class="nav-link text-dark" href="/list">📋 게시판</a>
+            <a class="nav-link text-dark <%= currentUrl.startsWith('/list') ? 'active' : '' %>" href="/list">📋 게시판</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-dark" href="/stock">📦 재고관리</a>
+            <a class="nav-link text-dark <%= currentUrl.startsWith('/stock') ? 'active' : '' %>" href="/stock">📦 재고관리</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-dark" href="/coupang">🛒 쿠팡재고</a>
+            <a class="nav-link text-dark <%= currentUrl.startsWith('/coupang') && !currentUrl.includes('/add') ? 'active' : '' %>" href="/coupang">🛒 쿠팡재고</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-dark" href="/coupang/add">💰 매출/광고비</a>
+            <a class="nav-link text-dark <%= currentUrl.startsWith('/coupang/add') ? 'active' : '' %>" href="/coupang/add">💰 매출/광고비</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-dark" href="/voucher">📝 전표입력</a>
+            <a class="nav-link text-dark <%= currentUrl.startsWith('/voucher') ? 'active' : '' %>" href="/voucher">📝 전표입력</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-dark" href="/write">✍ 글작성</a>
+            <a class="nav-link text-dark <%= currentUrl.startsWith('/write') ? 'active' : '' %>" href="/write">✍ 글작성</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-dark" href="/admin">🛠 관리자</a>
+            <a class="nav-link text-dark <%= currentUrl.startsWith('/admin') ? 'active' : '' %>" href="/admin">🛠 관리자</a>
           </li>
         <% } %>
         <li class="nav-item">
-          <a class="nav-link text-dark" href="/help">❓ 사용방법</a>
+          <a class="nav-link text-dark <%= currentUrl.startsWith('/help') ? 'active' : '' %>" href="/help">❓ 사용방법</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-dark" href="/ocr">🖼️ OCR</a>
+          <a class="nav-link text-dark <%= currentUrl.startsWith('/ocr') ? 'active' : '' %>" href="/ocr">🖼️ OCR</a>
         </li>
       </ul>
 
@@ -62,6 +67,7 @@
           </li>
         <% } %>
       </ul>
+    </div>
     </div>
   </div>
 </nav>
