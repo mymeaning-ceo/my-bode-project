@@ -11,7 +11,7 @@
   <div class="container my-4">
     <h1 class="mb-3">뷰 접근 권한</h1>
     <form action="/admin/permissions" method="post">
-           <table class="table">
+      <table class="table table-striped table-bordered align-middle">
         <thead>
           <tr>
             <th>View</th>
@@ -24,14 +24,17 @@
             <tr>
               <td><%= v %></td>
               <td>
-                <input class="form-check-input" type="checkbox" name="view" value="<%= v %>" id="v_<%= v %>" <%= perm.loginRequired ? 'checked' : '' %>>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="view" value="<%= v %>" id="v_<%= v %>" <%= perm.loginRequired ? 'checked' : '' %>>
+                </div>
               </td>
               <td>
-                <select name="user_<%= v %>" multiple class="form-select">
-                  <% users.forEach(function(u) { %>
-                    <option value="<%= u._id %>" <%= (perm.allowedUsers || []).includes(String(u._id)) ? 'selected' : '' %>><%= u.username %></option>
-                  <% }) %>
-                </select>
+                <% users.forEach(function(u) { %>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="user_<%= v %>" value="<%= u._id %>" id="u_<%= v %>_<%= u._id %>" <%= (perm.allowedUsers || []).includes(String(u._id)) ? 'checked' : '' %>>
+                    <label class="form-check-label" for="u_<%= v %>_<%= u._id %>"><%= u.username %></label>
+                  </div>
+                <% }) %>
               </td>
             </tr>
           <% }) %>
