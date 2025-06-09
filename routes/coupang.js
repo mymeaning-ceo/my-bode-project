@@ -4,12 +4,12 @@ const multer = require('multer');
 const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
-const { checkLogin } = require('../middlewares/auth'); // 경로 반드시 확인!
+const { checkLogin } = require('../middlewares/auth');
 
 let db;
-const connectDB = require('../database'); // 경로 반드시 확인!
+const connectDB = require('../database');
 connectDB.then(client => {
-  db = client.db('forum'); // 'forum' DB명 확인
+  db = client.db('forum');
 });
 
 // 업로드 디렉토리
@@ -20,7 +20,7 @@ const upload = multer({ dest: uploadsDir });
 // 검색 가능한 브랜드 목록
 const BRANDS = ['BYC', '트라이', '제임스딘', '스페클로', '물랑루즈'];
 
-// 한글 매핑 및 순서
+// 한글 매핑 및 필드 정의
 const 한글 = {
   'Option ID': '옵션ID',
   'Product name': '상품명',
@@ -30,6 +30,7 @@ const 한글 = {
   'Sales in the last 30 days': '30일 판매량',
   'Shortage quantity': '부족재고량'
 };
+
 const DEFAULT_COLUMNS = [
   'Option ID',
   'Product name',
@@ -49,6 +50,7 @@ const NUMERIC_COLUMNS = [
   'Shortage quantity'
 ];
 
+// 부족재고량 계산 함수
 function addShortage(items) {
   return items.map(item => {
     const sales30 = Number(item['Sales in the last 30 days'] || 0);
@@ -61,12 +63,12 @@ function addShortage(items) {
   });
 }
 
-// 공통 필드 추출
+// 필드 추출 함수
 function getAllFields(resultArray) {
   return resultArray[0] ? Object.keys(resultArray[0]).filter(k => k !== '_id') : [];
 }
 
-// 목록
+// 목록 렌더링
 router.get('/', async (req, res) => {
   const keyword = '';
   const brand = req.query.brand || '';
@@ -74,15 +76,11 @@ router.get('/', async (req, res) => {
     const query = brand ? { 'Product name': new RegExp(brand, 'i') } : {};
     let result = await db.collection('coupang').find(query).sort({ 'Product name': 1 }).toArray();
 
-    // 숫자형 필드만 숫자 타입으로 변환 (옵션ID는 문자열 유지)
     result = result.map(row => {
       const newRow = { ...row };
-      
-      // Option ID가 숫자라면 문자열로 변환
       if (typeof newRow['Option ID'] === 'number') {
         newRow['Option ID'] = String(newRow['Option ID']);
       }
-      
       NUMERIC_COLUMNS.forEach(col => {
         if (col !== 'Option ID' && newRow[col] !== undefined && newRow[col] !== null) {
           const num = Number(String(newRow[col]).replace(/,/g, ''));
@@ -106,7 +104,7 @@ router.get('/', async (req, res) => {
       전체필드: DEFAULT_COLUMNS,
       성공메시지: null,
       한글,
-      keyword: '',
+      keyword,
       brand,
       brandOptions: BRANDS
     });
@@ -116,9 +114,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-
-
-// 엑셀 업로드
+// 엑셀 업로드 처리
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
     const filePath = req.file.path;
@@ -126,32 +122,21 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
-    // ✅ 헤더는 1행, 데이터는 2행부터
     const headerRow = sheetData[0];
     const dataRows = sheetData.slice(1);
 
-    // 매핑
+    // 헤더 매핑
     const indexMap = {};
-    I    /* ────────────────────────────────────────────────────────────────────────────────────────────────────
-       헤더 매핑 (영문·한글 모두 지원)
-    ────────────────────────────────────────────────────────────────────────────────────────────────────
-    */
-    const indexMap = {};
-
     headerRow.forEach((col, idx) => {
       if (!col) return;
       const trimmed = String(col).trim();
 
-      // ① 영문 헤더 그대로
       if (IMPORT_COLUMNS.includes(trimmed)) {
         indexMap[trimmed] = idx;
         return;
       }
 
-      // ② 한글 헤더 → 영문 키 변환
-      const engKey = Object.entries(한글)
-        .find(([eng, kor]) => kor === trimmed)?.[0];
-
+      const engKey = Object.entries(한글).find(([eng, kor]) => kor === trimmed)?.[0];
       if (engKey && IMPORT_COLUMNS.includes(engKey)) {
         indexMap[engKey] = idx;
       }
@@ -159,20 +144,14 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
 
     const data = dataRows.map(row => {
       const obj = {};
-
-      // indexMap 에 등록된 실제 컬럼만 순회
       for (const [engKey, colIdx] of Object.entries(indexMap)) {
         let val = row[colIdx] ?? '';
-
         if (NUMERIC_COLUMNS.includes(engKey)) {
           const num = Number(String(val).replace(/,/g, ''));
           obj[engKey] = isNaN(num) ? 0 : num;
         } else {
           obj[engKey] = val;
         }
-      }
-      return obj;
-    });}
       }
       return obj;
     });
@@ -189,7 +168,6 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     fs.unlink(filePath, () => {});
 
     let resultArray = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
-
     resultArray = resultArray.map(row => {
       const newRow = { ...row };
       if (typeof newRow['Option ID'] === 'number') newRow['Option ID'] = String(newRow['Option ID']);
@@ -203,6 +181,7 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     });
 
     const resultWithShortage = addShortage(resultArray);
+
     res.render('coupang.ejs', {
       결과: resultWithShortage,
       필드: DEFAULT_COLUMNS,
@@ -262,6 +241,7 @@ router.get('/search', async (req, res) => {
     const fields = (selected && selected.length > 0)
       ? DEFAULT_COLUMNS.filter(col => selected.includes(col))
       : DEFAULT_COLUMNS;
+
     res.render('coupang.ejs', {
       결과: resultWithShortage,
       필드: fields,
