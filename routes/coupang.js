@@ -122,37 +122,29 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
-    const headerRow = sheetData[0];
-    const dataRows = sheetData.slice(1);
-
-    // 헤더 매핑
-    const indexMap = {};
-    headerRow.forEach((col, idx) => {
-      if (!col) return;
-      const trimmed = String(col).trim();
-
-      if (IMPORT_COLUMNS.includes(trimmed)) {
-        indexMap[trimmed] = idx;
-        return;
-      }
-
-      const engKey = Object.entries(한글).find(([eng, kor]) => kor === trimmed)?.[0];
-      if (engKey && IMPORT_COLUMNS.includes(engKey)) {
-        indexMap[engKey] = idx;
-      }
-    });
+    const dataRows = sheetData.slice(1); // 헤더가 아닌 본문만
 
     const data = dataRows.map(row => {
       const obj = {};
-      for (const [engKey, colIdx] of Object.entries(indexMap)) {
-        let val = row[colIdx] ?? '';
-        if (NUMERIC_COLUMNS.includes(engKey)) {
-          const num = Number(String(val).replace(/,/g, ''));
-          obj[engKey] = isNaN(num) ? 0 : num;
-        } else {
-          obj[engKey] = val;
-        }
-      }
+
+      obj['Option ID'] = row[0] ?? '';
+      obj['Option name'] = row[1] ?? '';
+      obj['Product name'] = row[2] ?? '';
+
+      const inventory = Number(String(row[3]).replace(/,/g, '')) || 0;
+      obj['Orderable quantity (real-time)'] = inventory;
+
+      const salesAmount = Number(String(row[9]).replace(/,/g, '')) || 0;
+      obj['Sales amount on the last 30 days'] = salesAmount;
+
+      const salesCount = Number(String(row[11]).replace(/,/g, '')) || 0;
+      obj['Sales in the last 30 days'] = salesCount;
+
+      // 부족재고량 계산
+      const daily = salesCount / 30;
+      const safety = daily * 7;
+      obj['Shortage quantity'] = inventory < safety ? Math.ceil(safety - inventory) : 0;
+
       return obj;
     });
 
@@ -167,26 +159,13 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     if (bulkOps.length > 0) await db.collection('coupang').bulkWrite(bulkOps);
     fs.unlink(filePath, () => {});
 
-    let resultArray = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
-    resultArray = resultArray.map(row => {
-      const newRow = { ...row };
-      if (typeof newRow['Option ID'] === 'number') newRow['Option ID'] = String(newRow['Option ID']);
-      NUMERIC_COLUMNS.forEach(col => {
-        if (col !== 'Option ID' && newRow[col] !== undefined && newRow[col] !== null) {
-          const num = Number(String(newRow[col]).replace(/,/g, ''));
-          newRow[col] = isNaN(num) ? 0 : num;
-        }
-      });
-      return newRow;
-    });
-
-    const resultWithShortage = addShortage(resultArray);
+    const resultWithShortage = addShortage(data); // 보기용 재계산 (이미 DB에 저장됨)
 
     res.render('coupang.ejs', {
       결과: resultWithShortage,
       필드: DEFAULT_COLUMNS,
       전체필드: DEFAULT_COLUMNS,
-      성공메시지: '✅ 업로드 완료',
+      성공메시지: '✅ 엑셀 업로드 완료',
       한글,
       keyword: '',
       brand: '',
@@ -197,6 +176,7 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     res.status(500).send('❌ 업로드 실패');
   }
 });
+
 
 // 검색
 router.get('/search', async (req, res) => {
