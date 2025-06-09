@@ -38,7 +38,7 @@ def main():
     client = MongoClient(mongo_uri)
     col = client['stockdb']['stock']
 
-       try:
+        try:
         with open(excel_path, 'rb') as f:
             docs = transform(f)
     except Exception as e:
