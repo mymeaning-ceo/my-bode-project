@@ -51,11 +51,11 @@ router.get('/', async (req, res) => {
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
     const inputPath = req.file.path;
-    const outputPath = inputPath.replace('.xlsx', '.csv');
+    const outputPath = inputPath.replace(/\.xlsx?$/, '.json');
 
     const pythonCommand = 'python'; // 또는 'python3' 환경에 따라 조정
 
-    exec(`${pythonCommand} scripts/excel_to_csv.py "${inputPath}" "${outputPath}"`, async (error, stdout, stderr) => {
+    exec(`${pythonCommand} scripts/excel_to_json.py "${inputPath}" "${outputPath}"`, async (error, stdout, stderr) => {
       if (error) {
         console.error('❌ Python 오류:', stderr);
         return res.status(500).send('Python 변환 실패');
@@ -63,22 +63,18 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
 
       console.log('✅ Python 출력:', stdout);
 
-      // ✅ CSV 파일 읽기
-      const csvData = fs.readFileSync(outputPath, 'utf-8');
-      const lines = csvData.split('\n').filter(line => line.trim() !== '');
-      const headers = lines[0].split(',');
-      const data = lines.slice(1).map(line => {
-        const values = line.split(',');
-        const item = {};
-        headers.forEach((h, i) => {
-          item[h] = values[i];
-        });
-        return item;
-      });
+      // ✅ JSON 파일 읽기
+      const jsonData = fs.readFileSync(outputPath, 'utf-8');
+      const data = JSON.parse(jsonData);
+      const headers = data[0] ? Object.keys(data[0]) : [];
 
       // ✅ MongoDB 저장
       await db.collection('stock').deleteMany({});
-      await db.collection('stock').insertMany(data);
+      if (data.length) await db.collection('stock').insertMany(data);
+
+      // 임시 파일 삭제
+      fs.unlink(inputPath, () => {});
+      fs.unlink(outputPath, () => {});
 
       res.render('stock.ejs', {
         결과: data,
