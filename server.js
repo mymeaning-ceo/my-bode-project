@@ -130,7 +130,7 @@ app.post('/stock/upload', upload.single('file'), async (req, res) => {
       mongoUri,
       dbName,
       collectionName
-    ]);
+    ], { env: { ...process.env } });
 
         let pyError = '';
     py.stderr.on('data', (data) => { pyError += data.toString(); });
