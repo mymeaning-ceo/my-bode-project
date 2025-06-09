@@ -5,6 +5,9 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const { checkLogin } = require('../middlewares/auth');
+const { exec } = require('child_process');
+
+
 
 // 커스텀 엑셀 파싱 설정
 const STOCK_START_ROW = parseInt(process.env.STOCK_START_ROW || '0');
@@ -47,35 +50,50 @@ router.get('/', async (req, res) => {
  */
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
-    const filePath = req.file.path; // 업로드된 Excel 경로
-    const csvPath = filePath.replace(/\.(xls|xlsx)$/i, '.csv');
+    const inputPath = req.file.path;
+    const outputPath = inputPath.replace('.xlsx', '.csv');
 
-    // 1) 파이썬 스크립트 실행: 엑셀 → CSV(정규화)
-    const { execSync } = require('child_process');
-    execSync(`python transform_try.py "${filePath}" "${csvPath}"`);
+    const pythonCommand = 'python'; // 또는 'python3' 환경에 따라 조정
 
-    // 2) CSV → JSON 로드
-    const csv = require('csvtojson');
-    const jsonArray = await csv().fromFile(csvPath);
+    exec(`${pythonCommand} scripts/excel_to_csv.py "${inputPath}" "${outputPath}"`, async (error, stdout, stderr) => {
+      if (error) {
+        console.error('❌ Python 오류:', stderr);
+        return res.status(500).send('Python 변환 실패');
+      }
 
-    // 3) MongoDB 저장
-    const { MongoClient } = require('mongodb');
-    const client = await MongoClient.connect(process.env.MONGO_URI);
-    const db = client.db('TRY_stock');
-    const collection = db.collection('allocation');
+      console.log('✅ Python 출력:', stdout);
 
-    await collection.deleteMany({}); // 기존 데이터 초기화
-    await collection.insertMany(jsonArray); // 새 데이터 삽입
+      // ✅ CSV 파일 읽기
+      const csvData = fs.readFileSync(outputPath, 'utf-8');
+      const lines = csvData.split('\n').filter(line => line.trim() !== '');
+      const headers = lines[0].split(',');
+      const data = lines.slice(1).map(line => {
+        const values = line.split(',');
+        const item = {};
+        headers.forEach((h, i) => {
+          item[h] = values[i];
+        });
+        return item;
+      });
 
-    client.close();
+      // ✅ MongoDB 저장
+      await db.collection('stock').deleteMany({});
+      await db.collection('stock').insertMany(data);
 
-    // 4) 업로드 완료 후 화면 이동
-    res.redirect('/stock'); // stock.ejs 렌더링
+      res.render('stock.ejs', {
+        결과: data,
+        필드: headers,
+        성공메시지: '✅ 엑셀 업로드 및 변환 완료'
+      });
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Upload & transform failed');
+    console.error('❌ 업로드 오류:', err);
+    res.status(500).send('Upload failed');
   }
 });
+
+
+
 
 /**
  * 검색 기능
@@ -113,5 +131,52 @@ router.post('/delete-all', checkLogin, async (req, res) => {
     res.status(500).send('❌ 삭제 실패');
   }
 });
+
+router.post('/preview', upload.single('excelFile'), async (req, res) => {
+  try {
+    if (!req.file) throw new Error('❌ 파일 없음');
+
+    const workbook = xlsx.readFile(req.file.path);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+    if (sheetData.length < 3) throw new Error('❌ 데이터 부족');
+
+    const headers = sheetData[1];
+    const dataRows = sheetData.slice(2);
+
+    const fieldCounter = {};
+    const uniqueHeaders = headers.map(h => {
+      if (!h) return '';
+      const base = h.trim();
+      if (!fieldCounter[base]) {
+        fieldCounter[base] = 1;
+        return base;
+      } else {
+        fieldCounter[base]++;
+        return `${base}${fieldCounter[base]}`;
+      }
+    });
+
+    const previewData = dataRows.map(row => {
+      const item = {};
+      uniqueHeaders.forEach((key, i) => {
+        item[key] = row[i] ?? '';
+      });
+      return item;
+    });
+
+    fs.unlink(req.file.path, () => {});
+
+    res.render('preview.ejs', {
+      데이터: previewData.slice(0, 30),
+      필드: uniqueHeaders
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('미리보기 실패');
+  }
+});
+
 
 module.exports = router;
