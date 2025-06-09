@@ -8,8 +8,8 @@ csv_path   = sys.argv[2] if len(sys.argv) > 2 else 'try_long_format.csv'
 # 1) 엑셀 읽기
 df = pd.read_excel(excel_path, header=1)
 
-base_cols   = ['유형', '품명', '호점']
-variant_cols = ['점검-색상', '단위', '재고량', 'DC율', '최초출고일']
+base_cols   = ['유형', '품목번', '품명']
+variant_cols = ['호칭-색상', '단위', '재고량', 'DC율', '최초출고일']
 
 records = []
 num_groups = (df.shape[1] - len(base_cols)) // 6
