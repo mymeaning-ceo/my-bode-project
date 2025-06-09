@@ -44,12 +44,21 @@ for i in range(num_groups):
 
     block = block.dropna(subset=[variant_cols[0]])
 
-    # 정제
-    block['DC율'] = (
-        block['DC율'].astype(str).str.replace('%', '', regex=False).replace('', '0').astype(float) / 100
+    # 정제 - 현재 반복 차수에 맞는 컬럼명을 사용
+    dc_col = variant_cols[4]
+    date_col = variant_cols[5]
+    qty_col = variant_cols[3]
+
+    block[dc_col] = (
+        block[dc_col]
+        .astype(str)
+        .str.replace('%', '', regex=False)
+        .replace('', '0')
+        .astype(float)
+        / 100
     )
-    block['최초출고일'] = pd.to_datetime(block['최초출고일'], errors='coerce')
-    block['재고량'] = pd.to_numeric(block['재고량'], errors='coerce')
+    block[date_col] = pd.to_datetime(block[date_col], errors='coerce')
+    block[qty_col] = pd.to_numeric(block[qty_col], errors='coerce')
 
     records.extend(block.to_dict('records'))
 
