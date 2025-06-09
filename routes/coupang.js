@@ -127,17 +127,17 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const data = dataRows.map(row => {
       const obj = {};
 
-      obj['Option ID'] = row[0] ?? '';
-      obj['Option name'] = row[1] ?? '';
-      obj['Product name'] = row[2] ?? '';
+      obj['Option ID'] = row[2] ?? '';
+      obj['Option name'] = row[4] ?? '';
+      obj['Product name'] = row[5] ?? '';
 
-      const inventory = Number(String(row[3]).replace(/,/g, '')) || 0;
+      const inventory = Number(String(row[7]).replace(/,/g, '')) || 0;
       obj['Orderable quantity (real-time)'] = inventory;
 
-      const salesAmount = Number(String(row[9]).replace(/,/g, '')) || 0;
+      const salesAmount = Number(String(row[11]).replace(/,/g, '')) || 0;
       obj['Sales amount on the last 30 days'] = salesAmount;
 
-      const salesCount = Number(String(row[11]).replace(/,/g, '')) || 0;
+      const salesCount = Number(String(row[13]).replace(/,/g, '')) || 0;
       obj['Sales in the last 30 days'] = salesCount;
 
       // 부족재고량 계산
