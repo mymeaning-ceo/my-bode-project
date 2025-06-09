@@ -35,4 +35,4 @@ for i in range(num_groups):
 
 long_df = pd.DataFrame(records)
 long_df.to_csv(csv_path, index=False, encoding='utf-8-sig')
-print(f'CSV saved: {csv_path}, rows: {len(long_df))
+print(f'CSV saved: {csv_path}, rows: {len(long_df)}')
