@@ -176,6 +176,34 @@ router.post('/preview', upload.single('excelFile'), async (req, res) => {
     console.error(err);
     res.status(500).send('미리보기 실패');
   }
+
+// === Excel 업로드 → MongoDB 저장 ===
+const multer  = require('multer');
+const { execFile } = require('child_process');
+const upload = multer({ dest: path.join(__dirname, '../uploads') });
+
+router.post('/upload', upload.single('excel'), (req, res) => {
+  const script = process.env.PY_SCRIPT_PATH || 'scripts/excel_to_mongo.py';
+  execFile('python', [script, req.file.path], (err, stdout, stderr) => {
+    if (err) {
+      console.error(stderr);
+      return res.status(500).send('Python script error');
+    }
+    console.log(stdout);
+    res.redirect('/stock');
+  });
+});
+
+router.get('/', async (req, res) => {
+  try {
+    const col = req.app.locals.db.collection('stock');
+    const items = await col.find().toArray();
+    res.render('stock', { items });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('DB error');
+  }
+});
 });
 
 
