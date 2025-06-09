@@ -23,10 +23,10 @@
     <div class="text-center">
       <h1 class="mb-4">안녕하세요 👋 <span class="text-primary">내의미</span> 업무 시스템에 오신 것을 환영합니다!</h1>
       <p class="lead">원하는 기능을 선택하세요:</p>
-      <div class="d-flex justify-content-center gap-3 mt-4">
-        <a href="/stock" class="btn btn-outline-primary">📦 재고 관리</a>
-        <a href="/list" class="btn btn-outline-secondary">📋 게시글 목록</a>
-        <a href="/write" class="btn btn-outline-success">✍️ 글 작성</a>
+      <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+        <% menus.forEach(m => { %>
+          <a href="<%= m %>" class="btn btn-outline-primary"><%= menuLabels[m] || m %></a>
+        <% }) %>
       </div>
     </div>
   </div>

@@ -23,7 +23,7 @@
 
   <!-- 글쓰기 버튼 -->
   <div class="container mb-3 text-end">
-    <a href="/list/write" class="btn btn-primary">글 작성</a>
+    <a href="/write" class="btn btn-primary">글 작성</a>
   </div>
 
 
@@ -36,8 +36,8 @@
           <h5 class="card-title mb-2">
             <a href="/detail/<%= item._id %>" class="text-decoration-none"><%= item.title %></a>
             <% if (유저 && String(유저._id) === String(item.user)) { %>
-              <a href="/edit/<%= item._id %>" class="ms-2 text-warning">✏️</a>
-              <span class="text-danger delete" data-id="<%= item._id %>">🗑</span>
+              <a href="/edit/<%= item._id %>" class="action-icon text-secondary" title="수정">✏️</a>
+              <a href="#" class="action-icon text-danger delete" data-id="<%= item._id %>" title="삭제">🗑️</a>
             <% } %>
           </h5>
           <p class="card-text text-muted mb-0"><%= item.content %></p>

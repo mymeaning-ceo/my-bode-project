@@ -14,6 +14,9 @@
 
   <div class="container my-5">
     <h2 class="mb-4 fw-bold">📦 재고 관리</h2>
+    <div class="alert alert-info mb-4">
+      헤더를 클릭하거나 위 셀렉트 박스로 정렬할 수 있습니다.
+    </div>
 
     <!-- 업로드 후 메시지 -->
     <% if (성공메시지) { %>
@@ -24,14 +27,14 @@
     <% } %>
 
     <!-- 파일 업로드 + 초기화 -->
-    <div class="d-flex flex-wrap gap-2 mb-4">
-      <form action="/stock/upload" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap gap-2">
+    <div class="action-form mb-4">
+      <form action="/stock/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
         <input type="file" name="excelFile" accept=".xlsx, .xls" class="form-control" required>
-        <button type="submit" class="btn btn-success">엑셀 업로드</button>
+        <button type="submit" class="btn btn-success btn-upload">엑셀 업로드</button>
       </form>
 
       <form action="/stock/delete-all" method="POST" onsubmit="return confirm('정말 모든 데이터를 삭제하시겠습니까?')">
-        <button type="submit" class="btn btn-danger">데이터 초기화</button>
+        <button type="submit" class="btn btn-danger btn-reset">데이터 초기화</button>
       </form>
     </div>
 
@@ -89,9 +92,6 @@
           <% } %>
         </tbody>
       </table>
-    </div>
-    <div class="alert alert-info mt-4">
-      헤더를 클릭하거나 위 셀렉트 박스로 정렬할 수 있습니다.
     </div>
   </div>
 

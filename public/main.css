@@ -54,8 +54,19 @@ body {
 
 /* 브랜드 로고 */
 .brand-logo {
-  height: 40px;
+  max-height: 40px;
+  max-width: 120px;
+  width: auto;
+  object-fit: contain;
+  vertical-align: middle;
 }
+
+.navbar-nav .nav-link.active {
+  font-weight: bold;
+  color: #0d6efd !important;
+}
+
+
 
 /* 테이블 헤더 */
 th {
@@ -134,4 +145,36 @@ input[type="file"]::-webkit-file-upload-button {
 .banner-form button {
   flex: 0 0 auto;
   white-space: nowrap;
+}
+
+/* 업로드 및 초기화 버튼 영역 */
+.action-form {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-upload,
+.btn-reset {
+  min-width: 130px;
+}
+
+/* 게시판 액션 아이콘 */
+.action-icon {
+  font-size: 0.9rem;
+  margin-left: 0.25rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 네비게이션 아이콘과 텍스트 정렬 */
+.navbar-nav {
+  align-items: center;
+}
+
+.navbar-nav .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
