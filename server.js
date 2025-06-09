@@ -132,13 +132,15 @@ app.post('/stock/upload', upload.single('file'), async (req, res) => {
       collectionName
     ]);
 
+        let pyError = '';
+    py.stderr.on('data', (data) => { pyError += data.toString(); });
     py.on('close', (code) => {
       // 파일 삭제 (비동기)
       fs.unlink(filePath, () => {});
       if (code === 0) {
         return res.json({ ok: true });
       }
-      return res.status(500).json({ error: 'python script failed', code });
+         return res.status(500).json({ error: 'python script failed', code, details: pyError.trim() });
     });
   } catch (err) {
     console.error(err);
