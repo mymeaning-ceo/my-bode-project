@@ -1,5 +1,6 @@
 import os, sys, pandas as pd
 from pymongo import MongoClient
+import traceback
 
 
 def transform(excel_bytes):
@@ -37,15 +38,20 @@ def main():
     client = MongoClient(mongo_uri)
     col = client['stockdb']['stock']
 
-    with open(excel_path, 'rb') as f:
-        docs = transform(f)
+       try:
+        with open(excel_path, 'rb') as f:
+            docs = transform(f)
+    except Exception as e:
+        print("\u274C Transform error:", e, file=sys.stderr)
+        traceback.print_exc()
+        sys.exit(2)
 
     if docs:
         col.delete_many({})  # 전체 교체. 필요 시 조건 변경
         col.insert_many(docs)
         print(f"\u2705 Inserted {len(docs)} docs into MongoDB")
     else:
-        print("\u26A0\uFE0F No data parsed from the Excel file")
+        print("\u26A0\uFE0F No data parsed from the Excel file") the Excel file")
 
 
 if __name__ == "__main__":
