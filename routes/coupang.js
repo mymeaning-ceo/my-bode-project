@@ -127,9 +127,9 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const data = dataRows.map(row => {
       const obj = {};
 
-      obj['Option ID'] = row[2] ?? '';
-      obj['Option name'] = row[4] ?? '';
-      obj['Product name'] = row[5] ?? '';
+      obj['Op ID'] = row[2] ?? '';
+      obj['Op name'] = row[4] ?? '';
+      obj['Product'] = row[5] ?? '';
 
       const inventory = Number(String(row[7]).replace(/,/g, '')) || 0;
       obj['Orderable quantity (real-time)'] = inventory;
