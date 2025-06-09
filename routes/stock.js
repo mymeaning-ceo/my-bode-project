@@ -33,13 +33,22 @@ const upload = multer({ dest: uploadsDir });
 router.get('/', async (req, res) => {
   try {
     const result = await db.collection('stock').find().sort({ 상품명: 1 }).toArray();
-    const fields = STOCK_COLUMNS || (result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : []);
+    const fields =
+      STOCK_COLUMNS || (result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : []);
     res.render('stock.ejs', { 결과: result, 필드: fields, 성공메시지: null });
   } catch (err) {
+    console.error('목록 조회 오류:', err);
+    res.status(500).send('❌ 재고 목록 불러오기 실패');
+  }
+});
+
+/**
+ * 엑셀 업로드 처리
+ */
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
-    const filePath = req.file.path;              // 업로드된 Excel 경로
-    const csvPath  = filePath.replace(/\.(xls|xlsx)$/i, '.csv');
+    const filePath = req.file.path; // 업로드된 Excel 경로
+    const csvPath = filePath.replace(/\.(xls|xlsx)$/i, '.csv');
 
     // 1) 파이썬 스크립트 실행: 엑셀 → CSV(정규화)
     const { execSync } = require('child_process');
@@ -55,18 +64,17 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const db = client.db('TRY_stock');
     const collection = db.collection('allocation');
 
-    await collection.deleteMany({});          // 기존 데이터 초기화
-    await collection.insertMany(jsonArray);   // 새 데이터 삽입
+    await collection.deleteMany({}); // 기존 데이터 초기화
+    await collection.insertMany(jsonArray); // 새 데이터 삽입
 
     client.close();
 
     // 4) 업로드 완료 후 화면 이동
-    res.redirect('/stock');                   // stock.ejs 렌더링
+    res.redirect('/stock'); // stock.ejs 렌더링
   } catch (err) {
     console.error(err);
     res.status(500).send('Upload & transform failed');
   }
-});  }
 });
 
 /**
