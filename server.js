@@ -60,6 +60,9 @@ app.use(async (req, res, next) => {
   next()
 })
 
+console.log('🧪 S3_KEY:', process.env.S3_KEY);
+console.log('🧪 S3_SECRET:', process.env.S3_SECRET ? '●●●●●' : 'MISSING');
+
 const { S3Client } = require('@aws-sdk/client-s3')
 const upload = require('./upload'); // post.js 등에서
 
