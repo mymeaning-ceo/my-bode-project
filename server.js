@@ -4,6 +4,9 @@ const app = express()
 const { MongoClient, ObjectId } = require('mongodb')
 const methodOverride = require('method-override')
 const bcrypt = require('bcrypt')
+const multer = require('multer');
+const { spawn } = require('child_process');
+const fs = require('fs');
 
 app.use(express.static(__dirname + '/public'))
 app.set('view engine', 'ejs')
@@ -105,6 +108,44 @@ app.use(async (req, res, next) => {
     res.locals.logo = '';
     res.locals.banners = [];
   }
+
+/**
+ * 엘셀 업로드 → Python 변환 → MongoDB 저장
+ */
+const upload = multer({ dest: 'uploads/' });
+
+app.post('/stock/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'file not found' });
+    }
+    const filePath = req.file.path;
+    const mongoUri = process.env.DB_URL;
+    const dbName = process.env.DB_NAME || 'forum';
+    const collectionName = 'stock';
+
+    const py = spawn('python3', [
+      'scripts/excel_to_mongo.py',
+      filePath,
+      mongoUri,
+      dbName,
+      collectionName
+    ]);
+
+    py.on('close', (code) => {
+      // 파일 삭제 (비동기)
+      fs.unlink(filePath, () => {});
+      if (code === 0) {
+        return res.json({ ok: true });
+      }
+      return res.status(500).json({ error: 'python script failed', code });
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'internal server error' });
+  }
+});
+
   next();
 });
 
