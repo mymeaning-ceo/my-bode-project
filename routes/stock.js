@@ -36,61 +36,37 @@ router.get('/', async (req, res) => {
     const fields = STOCK_COLUMNS || (result[0] ? Object.keys(result[0]).filter(k => k !== '_id') : []);
     res.render('stock.ejs', { 결과: result, 필드: fields, 성공메시지: null });
   } catch (err) {
-    console.error('목록 조회 오류:', err);
-    res.status(500).send('❌ 재고 목록 불러오기 실패');
-  }
-});
-
-/**
- * 엑셀 업로드 처리
- */
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).send('❌ 파일이 업로드되지 않았습니다.');
-    }
+    const filePath = req.file.path;              // 업로드된 Excel 경로
+    const csvPath  = filePath.replace(/\.(xls|xlsx)$/i, '.csv');
 
-    const filePath = req.file.path;
-    const workbook = xlsx.readFile(filePath);
-    const sheetName = workbook.SheetNames[0];
-    let data = xlsx.utils.sheet_to_json(
-      workbook.Sheets[sheetName],
-      { range: STOCK_START_ROW }
-    );
+    // 1) 파이썬 스크립트 실행: 엑셀 → CSV(정규화)
+    const { execSync } = require('child_process');
+    execSync(`python transform_try.py "${filePath}" "${csvPath}"`);
 
-    if (STOCK_COLUMNS && STOCK_COLUMNS.length > 0) {
-      data = data.map(row => {
-        const obj = {};
-        STOCK_COLUMNS.forEach(col => {
-          obj[col] = row[col];
-        });
-        return obj;
-      });
-    }
+    // 2) CSV → JSON 로드
+    const csv = require('csvtojson');
+    const jsonArray = await csv().fromFile(csvPath);
 
-    if (data.length === 0) {
-      return res.status(400).send('❌ 엑셀 파일이 비어 있습니다.');
-    }
+    // 3) MongoDB 저장
+    const { MongoClient } = require('mongodb');
+    const client = await MongoClient.connect(process.env.MONGO_URI);
+    const db = client.db('TRY_stock');
+    const collection = db.collection('allocation');
 
-    await db.collection('stock').insertMany(data);
+    await collection.deleteMany({});          // 기존 데이터 초기화
+    await collection.insertMany(jsonArray);   // 새 데이터 삽입
 
-    fs.unlink(filePath, err => {
-      if (err) console.error('파일 삭제 실패:', err);
-    });
+    client.close();
 
-    // 업로드 후 재고 목록 + 메시지 전달
-    const resultArray = await db.collection('stock').find().sort({ 상품명: 1 }).toArray();
-    const fields = STOCK_COLUMNS || (resultArray[0] ? Object.keys(resultArray[0]).filter(k => k !== '_id') : []);
-    res.render('stock.ejs', {
-      결과: resultArray,
-      필드: fields,
-      성공메시지: '✅ 엑셀 업로드가 완료되었습니다!'
-    });
-
+    // 4) 업로드 완료 후 화면 이동
+    res.redirect('/stock');                   // stock.ejs 렌더링
   } catch (err) {
-    console.error('엑셀 업로드 오류:', err);
-    res.status(500).send('❌ 업로드 실패');
+    console.error(err);
+    res.status(500).send('Upload & transform failed');
   }
+});  }
 });
 
 /**
