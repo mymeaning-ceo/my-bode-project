@@ -131,7 +131,8 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const dataRows = sheetData.slice(1);
 
     // 매핑
-    /* ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    const indexMap = {};
+    I    /* ────────────────────────────────────────────────────────────────────────────────────────────────────
        헤더 매핑 (영문·한글 모두 지원)
     ────────────────────────────────────────────────────────────────────────────────────────────────────
     */
@@ -141,7 +142,7 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
       if (!col) return;
       const trimmed = String(col).trim();
 
-      // ① 영문 헤더 그대로 매칭
+      // ① 영문 헤더 그대로
       if (IMPORT_COLUMNS.includes(trimmed)) {
         indexMap[trimmed] = idx;
         return;
@@ -171,4 +172,121 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
         }
       }
       return obj;
+    });}
+      }
+      return obj;
     });
+
+    const bulkOps = data.map(item => ({
+      updateOne: {
+        filter: { 'Option ID': item['Option ID'] },
+        update: { $set: item },
+        upsert: true
+      }
+    }));
+
+    if (bulkOps.length > 0) await db.collection('coupang').bulkWrite(bulkOps);
+    fs.unlink(filePath, () => {});
+
+    let resultArray = await db.collection('coupang').find().sort({ 'Product name': 1 }).toArray();
+
+    resultArray = resultArray.map(row => {
+      const newRow = { ...row };
+      if (typeof newRow['Option ID'] === 'number') newRow['Option ID'] = String(newRow['Option ID']);
+      NUMERIC_COLUMNS.forEach(col => {
+        if (col !== 'Option ID' && newRow[col] !== undefined && newRow[col] !== null) {
+          const num = Number(String(newRow[col]).replace(/,/g, ''));
+          newRow[col] = isNaN(num) ? 0 : num;
+        }
+      });
+      return newRow;
+    });
+
+    const resultWithShortage = addShortage(resultArray);
+    res.render('coupang.ejs', {
+      결과: resultWithShortage,
+      필드: DEFAULT_COLUMNS,
+      전체필드: DEFAULT_COLUMNS,
+      성공메시지: '✅ 업로드 완료',
+      한글,
+      keyword: '',
+      brand: '',
+      brandOptions: BRANDS
+    });
+  } catch (err) {
+    console.error('POST /coupang/upload 오류:', err);
+    res.status(500).send('❌ 업로드 실패');
+  }
+});
+
+// 검색
+router.get('/search', async (req, res) => {
+  try {
+    const keyword = req.query.keyword || '';
+    const brand = req.query.brand || '';
+    const regex = keyword ? new RegExp(keyword, 'i') : null;
+    const brandRegex = brand ? new RegExp(brand, 'i') : null;
+
+    const conditions = [];
+    if (regex) {
+      conditions.push({
+        $or: [
+          { 'Product name': regex },
+          { 'Option name': regex },
+          { 'Option ID': regex }
+        ]
+      });
+    }
+    if (brandRegex) {
+      conditions.push({ 'Product name': brandRegex });
+    }
+
+    const query = conditions.length > 0 ? { $and: conditions } : {};
+    let result = await db.collection('coupang').find(query).sort({ 'Product name': 1 }).toArray();
+
+    result = result.map(row => {
+      const newRow = { ...row };
+      if (typeof newRow['Option ID'] === 'number') newRow['Option ID'] = String(newRow['Option ID']);
+      NUMERIC_COLUMNS.forEach(col => {
+        if (col !== 'Option ID' && newRow[col] !== undefined && newRow[col] !== null) {
+          const num = Number(String(newRow[col]).replace(/,/g, ''));
+          newRow[col] = isNaN(num) ? 0 : num;
+        }
+      });
+      return newRow;
+    });
+
+    const resultWithShortage = addShortage(result);
+    let selected = req.query.fields;
+    if (selected && !Array.isArray(selected)) selected = selected.split(',');
+    const fields = (selected && selected.length > 0)
+      ? DEFAULT_COLUMNS.filter(col => selected.includes(col))
+      : DEFAULT_COLUMNS;
+    res.render('coupang.ejs', {
+      결과: resultWithShortage,
+      필드: fields,
+      전체필드: DEFAULT_COLUMNS,
+      성공메시지: null,
+      한글,
+      keyword,
+      brand,
+      brandOptions: BRANDS
+    });
+  } catch (err) {
+    console.error('GET /coupang/search 오류:', err);
+    res.status(500).send('❌ 검색 실패');
+  }
+});
+
+// 전체 삭제
+router.post('/delete-all', checkLogin, async (req, res) => {
+  try {
+    await db.collection('coupang').deleteMany({});
+    res.redirect('/coupang');
+  } catch (err) {
+    console.error('POST /coupang/delete-all 오류:', err);
+    res.status(500).send('❌ 삭제 실패');
+  }
+});
+
+module.exports = router;
