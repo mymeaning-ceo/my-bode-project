@@ -121,15 +121,15 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     const workbook = xlsx.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-
-    const dataRows = sheetData.slice(1); // 헤더가 아닌 본문만
-
+    const dataRows = sheetData.slice(2);  // ✅ 첫 2행 제거 (0번: 숫자, 1번: 헤더)
+    
     const data = dataRows.map(row => {
       const obj = {};
-
-      obj['Option ID'] = row[0] ?? '';
-      obj['Product name'] = row[1] ?? '';
-      obj['Option name'] = row[2] ?? '';
+    
+      obj['Option ID'] = row[2] ?? '';
+      obj['Product name'] = row[4] ?? '';
+      obj['Option name'] = row[5] ?? '';
+    
 
       const inventory = Number(String(row[7]).replace(/,/g, '')) || 0;
       obj['Orderable quantity (real-time)'] = inventory;
