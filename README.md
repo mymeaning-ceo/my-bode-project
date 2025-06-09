@@ -12,3 +12,13 @@ This project requires several environment variables to run:
 Create a `.env` file in the project root and define these values before starting
 the server.
 
+
+## Python scripts
+
+Some features convert Excel files to CSV using Python. Install the Python dependencies before running the server:
+
+```bash
+pip install -r requirements.txt
+```
+
+The `requirements.txt` file lists the minimal packages (`pandas` and `openpyxl`) needed to parse Excel files.
