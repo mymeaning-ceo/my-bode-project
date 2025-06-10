@@ -74,20 +74,6 @@ async function loadPermissions() {
 }
 global.loadPermissions = loadPermissions;
 
-app.use(session({
-  secret: '비밀키',
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-      client: mongoose.connection.getClient(),
-  dbName: 'forum',
-  collectionName: 'sessions',
-  ttl: 60 * 60,
-    dbName: 'forum'
-  }),
-  cookie: { maxAge: 60 * 60 * 1000 }  // 1시간
-}));
-
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -367,7 +353,7 @@ app.get('/logout', (req, res, next) => {
 app.use('/shop', require('./routes/shop.js'))
 app.use('/board/sub', require('./routes/board.js'))
 app.use('/search', require('./routes/search.js'));
-+ app.use('/stock', require('./stock/upload.js'));
+app.use('/stock', require('./stock/upload.js'));
 app.use('/coupang', require('./routes/coupang.js'));
 app.use('/coupang/add', require('./routes/coupangAdd.js'));
 app.use('/voucher', require('./routes/voucher.js'));
