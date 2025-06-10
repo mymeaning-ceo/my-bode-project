@@ -51,11 +51,12 @@ router.get('/', async (req, res) => {
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
     const inputPath = req.file.path;
-    const outputPath = inputPath.replace(/\.xlsx?$/.csvson');
+    const outputPath = inputPath.replace(/\.xlsx?$/, '.json');
 
-    const pythonCommand = 'python'; // 또는 'python3' 환경에 따라 조정
+    const pythonCommand = 'python'; // 또는 'python3'
 
-    exec(`${pythonCommand} scripts/excel_to_csv.py.py "${inputPath}" "${outputPath}"`, async (error, stdout, stderr) => {
+    const scriptPath = path.join(__dirname, '../scripts/excel_to_csv.py');
+    exec(`${pythonCommand} scripts/excel_to_csv.py "${inputPath}" "${outputPath}"`, async (error, stdout, stderr) => {
       if (error) {
         console.error('❌ Python 오류:', stderr);
         return res.status(500).send('Python 변환 실패');
@@ -72,7 +73,7 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
       await db.collection('stock').deleteMany({});
       if (data.length) await db.collection('stock').insertMany(data);
 
-      // 임시 파일 삭제
+      // ✅ 임시 파일 삭제
       fs.unlink(inputPath, () => {});
       fs.unlink(outputPath, () => {});
 
@@ -87,7 +88,6 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     res.status(500).send('Upload failed');
   }
 });
-
 
 
 
