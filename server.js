@@ -7,7 +7,6 @@ const bcrypt = require('bcrypt')
 const multer = require('multer');
 const { spawn } = require('child_process');
 const fs = require('fs');
-<<<<<<< HEAD
 const mongoose = require('mongoose');
 mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
@@ -17,13 +16,6 @@ mongoose.connect(process.env.DB_URL, {
     console.error('❌ MongoDB connection error:', err);
     process.exit(1);
   });
-=======
-const session = require('express-session');
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
-const MongoStore = require('connect-mongo');
-const path = require('path');
->>>>>>> 3366bbc19b1fdf9f05ebc10e5c116a2419f24224
 
 app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
@@ -71,7 +63,6 @@ async function loadPermissions() {
 }
 global.loadPermissions = loadPermissions;
 
-<<<<<<< HEAD
 app.use(session({
   secret: '비밀키',
   resave: false,
@@ -90,9 +81,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // 페이지 접근 권한 체크
-=======
-// 권한 체크 미들웨어
->>>>>>> 3366bbc19b1fdf9f05ebc10e5c116a2419f24224
 app.use(async (req, res, next) => {
   const config = permissions[req.path];
   if (!config) return next();
