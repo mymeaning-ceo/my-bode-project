@@ -51,11 +51,11 @@ router.get('/', async (req, res) => {
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
     const inputPath = req.file.path;
-    const outputPath = inputPath.replace(/\.xlsx?$/, '.json');
+    const outputPath = inputPath.replace(/\.xlsx?$/.csvson');
 
     const pythonCommand = 'python'; // 또는 'python3' 환경에 따라 조정
 
-    exec(`${pythonCommand} scripts/excel_to_json.py "${inputPath}" "${outputPath}"`, async (error, stdout, stderr) => {
+    exec(`${pythonCommand} scripts/excel_to_csv.py.py "${inputPath}" "${outputPath}"`, async (error, stdout, stderr) => {
       if (error) {
         console.error('❌ Python 오류:', stderr);
         return res.status(500).send('Python 변환 실패');
