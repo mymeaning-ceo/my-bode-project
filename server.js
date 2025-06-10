@@ -31,15 +31,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
+// 세션 설정 (한 번만 선언)
 app.use(session({
   secret: '비밀키',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.DB_URL,
-    dbName: 'forum'
+    client: mongoose.connection.getClient(), // ← mongoUrl 대신 client
+    dbName: 'forum',
+    collectionName: 'sessions',
+    ttl: 60 * 60          // 1시간
   }),
-  cookie: { maxAge: 60 * 60 * 1000 }
+  cookie: { maxAge: 60 * 60 * 1000 } // 1시간
 }));
 
 app.use(passport.initialize());
