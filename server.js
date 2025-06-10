@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 const express = require('express')
 const app = express()
 const session = require('express-session');  // ✅ 이 줄이 빠졌을 경우 ReferenceError 발생
@@ -30,6 +30,10 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+
+console.log('DB_URL:', process.env.DB_URL);
+console.log('S3_KEY:', process.env.S3_KEY);
+console.log('S3_REGION:', process.env.S3_REGION);
 
 // 세션 설정 (한 번만 선언)
 app.use(session({
@@ -360,3 +364,4 @@ app.use('/voucher', require('./routes/voucher.js'));
 app.use('/ocr', require('./routes/ocr.js'));
 app.use('/help', require('./routes/help.js'));
 app.use('/', require('./routes/auth.js'));
+
