@@ -1,13 +1,13 @@
 require('dotenv').config();
 const express = require('express')
 const app = express()
+const session = require('express-session');  // ✅ 이 줄이 빠졌을 경우 ReferenceError 발생
 const { MongoClient, ObjectId } = require('mongodb')
 const methodOverride = require('method-override')
 const bcrypt = require('bcrypt')
 const multer = require('multer');
 const { spawn } = require('child_process');
 const fs = require('fs');
-const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const mongoose = require('mongoose');
@@ -31,6 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
+// 세션 설정 (한 번만 선언)
 app.use(session({
   secret: '비밀키',
   resave: false,
@@ -73,7 +74,24 @@ async function loadPermissions() {
 }
 global.loadPermissions = loadPermissions;
 
-// 권한 체크 미들웨어
+app.use(session({
+  secret: '비밀키',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+      client: mongoose.connection.getClient(),
+  dbName: 'forum',
+  collectionName: 'sessions',
+  ttl: 60 * 60,
+    dbName: 'forum'
+  }),
+  cookie: { maxAge: 60 * 60 * 1000 }  // 1시간
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// 페이지 접근 권한 체크
 app.use(async (req, res, next) => {
   const config = permissions[req.path];
   if (!config) return next();
@@ -349,7 +367,7 @@ app.get('/logout', (req, res, next) => {
 app.use('/shop', require('./routes/shop.js'))
 app.use('/board/sub', require('./routes/board.js'))
 app.use('/search', require('./routes/search.js'));
-app.use('/stock', require('./routes/stock.js'));
++ app.use('/stock', require('./stock/upload.js'));
 app.use('/coupang', require('./routes/coupang.js'));
 app.use('/coupang/add', require('./routes/coupangAdd.js'));
 app.use('/voucher', require('./routes/voucher.js'));
