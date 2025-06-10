@@ -26,7 +26,7 @@ exports.uploadAndProcess = async (req, res) => {
     const excelPath = req.file.path;
 
     // 2) 파이썬 스크립트 경로
-    const scriptPath = path.join(__dirname, '../python/transform_try.py');
+    const scriptPath = path.join(__dirname, '../scripts/transform_try.py');
 
     // 3) 파이썬 실행 (엑셀 → CSV 변환)
     await runPython(scriptPath, excelPath);
