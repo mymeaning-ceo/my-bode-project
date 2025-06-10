@@ -367,7 +367,7 @@ app.get('/logout', (req, res, next) => {
 app.use('/shop', require('./routes/shop.js'))
 app.use('/board/sub', require('./routes/board.js'))
 app.use('/search', require('./routes/search.js'));
-app.use('/stock', require('./routes/stock.js'));
++ app.use('/stock', require('./stock/upload.js'));
 app.use('/coupang', require('./routes/coupang.js'));
 app.use('/coupang/add', require('./routes/coupangAdd.js'));
 app.use('/voucher', require('./routes/voucher.js'));
