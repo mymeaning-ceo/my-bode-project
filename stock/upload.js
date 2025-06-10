@@ -24,6 +24,7 @@ router.post('/upload', checkLogin, upload.single('excelFile'), async (req, res) 
   
       res.redirect('/stock');
     } catch (err) {
+      
       console.error('엑셀 업로드 오류:', err);
       res.status(500).send('❌ 업로드 실패');
     }

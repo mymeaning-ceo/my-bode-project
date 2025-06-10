@@ -1,9 +1,4 @@
 require('dotenv').config();
-
-if (!process.env.DB_URL) {
-  console.error('Missing DB_URL environment variable. Ensure your .env file is saved in UTF-8 without BOM.');
-  process.exit(1);
-}
 const express = require('express')
 const app = express()
 const { MongoClient, ObjectId } = require('mongodb')
@@ -12,19 +7,33 @@ const bcrypt = require('bcrypt')
 const multer = require('multer');
 const { spawn } = require('child_process');
 const fs = require('fs');
+const session = require('express-session');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const MongoStore = require('connect-mongo');
+const path = require('path');
 
-app.use(express.static(__dirname + '/public'))
-app.set('view engine', 'ejs')
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(methodOverride('_method'))
+app.use(express.static(__dirname + '/public'));
+app.set('view engine', 'ejs');
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
-const session = require('express-session')
-const passport = require('passport')
-const LocalStrategy = require('passport-local')
-const MongoStore = require('connect-mongo')
+app.use(session({
+  secret: '비밀키',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.DB_URL,
+    dbName: 'forum'
+  }),
+  cookie: { maxAge: 60 * 60 * 1000 }
+}));
 
-let permissions = {}
+app.use(passport.initialize());
+app.use(passport.session());
+
+let permissions = {};
 const menuLabels = {
   '/stock': '재고 관리',
   '/coupang': '쿠팡 재고',
@@ -35,68 +44,51 @@ const menuLabels = {
   '/admin': '관리자',
   '/ocr': 'OCR',
   '/voucher': '전표 입력'
-}
+};
+
 async function loadPermissions() {
-  if (!db) return
-  const docs = await db.collection('permissions').find().toArray()
-  permissions = {}
+  if (!db) return;
+  const docs = await db.collection('permissions').find().toArray();
+  permissions = {};
   docs.forEach(d => {
     permissions[d.view] = {
       loginRequired: d.loginRequired,
       allowedUsers: d.allowedUsers || []
-    }
-  })
+    };
+  });
 }
-global.loadPermissions = loadPermissions
+global.loadPermissions = loadPermissions;
 
-app.use(session({
-  secret: '비밀키',
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.DB_URL,
-    dbName: 'forum'
-  }),
-  cookie: { maxAge: 60 * 60 * 1000 }  // 1시간
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-// 페이지 접근 권한 체크
+// 권한 체크 미들웨어
 app.use(async (req, res, next) => {
-  const config = permissions[req.path]
-  if (!config) return next()
+  const config = permissions[req.path];
+  if (!config) return next();
 
   if (config.loginRequired && !req.isAuthenticated()) {
-    return res.redirect('/login?redirect=' + req.path)
+    return res.redirect('/login?redirect=' + req.path);
   }
-  if (config.allowedUsers && config.allowedUsers.length > 0) {
-    if (!req.isAuthenticated() || !config.allowedUsers.includes(String(req.user._id))) {
-      return res.status(403).send('권한이 없습니다.')
-    }
+  if (config.allowedUsers.length > 0 && (!req.isAuthenticated() || !config.allowedUsers.includes(String(req.user._id)))) {
+    return res.status(403).send('권한이 없습니다.');
   }
-  next()
-})
+  next();
+});
 
 console.log('🧪 S3_KEY:', process.env.S3_KEY);
 console.log('🧪 S3_SECRET:', process.env.S3_SECRET ? '●●●●●' : 'MISSING');
 
-const { S3Client } = require('@aws-sdk/client-s3')
-const upload = require('./upload'); // post.js 등에서
+const { S3Client } = require('@aws-sdk/client-s3');
+const uploadExcel = multer({ dest: 'uploads/' });
 
-app.use((요청, 응답, next) => {
-  응답.locals.유저 = 요청.user;  // 모든 ejs에서 유저 변수 사용 가능
+app.use((req, res, next) => {
+  res.locals.유저 = req.user;
   next();
 });
 
-// 현재 페이지 URL을 템플릿에서 사용해 네비게이션 활성화
 app.use((req, res, next) => {
   res.locals.currentUrl = req.path;
   next();
 });
 
-// 로고 및 배너 정보를 모든 템플릿에서 사용
 app.use(async (req, res, next) => {
   if (!db) return next();
   try {
@@ -113,39 +105,37 @@ app.use(async (req, res, next) => {
     res.locals.logo = '';
     res.locals.banners = [];
   }
+  next();
+});
 
 /**
  * 엘셀 업로드 → Python 변환 → MongoDB 저장
  */
-const localUpload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: 'uploads/' });
 
-app.post('/stock/upload', localUpload.single('file'), async (req, res) => {
+app.post('/stock/upload', upload.single('file'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'file not found' });
-    }
+    if (!req.file) return res.status(400).json({ error: 'file not found' });
+
     const filePath = req.file.path;
-    const mongoUri = process.env.DB_URL;
-    const dbName = process.env.DB_NAME || 'forum';
-    const collectionName = 'stock';
-
+    const scriptPath = path.join(__dirname, 'scripts', 'excel_to_mongo.py');
     const py = spawn('python3', [
-      'scripts/excel_to_mongo.py',
-      filePath,
-      mongoUri,
-      dbName,
-      collectionName
-    ], { env: { ...process.env } });
-
-        let pyError = '';
-    py.stderr.on('data', (data) => { pyError += data.toString(); });
-    py.on('close', (code) => {
-      // 파일 삭제 (비동기)
-      fs.unlink(filePath, () => {});
-      if (code === 0) {
-        return res.json({ ok: true });
+      scriptPath,
+      filePath
+    ], {
+      env: {
+        ...process.env,
+        MONGO_URI: process.env.DB_URL
       }
-         return res.status(500).json({ error: 'python script failed', code, details: pyError.trim() });
+    });
+
+    let pyError = '';
+    py.stderr.on('data', data => { pyError += data.toString(); });
+
+    py.on('close', code => {
+      fs.unlink(filePath, () => {});
+      if (code === 0) return res.json({ ok: true });
+      return res.status(500).json({ error: 'python script failed', code, details: pyError.trim() });
     });
   } catch (err) {
     console.error(err);
@@ -153,29 +143,25 @@ app.post('/stock/upload', localUpload.single('file'), async (req, res) => {
   }
 });
 
-  next();
-});
 
-let connectDB = require('./database.js')
-let db
-connectDB.then((client)=>{
-  console.log('DB연결성공')
-  db = client.db('forum')
+let connectDB = require('./database.js');
+let db;
+connectDB.then(client => {
+  console.log('DB연결성공');
+  db = client.db('forum');
   loadPermissions();
   const PORT = process.env.PORT || 8080;
   app.listen(PORT, () => {
     console.log(`http://localhost:${PORT} 에서 서버 실행중`);
   });
-}).catch((err) => {
-  console.log(err)
-})
+}).catch(err => {
+  console.log(err);
+});
 
 const { checkLogin, checkAdmin } = require('./middlewares/auth');
 app.get('/secure', checkLogin, (요청, 응답) => {
   응답.send('로그인 사용자')
 })
-
-const path = require('path');
 
 app.get('/', async (req, res) => {
   // 로그인 여부와 상관없이 동일한 메인 페이지
