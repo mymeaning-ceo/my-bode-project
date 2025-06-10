@@ -37,7 +37,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    client: mongoose.connection.getClient(),
+    mongoUrl: process.env.DB_URL,   // ← client 대신 mongoUrl 사용
     dbName: 'forum',
     collectionName: 'sessions',
     ttl: 60 * 60
