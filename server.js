@@ -37,12 +37,12 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    client: mongoose.connection.getClient(), // ← mongoUrl 대신 client
+    client: mongoose.connection.getClient(),
     dbName: 'forum',
     collectionName: 'sessions',
-    ttl: 60 * 60          // 1시간
+    ttl: 60 * 60
   }),
-  cookie: { maxAge: 60 * 60 * 1000 } // 1시간
+  cookie: { maxAge: 60 * 60 * 1000 }
 }));
 
 app.use(passport.initialize());
