@@ -10,6 +10,18 @@ const fs = require('fs');
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
+const mongoose = require('mongoose');
+
+// MongoDB connection
+mongoose.connect(process.env.DB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => console.log('✅ MongoDB connected'))
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  });
+
 const MongoStore = require('connect-mongo');
 const path = require('path');
 
