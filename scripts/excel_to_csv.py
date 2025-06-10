@@ -5,7 +5,13 @@ excel_path = sys.argv[1]
 csv_path = sys.argv[2]
 
 # 엑셀 읽기
-df = pd.read_excel(excel_path, header=1)
+try:
+    df = pd.read_excel(excel_path, header=0)
+except Exception as e:
+    print(f"❌ Excel 읽기 오류: {e}", file=sys.stderr)
+    sys.exit(1)
+
+    
 
 # 열 이름 정리
 df.columns = (
