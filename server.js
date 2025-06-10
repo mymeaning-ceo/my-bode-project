@@ -36,8 +36,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.DB_URL,
-    dbName: 'forum'
+    client: mongoose.connection.getClient(),
+    dbName: 'forum',
+    collectionName: 'sessions',
+    ttl: 60 * 60
   }),
   cookie: { maxAge: 60 * 60 * 1000 }
 }));
