@@ -9,9 +9,18 @@ const bcrypt = require('bcrypt')
 const multer = require('multer');
 const { spawn } = require('child_process');
 const fs = require('fs');
+<<<<<<< HEAD
 const mongoose = require('mongoose');
 
 
+=======
+const session = require('express-session');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const mongoose = require('mongoose');
+
+// MongoDB connection
+>>>>>>> main
 mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -20,6 +29,12 @@ mongoose.connect(process.env.DB_URL, {
     console.error('❌ MongoDB connection error:', err);
     process.exit(1);
   });
+<<<<<<< HEAD
+=======
+
+const MongoStore = require('connect-mongo');
+const path = require('path');
+>>>>>>> main
 
 app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
