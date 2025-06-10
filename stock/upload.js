@@ -1,12 +1,13 @@
 // stock/upload.js
 const express = require('express');
-const router = express.Router();          // ← 라우터 선언
+const router = express.Router();
 
 const xlsx = require('xlsx');
 const fs = require('fs');
+const multer = require('multer');
 const { checkLogin } = require('../middlewares/auth');
-const upload = require('../middlewares/upload'); // S3 업로드 미들웨어 예시
-const db = require('../database').db;      // DB 객체 가져오는 방식에 맞게 수정
+const upload = multer({ dest: 'uploads/' });   // ← 직접 multer 설정
+const db = require('../database').db; // DB 객체 가져오는 방식에 맞게 수정
 
 // 업로드 라우트
 router.post('/upload', checkLogin, upload.single('excelFile'), async (req, res) => {
