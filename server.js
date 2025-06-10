@@ -112,9 +112,9 @@ app.use(async (req, res, next) => {
 /**
  * 엘셀 업로드 → Python 변환 → MongoDB 저장
  */
-const upload = multer({ dest: 'uploads/' });
+const localUpload = multer({ dest: 'uploads/' });
 
-app.post('/stock/upload', upload.single('file'), async (req, res) => {
+app.post('/stock/upload', localUpload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'file not found' });
