@@ -29,17 +29,19 @@ def transform(excel_bytes):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python excel_to_mongo.py <excel_path>")
+    if len(sys.argv) < 5:
+        print(
+            "Usage: python excel_to_mongo.py <excel_path> <mongo_uri> <db_name> <collection_name>"
+        )
         sys.exit(1)
 
-    excel_path = sys.argv[1]
-    mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
-    client = MongoClient(mongo_uri)
-    col = client['stockdb']['stock']
+    excel_path, mongo_uri, db_name, collection_name = sys.argv[1:5]
 
-        try:
-        with open(excel_path, 'rb') as f:
+    client = MongoClient(mongo_uri)
+    col = client[db_name][collection_name]
+
+    try:
+        with open(excel_path, "rb") as f:
             docs = transform(f)
     except Exception as e:
         print("\u274C Transform error:", e, file=sys.stderr)
@@ -51,8 +53,7 @@ def main():
         col.insert_many(docs)
         print(f"\u2705 Inserted {len(docs)} docs into MongoDB")
     else:
-        print("\u26A0\uFE0F No data parsed from the Excel file") the Excel file")
-
+        print("\u26A0\uFE0F No data parsed from the Excel file")
 
 if __name__ == "__main__":
     main()
