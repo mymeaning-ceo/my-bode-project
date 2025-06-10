@@ -1,11 +1,12 @@
 import os, sys, pandas as pd
 from pymongo import MongoClient
 import traceback
+import re
 
 
 def transform(excel_bytes):
     df = pd.read_excel(excel_bytes, header=1)
-    df.columns = df.columns.str.strip().str.replace('\n','')
+    [re.sub(r'\s+', '', str(c).replace('\n', '')) for c in df.columns]
     start_col = 2 + 6  # I column index start of first group
     group_cnt = (df.shape[1] - start_col) // 6
     records = []
@@ -38,7 +39,7 @@ def main():
     client = MongoClient(mongo_uri)
     col = client['stockdb']['stock']
 
-        try:
+         try:
         with open(excel_path, 'rb') as f:
             docs = transform(f)
     except Exception as e:
