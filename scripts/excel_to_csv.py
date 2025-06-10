@@ -13,12 +13,8 @@ mongo_url = sys.argv[2]
 db_name = sys.argv[3]
 collection_name = sys.argv[4]
 
-# === [2] 엑셀 읽기 ===
-try:
-    df = pd.read_excel(excel_path, header=1)
-except Exception as e:
-    print(f"❌ 엑셀 읽기 실패: {e}")
-    sys.exit(1)
+# 엑셀 읽기
+df = pd.read_excel(excel_path, header=1)
 
 # === [3] 컬럼 정리 ===
 df.columns = (
