@@ -1,4 +1,9 @@
 require('dotenv').config();
+
+if (!process.env.DB_URL) {
+  console.error('Missing DB_URL environment variable. Ensure your .env file is saved in UTF-8 without BOM.');
+  process.exit(1);
+}
 const express = require('express')
 const app = express()
 const { MongoClient, ObjectId } = require('mongodb')

@@ -10,7 +10,8 @@ This project requires several environment variables to run:
   credentials must allow bucket creation).
 
 Create a `.env` file in the project root and define these values before starting
-the server.
+the server. Make sure the file is saved as **UTF-8 without BOM** so that
+`dotenv` can read it correctly.
 
 
 ## Python scripts
