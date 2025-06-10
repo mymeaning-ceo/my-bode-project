@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express')
 const app = express()
+const session = require('express-session');  // ✅ 이 줄이 빠졌을 경우 ReferenceError 발생
+const MongoStore = require('connect-mongo'); // ✅ 이 줄 추가
 const { MongoClient, ObjectId } = require('mongodb')
 const methodOverride = require('method-override')
 const bcrypt = require('bcrypt')
@@ -8,6 +10,8 @@ const multer = require('multer');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const mongoose = require('mongoose');
+
+
 mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
