@@ -12,6 +12,15 @@ const bcrypt = require('bcrypt')
 const multer = require('multer');
 const { spawn } = require('child_process');
 const fs = require('fs');
+const mongoose = require('mongoose');
+mongoose.connect(process.env.DB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => console.log('✅ MongoDB connected'))
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  });
 
 app.use(express.static(__dirname + '/public'))
 app.set('view engine', 'ejs')
@@ -54,7 +63,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.DB_URL,
+      client: mongoose.connection.getClient(),
+  dbName: 'forum',
+  collectionName: 'sessions',
+  ttl: 60 * 60,
     dbName: 'forum'
   }),
   cookie: { maxAge: 60 * 60 * 1000 }  // 1시간
