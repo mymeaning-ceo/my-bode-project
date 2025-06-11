@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm px-4">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="/">
-      <% if (logo) { %>
+      <% if (typeof logo !== 'undefined' && logo) { %>
         <img src="<%= logo %>" alt="logo" class="brand-logo me-2">
       <% } else { %>
         🩲 내의미
@@ -19,55 +19,55 @@
       </div>
       <div class="offcanvas-body">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <% if (유저) { %>
+          <% if (유저) { %>
+            <li class="nav-item">
+              <a class="nav-link text-dark <%= currentUrl.startsWith('/list') ? 'active' : '' %>" href="/list">📋 게시판</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark <%= currentUrl.startsWith('/stock') ? 'active' : '' %>" href="/stock">📦 재고관리</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark <%= currentUrl.startsWith('/coupang') && !currentUrl.includes('/add') ? 'active' : '' %>" href="/coupang">🛒 쿠팡재고</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark <%= currentUrl.startsWith('/coupang/add') ? 'active' : '' %>" href="/coupang/add">💰 매출/광고비</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark <%= currentUrl.startsWith('/voucher') ? 'active' : '' %>" href="/voucher">📝 전표입력</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark <%= currentUrl.startsWith('/write') ? 'active' : '' %>" href="/write">✍ 글작성</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark <%= currentUrl.startsWith('/admin') ? 'active' : '' %>" href="/admin">🛠 관리자</a>
+            </li>
+          <% } %>
           <li class="nav-item">
-            <a class="nav-link text-dark <%= currentUrl.startsWith('/list') ? 'active' : '' %>" href="/list">📋 게시판</a>
+            <a class="nav-link text-dark <%= currentUrl.startsWith('/help') ? 'active' : '' %>" href="/help">❓ 사용방법</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-dark <%= currentUrl.startsWith('/stock') ? 'active' : '' %>" href="/stock">📦 재고관리</a>
+            <a class="nav-link text-dark <%= currentUrl.startsWith('/ocr') ? 'active' : '' %>" href="/ocr">🖼️ OCR</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link text-dark <%= currentUrl.startsWith('/coupang') && !currentUrl.includes('/add') ? 'active' : '' %>" href="/coupang">🛒 쿠팡재고</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-dark <%= currentUrl.startsWith('/coupang/add') ? 'active' : '' %>" href="/coupang/add">💰 매출/광고비</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-dark <%= currentUrl.startsWith('/voucher') ? 'active' : '' %>" href="/voucher">📝 전표입력</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-dark <%= currentUrl.startsWith('/write') ? 'active' : '' %>" href="/write">✍ 글작성</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-dark <%= currentUrl.startsWith('/admin') ? 'active' : '' %>" href="/admin">🛠 관리자</a>
-          </li>
-        <% } %>
-        <li class="nav-item">
-          <a class="nav-link text-dark <%= currentUrl.startsWith('/help') ? 'active' : '' %>" href="/help">❓ 사용방법</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark <%= currentUrl.startsWith('/ocr') ? 'active' : '' %>" href="/ocr">🖼️ OCR</a>
-        </li>
-      </ul>
+        </ul>
 
-      <ul class="navbar-nav mb-2 mb-lg-0">
-        <% if (유저) { %>
-          <li class="nav-item">
-            <a class="nav-link text-muted" href="/profile">👤 <%= 유저.username %></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-danger" href="/logout">🚪 로그아웃</a>
-          </li>
-        <% } else { %>
-          <li class="nav-item">
-            <a class="nav-link text-dark" href="/register">📝 회원가입</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-dark" href="/login">🔐 로그인</a>
-          </li>
-        <% } %>
-      </ul>
-    </div>
+        <ul class="navbar-nav mb-2 mb-lg-0">
+          <% if (유저) { %>
+            <li class="nav-item">
+              <a class="nav-link text-muted" href="/profile">👤 <%= 유저.username %></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-danger" href="/logout">🚪 로그아웃</a>
+            </li>
+          <% } else { %>
+            <li class="nav-item">
+              <a class="nav-link text-dark" href="/register">📝 회원가입</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark" href="/login">🔐 로그인</a>
+            </li>
+          <% } %>
+        </ul>
+      </div>
     </div>
   </div>
 </nav>

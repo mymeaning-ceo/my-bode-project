@@ -1,29 +1,31 @@
 require('dotenv').config({ path: __dirname + '/.env' });
-const express = require('express')
-const app = express()
-const session = require('express-session');  // ✅ 이 줄이 빠졌을 경우 ReferenceError 발생
-const { MongoClient, ObjectId } = require('mongodb')
-const methodOverride = require('method-override')
-const bcrypt = require('bcrypt')
+const express = require('express');
+const app = express();
+const session = require('express-session');
+const { MongoClient, ObjectId } = require('mongodb');
+const methodOverride = require('method-override');
+const bcrypt = require('bcrypt');
 const multer = require('multer');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
+const path = require('path');
+const stockRouter = require('./routes/stock');
+const connectDB = require('./database');
+const { checkLogin, checkAdmin } = require('./middlewares/auth');
 
 // MongoDB connection
 mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 }).then(() => console.log('✅ MongoDB connected'))
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
     process.exit(1);
   });
-
-const MongoStore = require('connect-mongo');
-const path = require('path');
 
 app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
@@ -31,17 +33,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
-console.log('DB_URL:', process.env.DB_URL);
-console.log('S3_KEY:', process.env.S3_KEY);
-console.log('S3_REGION:', process.env.S3_REGION);
-
-// 세션 설정 (한 번만 선언)
+// 세션 설정
 app.use(session({
   secret: '비밀키',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.DB_URL,   // ← client 대신 mongoUrl 사용
+    mongoUrl: process.env.DB_URL,
     dbName: 'forum',
     collectionName: 'sessions',
     ttl: 60 * 60
@@ -49,10 +47,18 @@ app.use(session({
   cookie: { maxAge: 60 * 60 * 1000 }
 }));
 
+// Passport 설정
 app.use(passport.initialize());
 app.use(passport.session());
 
-let permissions = {};
+// EJS 글로벌 변수 설정
+app.use((req, res, next) => {
+  res.locals.유저 = req.user || null;
+  res.locals.currentUrl = req.path || '';
+  next();
+});
+
+// 메뉴 라벨 정의
 const menuLabels = {
   '/stock': '재고 관리',
   '/coupang': '쿠팡 재고',
@@ -65,6 +71,9 @@ const menuLabels = {
   '/voucher': '전표 입력'
 };
 
+let db;
+let permissions = {};
+
 async function loadPermissions() {
   if (!db) return;
   const docs = await db.collection('permissions').find().toArray();
@@ -76,16 +85,13 @@ async function loadPermissions() {
     };
   });
 }
+
 global.loadPermissions = loadPermissions;
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-// 페이지 접근 권한 체크
+// 접근 권한 체크 미들웨어
 app.use(async (req, res, next) => {
   const config = permissions[req.path];
   if (!config) return next();
-
   if (config.loginRequired && !req.isAuthenticated()) {
     return res.redirect('/login?redirect=' + req.path);
   }
@@ -95,22 +101,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-console.log('🧪 S3_KEY:', process.env.S3_KEY);
-console.log('🧪 S3_SECRET:', process.env.S3_SECRET ? '●●●●●' : 'MISSING');
-
-const { S3Client } = require('@aws-sdk/client-s3');
-const uploadExcel = multer({ dest: 'uploads/' });
-
-app.use((req, res, next) => {
-  res.locals.유저 = req.user;
-  next();
-});
-
-app.use((req, res, next) => {
-  res.locals.currentUrl = req.path;
-  next();
-});
-
+// 로고/배너 로드
 app.use(async (req, res, next) => {
   if (!db) return next();
   try {
@@ -130,25 +121,15 @@ app.use(async (req, res, next) => {
   next();
 });
 
-/**
- * 엘셀 업로드 → Python 변환 → MongoDB 저장
- */
+// Stock 업로드 (Python 변환)
 const upload = multer({ dest: 'uploads/' });
-
 app.post('/stock/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'file not found' });
-
     const filePath = req.file.path;
     const scriptPath = path.join(__dirname, 'scripts', 'excel_to_mongo.py');
-    const py = spawn('python3', [
-      scriptPath,
-      filePath
-    ], {
-      env: {
-        ...process.env,
-        MONGO_URI: process.env.DB_URL
-      }
+    const py = spawn('python3', [scriptPath, filePath], {
+      env: { ...process.env, MONGO_URI: process.env.DB_URL }
     });
 
     let pyError = '';
@@ -165,101 +146,65 @@ app.post('/stock/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-
-let connectDB = require('./database.js');
-let db;
+// DB 연결 후 서버 시작
 connectDB.then(client => {
-  console.log('DB연결성공');
   db = client.db('forum');
+  app.locals.db = db;
   loadPermissions();
-  const PORT = process.env.PORT || 8080;
+
+  app.use('/stock', stockRouter);
+  app.use('/', require('./routes/post'));
+  app.use('/admin', require('./routes/admin'));
+  app.use('/shop', require('./routes/shop'));
+  app.use('/board/sub', require('./routes/board'));
+  app.use('/search', require('./routes/search'));
+  app.use('/coupang', require('./routes/coupang'));
+  app.use('/coupang/add', require('./routes/coupangAdd'));
+  app.use('/voucher', require('./routes/voucher'));
+  app.use('/ocr', require('./routes/ocr'));
+  app.use('/help', require('./routes/help'));
+  app.use('/', require('./routes/auth'));
+
+  const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
-    console.log(`http://localhost:${PORT} 에서 서버 실행중`);
+    console.log(`✅ http://localhost:${PORT} 에서 서버 실행중`);
   });
-}).catch(err => {
-  console.log(err);
-});
+}).catch(console.error);
 
-const { checkLogin, checkAdmin } = require('./middlewares/auth');
-app.get('/secure', checkLogin, (요청, 응답) => {
-  응답.send('로그인 사용자')
-})
-
-app.get('/', async (req, res) => {
-  // 로그인 여부와 상관없이 동일한 메인 페이지
-  res.render('index.ejs', { banners: res.locals.banners });
-});
-
+// 인증 라우트들
+app.get('/secure', checkLogin, (req, res) => res.send('로그인 사용자'));
+app.get('/', (req, res) => res.render('index.ejs', { banners: res.locals.banners }));
 app.get('/dashboard', checkLogin, (req, res) => {
   const menus = Object.keys(permissions).filter(v => {
-    const p = permissions[v]
-    if (p.loginRequired && !req.isAuthenticated()) return false
-    if (p.allowedUsers && p.allowedUsers.length > 0 && (!req.isAuthenticated() || !p.allowedUsers.includes(String(req.user._id)))) return false
-    return true
-  })
-  res.render('dashboard.ejs', { banners: res.locals.banners, menus, menuLabels })
+    const p = permissions[v];
+    if (p.loginRequired && !req.isAuthenticated()) return false;
+    if (p.allowedUsers.length > 0 && (!req.isAuthenticated() || !p.allowedUsers.includes(String(req.user._id)))) return false;
+    return true;
+  });
+  res.render('dashboard.ejs', { banners: res.locals.banners, menus, menuLabels });
 });
 
-app.get('/news', (요청, 응답) => {
-  db.collection('post').insertOne({ title: '어쩌구' })
-})
+// Passport 전략
+passport.use(new LocalStrategy(async (username, password, cb) => {
+  const result = await db.collection('user').findOne({ username });
+  if (!result) return cb(null, false, { message: '아이디 없음' });
+  const match = await bcrypt.compare(password, result.password);
+  if (!match) return cb(null, false, { message: '비번 불일치' });
+  return cb(null, result);
+}));
 
-app.get('/time', (요청, 응답) => {
-  응답.render('time.ejs', { data: new Date() })
-})
-
-app.use('/', require('./routes/post.js'))
-app.use('/admin', require('./routes/admin.js'))
-
-app.get(['/list', '/list/:page'], async (요청, 응답) => {
-  const page = parseInt(요청.params.page || '1');
-  const limit = 10;
-  const skip = (page - 1) * limit;
-
-  const total = await db.collection('post').countDocuments();
-  const totalPage = Math.ceil(total / limit);
-
-  const result = await db.collection('post')
-    .find()
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .toArray();
-
-  응답.render('list.ejs', {
-    글목록: result,
-    현재페이지: page,
-    전체페이지: totalPage
+passport.serializeUser((user, done) => {
+  process.nextTick(() => {
+    done(null, { id: user._id, username: user.username });
   });
 });
 
-passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) => {
-  let result = await db.collection('user').findOne({ username : 입력한아이디})
-  if (!result) {
-    return cb(null, false, { message: '아이디 DB에 없음' })
-  }
-
-  if (await bcrypt.compare(입력한비번, result.password)) {
-    return cb(null, result)
-  } else {
-    return cb(null, false, { message: '비번불일치' });
-  }
-}))
-
-passport.serializeUser((user, done) => {
-  console.log(user)
-  process.nextTick(() => {
-    done(null, { id: user._id, username: user.username })
-  })
-})
-
 passport.deserializeUser(async (user, done) => {
-  let result = await db.collection('user').findOne({_id : new ObjectId(user.id)})
-  delete result.password
-  process.nextTick(() => {
-   done(null, result)
-  })
-})
+  const result = await db.collection('user').findOne({ _id: new ObjectId(user.id) });
+  delete result.password;
+  process.nextTick(() => done(null, result));
+});
+
 
 app.get('/login', (요청, 응답) => {
   응답.render('login.ejs', { redirectTo: 요청.query.redirect || '/' });
