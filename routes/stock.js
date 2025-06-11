@@ -65,4 +65,20 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// 🔥 전체 삭제 라우터
+router.post('/delete-all', async (req, res) => {
+  const db = req.app.locals.db;
+  if (!db) return res.status(500).send('❌ DB 연결이 완료되지 않았습니다.');
+
+  try {
+    await db.collection('stock').deleteMany({});
+    if (req.flash) req.flash('성공메시지', '✅ 전체 삭제가 완료되었습니다.');
+    res.redirect('/stock');
+  } catch (err) {
+    console.error('❌ /stock/delete-all 오류:', err);
+    res.status(500).send('삭제 실패');
+  }
+});
+
+
 module.exports = router;
