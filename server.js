@@ -299,15 +299,3 @@ app.get('/logout', (req, res, next) => {
   });
 });
 
-
-// ---------- 라우트 추가 부분 ----------
-app.use('/shop', require('./routes/shop.js'))
-app.use('/board/sub', require('./routes/board.js'))
-app.use('/search', require('./routes/search.js'));
-app.use('/coupang', require('./routes/coupang.js'));
-app.use('/coupang/add', require('./routes/coupangAdd.js'));
-app.use('/voucher', require('./routes/voucher.js'));
-app.use('/ocr', require('./routes/ocr.js'));
-app.use('/help', require('./routes/help.js'));
-app.use('/', require('./routes/auth.js'));
-
