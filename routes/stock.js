@@ -114,7 +114,7 @@ router.post('/upload', upload.single('excelFile'), (req, res) => {
     filePath,
     dbName,
     collectionName
-  ]);
+  ],{ shell: true });
 
   python.stdout.on('data', data => {
     console.log(`📤 Python STDOUT: ${data.toString()}`);
