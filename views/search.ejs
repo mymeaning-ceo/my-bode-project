@@ -10,71 +10,76 @@
 <body class="grey-bg">
 
   <%- include('nav.ejs') %>
+
+  <!-- 검색창 -->
   <div class="container my-4">
     <div class="input-group">
-      <input type="text" class="form-control search" value="<%= val %>" placeholder="제목 또는 내용 검색">
+      <input type="text" class="form-control search" placeholder="제목 또는 내용 검색" value="<%= typeof val !== 'undefined' ? val : '' %>">
       <button class="btn btn-outline-secondary search-send" type="button">검색</button>
     </div>
   </div>
 
   <script>
     document.querySelector('.search-send').addEventListener('click', function () {
-        let 입력한거 = document.querySelector('.search').value.trim();
-        if (입력한거 === '') {
-          alert('검색어를 입력하세요.');
-          return;
-        }
-        location.href = '/search?val=' + encodeURIComponent(입력한거);
-      });
-      
+      const input = document.querySelector('.search').value.trim();
+      if (input === '') {
+        alert('검색어를 입력하세요.');
+        return;
+      }
+      location.href = '/search?val=' + encodeURIComponent(input);
+    });
 
-      document.querySelector('.search').addEventListener('keydown', function(e){
-        if (e.key === 'Enter') {
-          document.querySelector('.search-send').click();
-        }
-      });
-      
+    document.querySelector('.search').addEventListener('keydown', function(e){
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.querySelector('.search-send').click();
+      }
+    });
   </script>
 
-  <h4>검색결과</h4>
+  <!-- 검색 결과 -->
+  <div class="container">
+    <h4 class="mb-3">검색결과</h4>
 
-  <div class="white-bg">
-    <% if (글목록.length === 0) { %>
-      <p>검색 결과가 없습니다.</p>
-    <% } %>
-
-    <% for (var i = 0; i < 글목록.length; i++) { %>
-      <div class="white-box">
-        <div class="list-box">
-          <h4>
-            <a href="/detail/<%= 글목록[i]._id %>"><%= 글목록[i].title %></a>
-            <a href="/edit/<%= 글목록[i]._id %>">✏️</a>
-            <span class="delete" data-id="<%= 글목록[i]._id %>">🗑</span>
-          </h4>
-          <p><%= 글목록[i].content %></p>
-        </div>
-      </div>
-    <% } %>
-  </div>
-
-  <div class="pagination">
-    <% if (전체페이지 > 1) { %>
-      <% if (현재페이지 > 1) { %>
-        <a href="/search?val=<%= val %>&page=<%= 현재페이지 - 1 %>">◀ 이전</a>
+    <div class="white-bg">
+      <% if (글목록.length === 0) { %>
+        <p>검색 결과가 없습니다.</p>
       <% } %>
 
-      <% for (let i = 1; i <= 전체페이지; i++) { %>
-        <% if (i === 현재페이지) { %>
-          <strong>[<%= i %>]</strong>
-        <% } else { %>
-          <a href="/search?val=<%= val %>&page=<%= i %>">[<%= i %>]</a>
+      <% for (let i = 0; i < 글목록.length; i++) { %>
+        <div class="white-box mb-3 p-3 border rounded bg-white">
+          <div class="list-box">
+            <h4>
+              <a href="/detail/<%= 글목록[i]._id %>"><%= 글목록[i].title %></a>
+              <a href="/edit/<%= 글목록[i]._id %>">✏️</a>
+              <span class="delete text-danger ms-2" style="cursor:pointer;" data-id="<%= 글목록[i]._id %>">🗑</span>
+            </h4>
+            <p><%= 글목록[i].content %></p>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination text-center mt-4">
+      <% if (전체페이지 > 1) { %>
+        <% if (현재페이지 > 1) { %>
+          <a href="/search?val=<%= val %>&page=<%= 현재페이지 - 1 %>">◀ 이전</a>
+        <% } %>
+
+        <% for (let i = 1; i <= 전체페이지; i++) { %>
+          <% if (i === 현재페이지) { %>
+            <strong>[<%= i %>]</strong>
+          <% } else { %>
+            <a href="/search?val=<%= val %>&page=<%= i %>">[<%= i %>]</a>
+          <% } %>
+        <% } %>
+
+        <% if (현재페이지 < 전체페이지) { %>
+          <a href="/search?val=<%= val %>&page=<%= 현재페이지 + 1 %>">다음 ▶</a>
         <% } %>
       <% } %>
-
-      <% if (현재페이지 < 전체페이지) { %>
-        <a href="/search?val=<%= val %>&page=<%= 현재페이지 + 1 %>">다음 ▶</a>
-      <% } %>
-    <% } %>
+    </div>
   </div>
 
   <script>
@@ -86,23 +91,22 @@
         fetch('/delete?docid=' + encodeURIComponent(id), {
           method: 'DELETE'
         })
-        .then(응답 => {
-          if (응답.ok) {
+        .then(response => {
+          if (response.ok) {
             alert('삭제 성공');
             location.reload();
           } else {
             alert('삭제 실패');
           }
         })
-        .catch(오류 => {
-          console.error(오류);
+        .catch(error => {
+          console.error(error);
           alert('서버 오류');
         });
       });
     });
   </script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
