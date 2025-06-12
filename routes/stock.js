@@ -109,7 +109,7 @@ router.post('/upload', upload.single('excelFile'), (req, res) => {
   const dbName = 'forum';
   const collectionName = 'stock';
 
-  const python = spawn('python', [
+  const python = spawn('python3', [
     'scripts/excel_to_mongo.py',
     filePath,
     dbName,
