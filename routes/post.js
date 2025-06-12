@@ -3,34 +3,49 @@ const router = express.Router();
 const { ObjectId } = require('mongodb');
 const { checkLogin } = require('../middlewares/auth');
 const upload = require('../upload.js');
+const moment = require('moment');
 
 let db;
 const connectDB = require('../database');
 connectDB.then(client => db = client.db('forum'));
 
-
-// 🔹 글 목록 (로그인 필요)
+// 🔹 게시글 목록
 router.get(['/list', '/list/:page'], checkLogin, async (req, res) => {
   try {
     const page = parseInt(req.params.page || '1');
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    const total = await db.collection('post').countDocuments();
+    const search = req.query.val;
+    const query = search
+      ? {
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { content: { $regex: search, $options: 'i' } }
+          ]
+        }
+      : {};
+
+    const total = await db.collection('post').countDocuments(query);
     const totalPage = Math.ceil(total / limit);
 
     const result = await db.collection('post')
-      .find()
+      .find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .toArray();
 
+    result.forEach(item => {
+      item.createdAtFormatted = moment(item.createdAt).format('YYYY년 MM월 DD일 HH:mm');
+    });
+
     res.render('list.ejs', {
       글목록: result,
       유저: req.user,
       현재페이지: page,
-      전체페이지: totalPage
+      전체페이지: totalPage,
+      '검색어': search || ''
     });
   } catch (e) {
     console.error('❌ 목록 오류:', e);
@@ -38,20 +53,13 @@ router.get(['/list', '/list/:page'], checkLogin, async (req, res) => {
   }
 });
 
-
-// 🔹 글쓰기 페이지 (로그인 필요)
-  router.get(['/write', '/list/write'], checkLogin, (req, res) => {
+// 🔹 글쓰기
+router.get(['/write', '/list/write'], checkLogin, (req, res) => {
   res.render('write.ejs', { 유저: req.user });
 });
 
-// 🔹 글 등록 처리 (로그인 필요 + 이미지 업로드)
 router.post(['/add', '/list/add'], upload.single('img1'), checkLogin, async (req, res) => {
   try {
-    
-    // ✅ 환경변수와 업로드 상태 로그
-    console.log('✅ S3 버킷 이름:', process.env.S3_BUCKET_NAME);
-    console.log('✅ 업로드된 파일 정보:', req.file);
-
     const imgLocation = req.file ? req.file.location : '';
     await db.collection('post').insertOne({
       title: req.body.title,
@@ -61,7 +69,6 @@ router.post(['/add', '/list/add'], upload.single('img1'), checkLogin, async (req
       username: req.user.username,
       createdAt: new Date()
     });
-
     res.redirect('/list');
   } catch (e) {
     console.error('📌 게시글 등록 오류:', e);
@@ -69,18 +76,13 @@ router.post(['/add', '/list/add'], upload.single('img1'), checkLogin, async (req
   }
 });
 
-
-// 🔹 글 상세 보기 (로그인 필요)
+// 🔹 게시글 상세 보기
 router.get('/detail/:id', checkLogin, async (req, res) => {
   try {
-    const result = await db.collection('post').findOne({
-      _id: new ObjectId(req.params.id)
-    });
-
+    const result = await db.collection('post').findOne({ _id: new ObjectId(req.params.id) });
     if (!result) return res.status(404).send('게시물을 찾을 수 없습니다.');
 
-    const comments = await db
-      .collection('comment')
+    const comments = await db.collection('comment')
       .find({ postId: result._id })
       .sort({ createdAt: 1 })
       .toArray();
@@ -96,8 +98,7 @@ router.get('/detail/:id', checkLogin, async (req, res) => {
   }
 });
 
-
-// 🔹 글 수정 페이지 (로그인 필요)
+// 🔹 게시글 수정
 router.get('/edit/:id', checkLogin, async (req, res) => {
   try {
     const result = await db.collection('post').findOne({
@@ -113,10 +114,9 @@ router.get('/edit/:id', checkLogin, async (req, res) => {
   }
 });
 
-// 🔹 글 수정 처리 (로그인 필요)
 router.put('/edit', checkLogin, async (req, res) => {
   try {
-    const 수정결과 = await db.collection('post').updateOne(
+    const result = await db.collection('post').updateOne(
       {
         _id: new ObjectId(req.body.id),
         user: new ObjectId(req.user._id)
@@ -129,9 +129,8 @@ router.put('/edit', checkLogin, async (req, res) => {
       }
     );
 
-    if (수정결과.matchedCount === 0) {
+    if (result.matchedCount === 0)
       return res.status(403).send('수정 권한이 없습니다.');
-    }
 
     res.redirect('/list');
   } catch (e) {
@@ -140,26 +139,24 @@ router.put('/edit', checkLogin, async (req, res) => {
   }
 });
 
-// 🔹 글 삭제 (로그인 필요)
+// 🔹 게시글 삭제
 router.delete('/delete', checkLogin, async (req, res) => {
   try {
     const postId = req.query.docid;
-    if (!ObjectId.isValid(postId)) {
+    if (!ObjectId.isValid(postId))
       return res.status(400).send('유효하지 않은 ID입니다.');
-    }
 
     const result = await db.collection('post').deleteOne({
       _id: new ObjectId(postId),
       user: new ObjectId(req.user._id)
     });
 
-    if (result.deletedCount === 0) {
+    if (result.deletedCount === 0)
       return res.status(403).send('삭제 권한이 없거나 게시글이 존재하지 않습니다.');
-    }
 
     res.status(200).send('삭제 성공');
-  } catch (err) {
-    console.error('❌ 삭제 오류:', err);
+  } catch (e) {
+    console.error('❌ 삭제 오류:', e);
     res.status(500).send('서버 오류');
   }
 });
@@ -185,11 +182,18 @@ router.post('/comment/add', checkLogin, async (req, res) => {
 router.put('/comment/edit', checkLogin, async (req, res) => {
   try {
     const result = await db.collection('comment').updateOne(
-      { _id: new ObjectId(req.body.id), user: req.user._id },
-      { $set: { content: req.body.content } }
+      {
+        _id: new ObjectId(req.body.id),
+        user: req.user._id
+      },
+      {
+        $set: { content: req.body.content }
+      }
     );
+
     if (result.matchedCount === 0)
       return res.status(403).send('수정 권한이 없습니다.');
+
     res.sendStatus(200);
   } catch (e) {
     console.error('❌ 댓글 수정 오류:', e);
@@ -204,8 +208,10 @@ router.delete('/comment/delete', checkLogin, async (req, res) => {
       _id: new ObjectId(req.query.id),
       user: req.user._id
     });
+
     if (result.deletedCount === 0)
       return res.status(403).send('삭제 권한이 없습니다.');
+
     res.sendStatus(200);
   } catch (e) {
     console.error('❌ 댓글 삭제 오류:', e);
