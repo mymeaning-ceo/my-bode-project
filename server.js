@@ -152,8 +152,8 @@ connectDB.then(client => {
   app.locals.db = db;
   loadPermissions();
 
-  app.use('/stock', stockRouter);
   app.use('/', require('./routes/post'));
+  app.use('/stock', stockRouter);
   app.use('/admin', require('./routes/admin'));
   app.use('/shop', require('./routes/shop'));
   app.use('/board/sub', require('./routes/board'));
@@ -164,6 +164,7 @@ connectDB.then(client => {
   app.use('/ocr', require('./routes/ocr'));
   app.use('/help', require('./routes/help'));
   app.use('/', require('./routes/auth'));
+  
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
@@ -298,11 +299,11 @@ app.get('/logout', (req, res, next) => {
   });
 });
 
+
 // ---------- 라우트 추가 부분 ----------
 app.use('/shop', require('./routes/shop.js'))
 app.use('/board/sub', require('./routes/board.js'))
 app.use('/search', require('./routes/search.js'));
-app.use('/stock', require('./stock/upload.js'));
 app.use('/coupang', require('./routes/coupang.js'));
 app.use('/coupang/add', require('./routes/coupangAdd.js'));
 app.use('/voucher', require('./routes/voucher.js'));
