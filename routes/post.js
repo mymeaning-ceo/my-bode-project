@@ -47,6 +47,11 @@ router.get(['/list', '/list/:page'], checkLogin, async (req, res) => {
 // 🔹 글 등록 처리 (로그인 필요 + 이미지 업로드)
 router.post(['/add', '/list/add'], upload.single('img1'), checkLogin, async (req, res) => {
   try {
+    
+    // ✅ 환경변수와 업로드 상태 로그
+    console.log('✅ S3 버킷 이름:', process.env.S3_BUCKET_NAME);
+    console.log('✅ 업로드된 파일 정보:', req.file);
+
     const imgLocation = req.file ? req.file.location : '';
     await db.collection('post').insertOne({
       title: req.body.title,
