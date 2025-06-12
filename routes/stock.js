@@ -114,7 +114,7 @@ router.post('/upload', upload.single('excelFile'), (req, res) => {
     filePath,
     dbName,
     collectionName
-  ],{ shell: true });
+  ], { shell: true }); // ✅ 경로 문제 대응
 
   python.stdout.on('data', data => {
     console.log(`📤 Python STDOUT: ${data.toString()}`);
@@ -137,23 +137,24 @@ router.post('/upload', upload.single('excelFile'), (req, res) => {
 
     if (code === 0) {
       if (req.flash) req.flash('성공메시지', '✅ 엑셀 업로드가 완료되었습니다.');
-      return res.send('✅ 업로드 성공');
+      return res.redirect('/stock');  // ✅ 성공 시 /stock 페이지로 이동
     } else {
       return res.status(500).send('❌ 엑셀 처리 중 오류 발생');
     }
   });
 
-  // ⏱️ 안전 타임아웃 (10초 제한)
+  // ⏱️ 타임아웃 보호 (10초)
   setTimeout(() => {
     if (!python.killed) {
       python.kill('SIGTERM');
-      console.error('⏱️ Python 실행 시간 초과로 강제 종료됨');
+      console.error('⏱️ Python 실행 시간 초과로 종료');
       if (!res.headersSent) {
         return res.status(500).send('❌ Python 실행 시간 초과');
       }
     }
   }, 10000);
 });
+
 
 
 
