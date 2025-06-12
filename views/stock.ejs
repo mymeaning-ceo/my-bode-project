@@ -52,12 +52,34 @@
       <p class="text-muted">🔎 총 <strong><%= 결과.length %></strong>건의 결과가 있습니다.</p>
     <% } %>
 
+    <!-- 화면에 보여줄 필드만 남기기 -->
+    <% /* 숨길 필드 */ %>
+    <% const 제외필드   = ['_id', 'type', 'first_release_date', 'dc_rate', 'unit', 'size_color']; %>
+
+    <% /* 원하는 컬럼 순서 */ %>
+    <% const 원하는순서 = ['item_code', 'item_name', 'color', 'size', 'qty', 'allocation']; %>
+
+    <% /* ➡️ [추가] 컬럼 한글명 매핑 */ %>
+    <% const headerMap = {
+      item_code: '품번',
+      item_name: '품명',
+      color:     '색상',
+      size:      '사이즈',
+      qty:       '수량',
+      allocation:'할당'
+    }; %>
+
+    <% /* 최종 표시 필드 */ %>
+    <% const 표시필드 = 원하는순서.filter(k => (필드 || []).includes(k) && !제외필드.includes(k)); %>
+
     <div class="table-responsive">
       <table class="table table-bordered table-hover bg-white align-middle auto-width">
         <thead class="table-light text-center">
-          <% if (필드 && 필드.length > 0) { %>
+          <% if (표시필드.length > 0) { %>
+              <table class="table table-bordered table-hover bg-white align-middle auto-width">
+            <!-- 셀렉트 박스(정렬) -->
             <tr id="sortRow">
-              <% 필드.forEach((key, idx) => { %>
+              <% 표시필드.forEach((key, idx) => { %>
                 <th>
                   <select class="form-select form-select-sm sort-select" data-index="<%= idx %>">
                     <option value="">-</option>
@@ -67,9 +89,12 @@
                 </th>
               <% }) %>
             </tr>
+            <!-- 헤더(클릭 정렬) -->
             <tr>
-              <% 필드.forEach((key, idx) => { %>
-                <th class="sortable" data-index="<%= idx %>"><%= key %> <span class="sort-indicator"></span></th>
+              <% 표시필드.forEach((key, idx) => { %>
+                <th class="sortable" data-index="<%= idx %>">
+                  <%= headerMap[key] || key %> <span class="sort-indicator"></span>
+                </th>
               <% }) %>
             </tr>
           <% } else { %>
@@ -80,9 +105,14 @@
           <% if (결과 && 결과.length > 0) { %>
             <% 결과.forEach(행 => { %>
               <tr>
-                <% 필드.forEach(key => { %>
-                  <td class="<%= key.includes('재고') && Number(행[key]) <= 10 ? 'low-stock' : '' %>">
-                    <%= typeof 행[key] === 'number' ? 행[key].toLocaleString('ko-KR') : 행[key] %>
+                <% 표시필드.forEach(key => { 
+                     const rawVal = 행[key];
+                     const numVal = typeof rawVal === 'string'
+                       ? Number(rawVal.replace(/,/g, ''))
+                       : rawVal;
+                %>
+                  <td class="<%= key.includes('재고') && numVal !== null && numVal <= 10 ? 'low-stock' : '' %>">
+                    <%= typeof rawVal === 'number' ? rawVal.toLocaleString('ko-KR') : rawVal %>
                   </td>
                 <% }) %>
               </tr>
@@ -100,71 +130,101 @@
     <% if (전체페이지수 > 1) { %>
       <nav class="mt-4" aria-label="페이지네이션">
         <ul class="pagination justify-content-center">
-    
           <% const maxPagesToShow = 10; %>
           <% const startPage = Math.floor((현재페이지 - 1) / maxPagesToShow) * maxPagesToShow + 1; %>
           <% const endPage = Math.min(startPage + maxPagesToShow - 1, 전체페이지수); %>
           <% const baseUrl = 검색어 ? ('/stock/search?keyword=' + encodeURIComponent(검색어) + '&page=') : '/stock?page='; %>
-    
+
           <% if (startPage > 1) { %>
             <li class="page-item">
               <a class="page-link" href="<%= baseUrl + (startPage - 1) %>">« 이전</a>
             </li>
             <li class="page-item disabled"><span class="page-link">...</span></li>
           <% } %>
-    
+
           <% for (let i = startPage; i <= endPage; i++) { %>
             <li class="page-item <%= i === 현재페이지 ? 'active' : '' %>">
               <a class="page-link" href="<%= baseUrl + i %>"><%= i %></a>
             </li>
           <% } %>
-    
+
           <% if (endPage < 전체페이지수) { %>
             <li class="page-item disabled"><span class="page-link">...</span></li>
             <li class="page-item">
               <a class="page-link" href="<%= baseUrl + (endPage + 1) %>">다음 »</a>
             </li>
           <% } %>
-    
         </ul>
       </nav>
     <% } %>
-    
 
   <!-- 정렬 스크립트 -->
   <script>
+    /* 공통 유틸 */
     const getCellValue = (tr, idx) => tr.children[idx].textContent.trim();
+    const toNumber = (v) => {
+      const n = parseFloat(v.replace(/,/g, ''));
+      return isNaN(n) ? null : n;
+    };
     const comparer = (idx, asc) => (a, b) => {
-      const v1 = getCellValue(asc ? a : b, idx).replace(/,/g, '');
-      const v2 = getCellValue(asc ? b : a, idx).replace(/,/g, '');
-      const n1 = parseFloat(v1), n2 = parseFloat(v2);
-      if (!isNaN(n1) && !isNaN(n2)) return n1 - n2;
-      return v1.localeCompare(v2);
+      const v1 = getCellValue(asc ? a : b, idx);
+      const v2 = getCellValue(asc ? b : a, idx);
+      const n1 = toNumber(v1), n2 = toNumber(v2);
+      if (n1 !== null && n2 !== null) return n1 - n2;
+      return v1.localeCompare(v2, 'ko');
     };
 
+    /* 헤더 클릭 정렬 */
     document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
       const table = th.closest('table');
+      const asc = th.dataset.asc !== 'true'; // 토글
       Array.from(table.querySelectorAll('tbody tr'))
-        .sort(comparer(parseInt(th.dataset.index), th.dataset.asc !== 'true'))
+        .sort(comparer(parseInt(th.dataset.index), asc))
         .forEach(tr => table.tBodies[0].appendChild(tr));
-      document.querySelectorAll('th.sortable').forEach(t => t.dataset.asc = '');
-      th.dataset.asc = th.dataset.asc === 'true' ? 'false' : 'true';
-      th.querySelector('.sort-indicator').textContent = th.dataset.asc === 'true' ? '▲' : '▼';
+
+      // 모든 헤더 초기화
+      document.querySelectorAll('th.sortable').forEach(t => {
+        t.dataset.asc = '';
+        t.querySelector('.sort-indicator').textContent = '';
+      });
+
+      // 현재 헤더 표시
+      th.dataset.asc = asc ? 'true' : 'false';
+      th.querySelector('.sort-indicator').textContent = asc ? '▲' : '▼';
+
+      // 셀렉트 박스 초기화
+      document.querySelectorAll('.sort-select').forEach(sel => sel.value = '');
     }));
 
+    /* 셀렉트 박스 정렬 */
     document.querySelectorAll('.sort-select').forEach(sel => {
       sel.addEventListener('change', () => {
         if (!sel.value) return;
         const table = sel.closest('table');
         const idx = parseInt(sel.dataset.index);
+        const asc = sel.value === 'asc';
+
         Array.from(table.querySelectorAll('tbody tr'))
-          .sort(comparer(idx, sel.value === 'asc'))
+          .sort(comparer(idx, asc))
           .forEach(tr => table.tBodies[0].appendChild(tr));
-        document.querySelectorAll('th.sortable').forEach(t => t.dataset.asc = '');
-        const th = table.querySelector('th.sortable[data-index="' + idx + '"]');
-        th.dataset.asc = sel.value === 'asc' ? 'true' : 'false';
-        th.querySelector('.sort-indicator').textContent = sel.value === 'asc' ? '▲' : '▼';
-        document.querySelectorAll('.sort-select').forEach(other => { if (other !== sel) other.value = ''; });
+
+        // 모든 헤더 초기화
+        document.querySelectorAll('th.sortable').forEach(t => {
+          t.dataset.asc = '';
+          t.querySelector('.sort-indicator').textContent = '';
+        });
+
+        // 셀렉트 초기화
+        document.querySelectorAll('.sort-select').forEach(other => {
+          if (other !== sel) other.value = '';
+        });
+
+        // 현재 헤더 표시
+        const th = table.querySelector(`th.sortable[data-index="${idx}"]`);
+        if (th) {
+          th.dataset.asc = asc ? 'true' : 'false';
+          th.querySelector('.sort-indicator').textContent = asc ? '▲' : '▼';
+        }
       });
     });
   </script>
