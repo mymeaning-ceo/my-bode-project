@@ -121,30 +121,6 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Stock 업로드 (Python 변환)
-const upload = multer({ dest: 'uploads/' });
-app.post('/stock/upload', upload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: 'file not found' });
-    const filePath = req.file.path;
-    const scriptPath = path.join(__dirname, 'scripts', 'excel_to_mongo.py');
-    const py = spawn('python3', [scriptPath, filePath], {
-      env: { ...process.env, MONGO_URI: process.env.DB_URL }
-    });
-
-    let pyError = '';
-    py.stderr.on('data', data => { pyError += data.toString(); });
-
-    py.on('close', code => {
-      fs.unlink(filePath, () => {});
-      if (code === 0) return res.json({ ok: true });
-      return res.status(500).json({ error: 'python script failed', code, details: pyError.trim() });
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'internal server error' });
-  }
-});
 
 // DB 연결 후 서버 시작
 connectDB.then(client => {
