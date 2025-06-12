@@ -98,8 +98,14 @@ router.post('/delete-all', async (req, res) => {
 
 // 📥 엑셀 업로드 라우터
 router.post('/upload', upload.single('excelFile'), (req, res) => {
-  console.log('✅ POST /stock/upload 라우터 진입'); // 이 줄 추가
-  const filePath = path.resolve(req.file.path); // 업로드된 파일 경로
+  console.log('✅ POST /stock/upload 라우터 진입');
+
+  if (!req.file) {
+    console.log('❌ 파일이 업로드되지 않았습니다.');
+    return res.status(400).send('❌ 파일이 없습니다.');
+  }
+
+  const filePath = path.resolve(req.file.path);
   const dbName = 'forum';
   const collectionName = 'stock';
 
@@ -110,19 +116,45 @@ router.post('/upload', upload.single('excelFile'), (req, res) => {
     collectionName
   ]);
 
-  // 로그 출력 (디버깅용)
-  python.stdout.on('data', data => console.log(`📤 Python STDOUT: ${data}`));
-  python.stderr.on('data', data => console.error(`⚠️ Python STDERR: ${data}`));
+  python.stdout.on('data', data => {
+    console.log(`📤 Python STDOUT: ${data.toString()}`);
+  });
 
-  python.on('close', code => {
-    if (code === 0) {
-      if (req.flash) req.flash('성공메시지', '✅ 엑셀 업로드가 완료되었습니다.');
-      res.redirect('/stock');
-    } else {
-      res.status(500).send('❌ 엑셀 처리 중 오류 발생');
+  python.stderr.on('data', data => {
+    console.error(`⚠️ Python STDERR: ${data.toString()}`);
+  });
+
+  python.on('error', err => {
+    console.error('🚨 Python 실행 실패:', err);
+    if (!res.headersSent) {
+      return res.status(500).send('❌ Python 실행 실패');
     }
   });
+
+  python.on('close', code => {
+    console.log(`📦 Python 프로세스 종료 코드: ${code}`);
+    if (res.headersSent) return;
+
+    if (code === 0) {
+      if (req.flash) req.flash('성공메시지', '✅ 엑셀 업로드가 완료되었습니다.');
+      return res.send('✅ 업로드 성공');
+    } else {
+      return res.status(500).send('❌ 엑셀 처리 중 오류 발생');
+    }
+  });
+
+  // ⏱️ 안전 타임아웃 (10초 제한)
+  setTimeout(() => {
+    if (!python.killed) {
+      python.kill('SIGTERM');
+      console.error('⏱️ Python 실행 시간 초과로 강제 종료됨');
+      if (!res.headersSent) {
+        return res.status(500).send('❌ Python 실행 시간 초과');
+      }
+    }
+  }, 10000);
 });
+
 
 
 module.exports = router;

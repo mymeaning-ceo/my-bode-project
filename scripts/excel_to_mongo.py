@@ -50,20 +50,16 @@ GROUP_COLS = ["호칭-색상", "단위", "할당", "재고량", "DC율", "최초
 BASE_COLS  = ["유형", "품목번", "품명"]
 
 def transform_csv_irregular(path: Union[str, Path], encoding="utf-8") -> list[dict]:
-    # 첫 줄은 메타 정보이므로 skiprows=1, 콤마 구분자로 로딩
     df = pd.read_csv(path, skiprows=1, sep=",", encoding=encoding)
     df.columns = [str(c).strip().replace("\n", " ") for c in df.columns]
 
-    # 병합된 셀을 채우기 위해 ffill (품번/품명/유형)
     for col in BASE_COLS:
         if col in df.columns:
             df[col] = df[col].ffill()
 
-    # 옵션 그룹 수 계산
     group_count = (len(df.columns) - len(BASE_COLS)) // len(GROUP_COLS)
     records = []
 
-    # 각 행별로 반복되는 옵션 그룹을 정규화 처리
     for _, row in df.iterrows():
         base = {
             "type": safe_str(row["유형"]),
@@ -142,8 +138,6 @@ def transform_excel(path: Union[str, Path, IO]) -> list[dict]:
 
     return records
 
-
-
 # ─────────────────────────────────────────────
 # ⑤ 파일 확장자에 따라 분기 처리
 # ─────────────────────────────────────────────
@@ -171,6 +165,7 @@ def main():
         sys.exit(1)
 
     try:
+        # 🔧 수정 내용: 확장자에 따라 엑셀/CSV를 자동 판단하여 처리
         docs = transform_file(file_path)
     except Exception as e:
         print("❌ Transform error:", e, file=sys.stderr)
