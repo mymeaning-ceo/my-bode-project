@@ -28,7 +28,21 @@ router.get('/', async (req, res) => {
 
   try {
     const totalCount = await db.collection('stock').countDocuments();
-    const 결과 = await db.collection('stock').find().skip(skip).limit(limit).toArray();
+    const latestArr = await db
+      .collection('stock')
+      .find()
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(1)
+      .toArray();
+    const latestInfo = latestArr[0];
+
+    const 결과 = await db
+      .collection('stock')
+      .find()
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
 
     const 원하는필드 = ['item_code', 'item_name', 'size_color', 'color', 'size', 'qty', 'allocation'];
     const 필드 = 결과.length > 0
@@ -42,7 +56,8 @@ router.get('/', async (req, res) => {
       현재페이지: page,
       전체페이지수: Math.ceil(totalCount / limit),
       검색어: '',
-      성공메시지: req.flash ? req.flash('성공메시지') : ''
+      성공메시지: req.flash ? req.flash('성공메시지') : '',
+      latestInfo
     });
   } catch (err) {
     console.error('❌ /stock 오류:', err);
@@ -70,7 +85,21 @@ router.get('/search', async (req, res) => {
       ]
     };
 
-    const 결과 = await db.collection('stock').find(query).skip(skip).limit(limit).toArray();
+    const latestArr = await db
+      .collection('stock')
+      .find()
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(1)
+      .toArray();
+    const latestInfo = latestArr[0];
+
+    const 결과 = await db
+      .collection('stock')
+      .find(query)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
     const totalCount = await db.collection('stock').countDocuments(query);
 
     const 원하는필드 = ['item_code', 'item_name', 'size_color', 'color', 'size', 'qty', 'allocation'];
@@ -85,7 +114,8 @@ router.get('/search', async (req, res) => {
       현재페이지: page,
       전체페이지수: Math.ceil(totalCount / limit),
       검색어: keyword,
-      성공메시지: req.flash ? req.flash('성공메시지') : ''
+      성공메시지: req.flash ? req.flash('성공메시지') : '',
+      latestInfo
     });
   } catch (err) {
     console.error('❌ /stock/search 오류:', err);
@@ -145,13 +175,27 @@ router.post('/upload', upload.single('excelFile'), (req, res) => {
     }
   });
 
-  python.on('close', code => {
+  python.on('close', async code => {
     console.log(`📦 Python 프로세스 종료 코드: ${code}`);
     if (res.headersSent) return;
 
     if (code === 0) {
-      if (req.flash) req.flash('성공메시지', '✅ 엑셀 업로드가 완료되었습니다.');
-      return res.redirect('/stock');  // ✅ 성공 시 /stock 페이지로 이동
+      try {
+        const db = req.app.locals.db;
+        if (db) {
+          await db.collection('stock').updateMany({}, {
+            $set: {
+              createdAt: new Date(),
+              uploadedBy: req.user ? req.user.username : '알 수 없음'
+            }
+          });
+        }
+        if (req.flash) req.flash('성공메시지', '✅ 엑셀 업로드가 완료되었습니다.');
+        return res.redirect('/stock');
+      } catch (err) {
+        console.error('❌ 업로드 후 정보 업데이트 실패:', err);
+        return res.status(500).send('❌ 업로드 후 정보 업데이트 실패');
+      }
     } else {
       return res.status(500).send('❌ 엑셀 처리 중 오류 발생');
     }
