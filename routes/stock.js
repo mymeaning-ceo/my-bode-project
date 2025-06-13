@@ -152,7 +152,7 @@ router.post('/upload', upload.single('excelFile'), (req, res) => {
         return res.status(500).send('❌ Python 실행 시간 초과');
       }
     }
-  }, 60000);
+  }, 600000);
 });
 
 
