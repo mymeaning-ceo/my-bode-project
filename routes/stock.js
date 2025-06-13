@@ -4,6 +4,7 @@ const multer = require('multer'); // 📌 파일 업로드 처리를 위한 mult
 const path = require('path');
 const { spawn } = require('child_process'); // 📌 Python 스크립트 실행을 위한 spawn
 
+
 // 📁 multer 설정: uploads/ 폴더에 엑셀 파일 저장
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -145,17 +146,33 @@ router.post('/upload', upload.single('excelFile'), (req, res) => {
     }
   });
 
-  python.on('close', code => {
-    console.log(`📦 Python 프로세스 종료 코드: ${code}`);
+  python.on('close', async (code) => {
+    console.log(`📦 Python 종료 코드: ${code}`);
     if (res.headersSent) return;
-
+  
     if (code === 0) {
+      const db = req.app.locals.db;
+  
+      // ✅ 사용자 ID와 업로드 시간 업데이트
+      if (req.user && db) {
+        await db.collection('stock').updateMany(
+          { uploadedBy: { $exists: false } }, // 새로 업로드된 데이터만
+          {
+            $set: {
+              uploadedBy: req.user.email || req.user.id || 'unknown',
+              createdAt: new Date()
+            }
+          }
+        );
+      }
+  
       if (req.flash) req.flash('성공메시지', '✅ 엑셀 업로드가 완료되었습니다.');
-      return res.redirect('/stock');  // ✅ 성공 시 /stock 페이지로 이동
+      return res.redirect('/stock');
     } else {
       return res.status(500).send('❌ 엑셀 처리 중 오류 발생');
     }
   });
+  
 
   // ⏱️ 타임아웃 보호 (10초)
   setTimeout(() => {
