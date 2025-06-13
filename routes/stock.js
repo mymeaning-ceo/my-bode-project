@@ -65,13 +65,13 @@ router.get('/search', async (req, res) => {
   try {
     const query = {
       $or: [
-        { 품명: { $regex: keyword, $options: 'i' } },
-        { 품목번: { $regex: keyword, $options: 'i' } }
+        { item_name: { $regex: keyword, $options: 'i' } },
+        { item_code: { $regex: keyword, $options: 'i' } }
       ]
     };
 
-    const totalCount = await db.collection('stock').countDocuments(query);
     const 결과 = await db.collection('stock').find(query).skip(skip).limit(limit).toArray();
+    const totalCount = await db.collection('stock').countDocuments(query);
 
     const 원하는필드 = ['item_code', 'item_name', 'size_color', 'color', 'size', 'qty', 'allocation'];
     const 필드 = 결과.length > 0
@@ -92,6 +92,7 @@ router.get('/search', async (req, res) => {
     res.status(500).send('서버 오류 발생');
   }
 });
+
 
 
 // 🔥 전체 삭제 라우터
