@@ -176,13 +176,27 @@ router.post('/upload', upload.single('excelFile'), (req, res) => {
     }
   });
 
-  python.on('close', code => {
+  python.on('close', async code => {
     console.log(`📦 Python 프로세스 종료 코드: ${code}`);
     if (res.headersSent) return;
-  
+
     if (code === 0) {
-      if (req.flash) req.flash('성공메시지', '✅ 엑셀 업로드가 완료되었습니다.');
-      return res.redirect('/stock');  // ✅ 성공 시 /stock 페이지로 이동
+      try {
+        const db = req.app.locals.db;
+        if (db) {
+          await db.collection('stock').updateMany({}, {
+            $set: {
+              createdAt: new Date(),
+              uploadedBy: req.user ? req.user.username : '알 수 없음'
+            }
+          });
+        }
+        if (req.flash) req.flash('성공메시지', '✅ 엑셀 업로드가 완료되었습니다.');
+        return res.redirect('/stock');  // ✅ 성공 시 /stock 페이지로 이동
+      } catch (err) {
+        console.error('❌ 업로드 후 처리 실패:', err);
+        return res.status(500).send('❌ 업로드 후 처리 실패');
+      }
     } else {
       return res.status(500).send('❌ 엑셀 처리 중 오류 발생');
     }
