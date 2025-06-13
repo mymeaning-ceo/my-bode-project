@@ -186,9 +186,9 @@ router.post('/upload', (req, res) => {
       }
     });
 
-    python.on('close', async code => {
-      console.log(`📦 Python 프로세스 종료 코드: ${code}`);
-      if (res.headersSent) return;
+  python.on('close', async code => {
+    console.log(`📦 Python 프로세스 종료 코드: ${code}`);
+    if (res.headersSent) return;
 
     if (code === 0) {
       try {
@@ -211,6 +211,7 @@ router.post('/upload', (req, res) => {
         return res.status(500).send('❌ 엑셀 처리 중 오류 발생');
       }
     });
+
   
 
     // ⏱️ 타임아웃 보호 (10초)
