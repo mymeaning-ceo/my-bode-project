@@ -2,9 +2,12 @@ require('dotenv').config(); // ⭐ 환경변수 먼저 로드
 const { MongoClient } = require('mongodb');
 
 const url = process.env.DB_URL;
-// useNewUrlParser and useUnifiedTopology are deprecated in mongodb >= 4.0
-// The driver now uses the modern connection string parser and topology engine
-// by default, so we can omit those options entirely.
+if (!url) {
+  console.error('❌ DB_URL 환경변수가 설정되지 않았습니다.');
+  module.exports = Promise.reject(new Error('DB_URL not provided'));
+  return;
+}
+
 const client = new MongoClient(url);
 
 let connectDB = client.connect()
