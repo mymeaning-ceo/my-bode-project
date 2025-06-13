@@ -121,13 +121,35 @@ app.use(async (req, res, next) => {
   next();
 });
 
-
 // DB 연결 후 서버 시작
 connectDB.then(client => {
   db = client.db('forum');
   app.locals.db = db;
+
+  // Passport 설정은 DB 연결 후 위치해야 함
+  passport.use(new LocalStrategy(async (username, password, cb) => {
+    const result = await db.collection('user').findOne({ username });
+    if (!result) return cb(null, false, { message: '아이디 없음' });
+    const match = await bcrypt.compare(password, result.password);
+    if (!match) return cb(null, false, { message: '비번 불일치' });
+    return cb(null, result);
+  }));
+
+  passport.serializeUser((user, done) => {
+    process.nextTick(() => {
+      done(null, { id: user._id, username: user.username });
+    });
+  });
+
+  passport.deserializeUser(async (user, done) => {
+    const result = await db.collection('user').findOne({ _id: new ObjectId(user.id) });
+    if (result) delete result.password;
+    process.nextTick(() => done(null, result));
+  });
+
   loadPermissions();
 
+  // 라우터 등록
   app.use('/', require('./routes/post'));
   app.use('/stock', stockRouter);
   app.use('/admin', require('./routes/admin'));
@@ -140,7 +162,6 @@ connectDB.then(client => {
   app.use('/ocr', require('./routes/ocr'));
   app.use('/help', require('./routes/help'));
   app.use('/', require('./routes/auth'));
-  
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
@@ -161,31 +182,9 @@ app.get('/dashboard', checkLogin, (req, res) => {
   res.render('dashboard.ejs', { banners: res.locals.banners, menus, menuLabels });
 });
 
-// Passport 전략
-passport.use(new LocalStrategy(async (username, password, cb) => {
-  const result = await db.collection('user').findOne({ username });
-  if (!result) return cb(null, false, { message: '아이디 없음' });
-  const match = await bcrypt.compare(password, result.password);
-  if (!match) return cb(null, false, { message: '비번 불일치' });
-  return cb(null, result);
-}));
-
-passport.serializeUser((user, done) => {
-  process.nextTick(() => {
-    done(null, { id: user._id, username: user.username });
-  });
-});
-
-passport.deserializeUser(async (user, done) => {
-  const result = await db.collection('user').findOne({ _id: new ObjectId(user.id) });
-  delete result.password;
-  process.nextTick(() => done(null, result));
-});
-
-
 app.get('/login', (요청, 응답) => {
   응답.render('login.ejs', { redirectTo: 요청.query.redirect || '/' });
-})
+});
 
 app.post('/login', (요청, 응답, next) => {
   passport.authenticate('local', (error, user, info) => {
@@ -194,7 +193,7 @@ app.post('/login', (요청, 응답, next) => {
 
     요청.logIn(user, (err) => {
       if (err) return next(err);
-      응답.redirect('/dashboard');  // ✅ 로그인 후 이동할 페이지
+      응답.redirect('/dashboard');
     });
   })(요청, 응답, next);
 });
@@ -204,17 +203,17 @@ app.get('/mypage', checkLogin, (요청, 응답) => {
 });
 
 app.post('/mypage/password', checkLogin, async (req, res) => {
-  const { password, password2 } = req.body
+  const { password, password2 } = req.body;
   if (password !== password2) {
-    return res.status(400).send('비밀번호가 일치하지 않습니다.')
+    return res.status(400).send('비밀번호가 일치하지 않습니다.');
   }
-  const hash = await bcrypt.hash(password, 10)
+  const hash = await bcrypt.hash(password, 10);
   await db.collection('user').updateOne(
     { _id: new ObjectId(req.user._id) },
     { $set: { password: hash } }
-  )
-  res.send('<script>alert("비밀번호가 변경되었습니다.");location.href="/mypage";</script>')
-})
+  );
+  res.send('<script>alert("비밀번호가 변경되었습니다.");location.href="/mypage";</script>');
+});
 
 app.get('/profile', checkLogin, (req, res) => {
   res.render('profile.ejs', { 유저: req.user });
@@ -241,24 +240,21 @@ app.post('/profile', checkLogin, async (req, res) => {
 });
 
 app.get('/register', (요청, 응답) => {
-  응답.render('register.ejs')
-})
+  응답.render('register.ejs');
+});
 
 app.post('/register', async (요청, 응답) => {
   const { username, password, password2 } = 요청.body;
 
-  // 비밀번호 불일치 확인
   if (password !== password2) {
     return 응답.status(400).send('비밀번호가 일치하지 않습니다.');
   }
 
-  // 아이디 중복 확인
   let 기존유저 = await db.collection('user').findOne({ username });
   if (기존유저) {
     return 응답.status(400).send('이미 존재하는 아이디입니다.');
   }
 
-  // 비밀번호 해시 후 저장
   let 해시 = await bcrypt.hash(password, 10);
   await db.collection('user').insertOne({
     username,
@@ -274,4 +270,3 @@ app.get('/logout', (req, res, next) => {
     res.redirect('/login');
   });
 });
-
