@@ -142,16 +142,8 @@ router.post('/delete-all', async (req, res) => {
 });
 
 // 📥 엑셀 업로드 라우터
-router.post('/upload', (req, res) => {
-  upload.single('excelFile')(req, res, async err => {
-    if (err) {
-      if (err instanceof multer.MulterError) {
-        console.error('❌ Multer 에러:', err);
-        return res.status(400).send('업로드 실패: ' + err.message);
-      }
-      console.error('❌ 업로드 중 오류:', err);
-      return res.status(500).send('업로드 실패');
-    }
+router.post('/upload', upload.single('excelFile'), async (req, res) => {
+  try {
 
     console.log('✅ POST /stock/upload 라우터 진입');
 
@@ -225,6 +217,14 @@ router.post('/upload', (req, res) => {
       }
     }, 60000);
   });
+  } catch (err) {
+    if (err instanceof multer.MulterError) {
+      console.error('❌ Multer 에러:', err);
+      return res.status(400).send('업로드 실패: ' + err.message);
+    }
+    console.error('❌ 업로드 중 오류:', err);
+    return res.status(500).send('업로드 실패');
+  }
 });
 
 
