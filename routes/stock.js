@@ -22,9 +22,9 @@ router.get('/', async (req, res) => {
   const db = req.app.locals.db;
   if (!db) return res.status(500).send('❌ DB 연결이 완료되지 않았습니다.');
 
-  const page = parseInt(req.query.page) || 1;
-  const limit = 50;
-  const skip = (page - 1) * limit;
+  const 결과 = await db.collection('stock').find().limit(50).toArray();
+  const 필드 = 결과.length > 0 ? Object.keys(결과[0]) : [];
+  
 
   try {
     const totalCount = await db.collection('stock').countDocuments();

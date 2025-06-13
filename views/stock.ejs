@@ -52,8 +52,7 @@
       <p class="text-muted">🔎 총 <strong><%= 결과.length %></strong>건의 결과가 있습니다.</p>
     <% } %>
 
-    <% const 제외필드   = ['_id', 'type', 'unit', 'first_release_date']; %>
-    <% const 원하는순서 = ['item_code', 'item_name', 'size_color', 'qty', 'allocation']; %>
+    <% const 표시필드 = ['item_code', 'item_name', 'size_color', 'qty', 'allocation']; %>
     <% const headerMap = {
       item_code: '품번',
       item_name: '품명',
@@ -61,7 +60,7 @@
       qty: '재고수량',
       allocation: '할당'
     }; %>
-    <% const 표시필드 = 원하는순서.filter(k => (필드 || []).includes(k) && !제외필드.includes(k)); %>
+    
 
     <div class="table-responsive">
       <table class="table table-bordered table-hover bg-white align-middle auto-width">
