@@ -25,17 +25,23 @@
 
   <div class="container my-5">
     <h2 class="mb-4 fw-bold">📦 재고 관리</h2>
+    <div class="alert alert-info mb-4">헤더를 클릭하거나 위 셀렉트 박스로 정렬할 수 있습니다.</div>
+  
+    <% if (성공메시지) { %>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <%= 성공메시지 %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+  
+    <!-- ✅ 여기 추가 -->
     <% if (결과 && 결과.length > 0 && 결과[0].createdAt) { %>
       <div class="text-end text-muted small mb-3">
-        🕒 최근 업로드: 
-        <%= new Date(결과[0].createdAt).toLocaleString('ko-KR') %> 
+        🕒 최근 업로드:
+        <%= new Date(결과[0].createdAt).toLocaleString('ko-KR') %>
         (<%= 결과[0].uploadedBy || '알 수 없음' %>)
       </div>
     <% } %>
-    
-    <div class="alert alert-info mb-4">
-      헤더를 클릭하거나 위 셀렉트 박스로 정렬할 수 있습니다.
-    </div>
 
     <% if (성공메시지) { %>
       <div class="alert alert-success alert-dismissible fade show" role="alert">
