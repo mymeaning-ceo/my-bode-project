@@ -51,21 +51,24 @@
         </ul>
 
         <ul class="navbar-nav mb-2 mb-lg-0">
-          <% if (유저) { %>
-            <li class="nav-item">
-              <a class="nav-link text-muted" href="/profile">👤 <%= 유저.username %></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-danger" href="/logout">🚪 로그아웃</a>
-            </li>
-          <% } else { %>
-            <li class="nav-item">
-              <a class="nav-link text-dark" href="/register">📝 회원가입</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-dark" href="/login">🔐 로그인</a>
-            </li>
-          <% } %>
+          <!-- 메뉴(로그인 상태) -->
+      <% if (typeof 유저 !== 'undefined' && 유저) { %>
+        <!-- 로그인 사용자용 메뉴 -->
+        <li class="nav-item">
+          <a class="nav-link text-muted" href="/profile">👤 <%= 유저.username %></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-danger" href="/logout">🚪 로그아웃</a>
+        </li>
+      <% } else { %>
+        <!-- 비로그인 사용자용 메뉴 -->
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="/register">📝 회원가입</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="/login">🔐 로그인</a>
+        </li>
+      <% } %>
         </ul>
       </div>
     </div>

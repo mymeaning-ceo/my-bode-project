@@ -21,7 +21,17 @@ app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// ─────────────────────────────────────────────
+// 1) 전역 locals 주입 미들웨어 (라우터 등록 전에 위치)
+// ─────────────────────────────────────────────
+app.use((req, res, next) => {
+  res.locals.유저 = req.user || null;      // 로그인 사용자 정보
+  res.locals.currentUrl = req.path || '';  // 현재 URL
+  next();
+});
 app.use(methodOverride('_method'));
+app.use('/api/stock', require('./routes/stockApi')); // ← JSON API
+app.use('/stock',     require('./routes/stock'));    // ← 화면 렌더링
 
 // 세션 설정
 const sessionOptions = {
@@ -47,13 +57,6 @@ app.use(session(sessionOptions));
 // Passport 설정
 app.use(passport.initialize());
 app.use(passport.session());
-
-// EJS 글로벌 변수 설정
-app.use((req, res, next) => {
-  res.locals.유저 = req.user || null;
-  res.locals.currentUrl = req.path || '';
-  next();
-});
 
 // 메뉴 라벨 정의
 const menuLabels = {
