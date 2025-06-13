@@ -52,32 +52,21 @@
       <p class="text-muted">🔎 총 <strong><%= 결과.length %></strong>건의 결과가 있습니다.</p>
     <% } %>
 
-    <!-- 화면에 보여줄 필드만 남기기 -->
-    <% /* 숨길 필드 */ %>
-    <% const 제외필드   = ['_id', 'type', 'first_release_date', 'dc_rate', 'unit', 'size_color']; %>
-
-    <% /* 원하는 컬럼 순서 */ %>
-    <% const 원하는순서 = ['item_code', 'item_name', 'color', 'size', 'qty', 'allocation']; %>
-
-    <% /* ➡️ [추가] 컬럼 한글명 매핑 */ %>
+    <% const 제외필드   = ['_id', 'type', 'unit', 'first_release_date']; %>
+    <% const 원하는순서 = ['item_code', 'item_name', 'size_color', 'qty', 'allocation']; %>
     <% const headerMap = {
       item_code: '품번',
       item_name: '품명',
-      color:     '색상',
-      size:      '사이즈',
-      qty:       '수량',
-      allocation:'할당'
+      size_color: '호칭-색상',
+      qty: '재고수량',
+      allocation: '할당'
     }; %>
-
-    <% /* 최종 표시 필드 */ %>
     <% const 표시필드 = 원하는순서.filter(k => (필드 || []).includes(k) && !제외필드.includes(k)); %>
 
     <div class="table-responsive">
       <table class="table table-bordered table-hover bg-white align-middle auto-width">
         <thead class="table-light text-center">
           <% if (표시필드.length > 0) { %>
-              <table class="table table-bordered table-hover bg-white align-middle auto-width">
-            <!-- 셀렉트 박스(정렬) -->
             <tr id="sortRow">
               <% 표시필드.forEach((key, idx) => { %>
                 <th>
@@ -89,7 +78,6 @@
                 </th>
               <% }) %>
             </tr>
-            <!-- 헤더(클릭 정렬) -->
             <tr>
               <% 표시필드.forEach((key, idx) => { %>
                 <th class="sortable" data-index="<%= idx %>">
@@ -105,13 +93,13 @@
           <% if (결과 && 결과.length > 0) { %>
             <% 결과.forEach(행 => { %>
               <tr>
-                <% 표시필드.forEach(key => { 
+                <% 표시필드.forEach(key => {
                      const rawVal = 행[key];
                      const numVal = typeof rawVal === 'string'
                        ? Number(rawVal.replace(/,/g, ''))
                        : rawVal;
                 %>
-                  <td class="<%= key.includes('재고') && numVal !== null && numVal <= 10 ? 'low-stock' : '' %>">
+                  <td class="<%= (key === 'qty' || key === '재고량') && numVal !== null && numVal <= 10 ? 'low-stock' : '' %>">
                     <%= typeof rawVal === 'number' ? rawVal.toLocaleString('ko-KR') : rawVal %>
                   </td>
                 <% }) %>
@@ -126,7 +114,6 @@
       </table>
     </div>
 
-    <!-- 페이지네이션 -->
     <% if (전체페이지수 > 1) { %>
       <nav class="mt-4" aria-label="페이지네이션">
         <ul class="pagination justify-content-center">
@@ -158,9 +145,7 @@
       </nav>
     <% } %>
 
-  <!-- 정렬 스크립트 -->
   <script>
-    /* 공통 유틸 */
     const getCellValue = (tr, idx) => tr.children[idx].textContent.trim();
     const toNumber = (v) => {
       const n = parseFloat(v.replace(/,/g, ''));
@@ -171,32 +156,28 @@
       const v2 = getCellValue(asc ? b : a, idx);
       const n1 = toNumber(v1), n2 = toNumber(v2);
       if (n1 !== null && n2 !== null) return n1 - n2;
-      return v1.localeCompare(v2, 'ko');
+      if (n1 === null && n2 === null) return 0;
+      if (n1 === null) return 1;
+      return -1;
     };
 
-    /* 헤더 클릭 정렬 */
     document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
       const table = th.closest('table');
-      const asc = th.dataset.asc !== 'true'; // 토글
+      const asc = th.dataset.asc !== 'true';
       Array.from(table.querySelectorAll('tbody tr'))
         .sort(comparer(parseInt(th.dataset.index), asc))
         .forEach(tr => table.tBodies[0].appendChild(tr));
 
-      // 모든 헤더 초기화
       document.querySelectorAll('th.sortable').forEach(t => {
         t.dataset.asc = '';
         t.querySelector('.sort-indicator').textContent = '';
       });
 
-      // 현재 헤더 표시
       th.dataset.asc = asc ? 'true' : 'false';
       th.querySelector('.sort-indicator').textContent = asc ? '▲' : '▼';
-
-      // 셀렉트 박스 초기화
       document.querySelectorAll('.sort-select').forEach(sel => sel.value = '');
     }));
 
-    /* 셀렉트 박스 정렬 */
     document.querySelectorAll('.sort-select').forEach(sel => {
       sel.addEventListener('change', () => {
         if (!sel.value) return;
@@ -208,18 +189,15 @@
           .sort(comparer(idx, asc))
           .forEach(tr => table.tBodies[0].appendChild(tr));
 
-        // 모든 헤더 초기화
         document.querySelectorAll('th.sortable').forEach(t => {
           t.dataset.asc = '';
           t.querySelector('.sort-indicator').textContent = '';
         });
 
-        // 셀렉트 초기화
         document.querySelectorAll('.sort-select').forEach(other => {
           if (other !== sel) other.value = '';
         });
 
-        // 현재 헤더 표시
         const th = table.querySelector(`th.sortable[data-index="${idx}"]`);
         if (th) {
           th.dataset.asc = asc ? 'true' : 'false';
