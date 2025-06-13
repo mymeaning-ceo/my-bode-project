@@ -29,11 +29,16 @@ router.get('/', async (req, res) => {
   try {
     const totalCount = await db.collection('stock').countDocuments();
     const 결과 = await db.collection('stock').find().skip(skip).limit(limit).toArray();
-    const 필드 = 결과.length > 0 ? Object.keys(결과[0]) : [];
+
+    const 원하는필드 = ['item_code', 'item_name', 'size_color', 'color', 'size', 'qty', 'allocation'];
+    const 필드 = 결과.length > 0
+      ? 원하는필드.filter(k => Object.keys(결과[0]).includes(k))
+      : [];
 
     res.render('stock', {
       결과,
-      필드: 필드.slice(0, 50), // 컬럼 최대 50개
+      필드,
+      전체필드: 필드,
       현재페이지: page,
       전체페이지수: Math.ceil(totalCount / limit),
       검색어: '',
@@ -44,6 +49,7 @@ router.get('/', async (req, res) => {
     res.status(500).send('서버 오류 발생');
   }
 });
+
 
 // 🔍 /stock/search 검색 기능
 router.get('/search', async (req, res) => {
@@ -65,11 +71,16 @@ router.get('/search', async (req, res) => {
 
     const totalCount = await db.collection('stock').countDocuments(query);
     const 결과 = await db.collection('stock').find(query).skip(skip).limit(limit).toArray();
-    const 필드 = 결과.length > 0 ? Object.keys(결과[0]) : [];
+
+    const 원하는필드 = ['item_code', 'item_name', 'size_color', 'color', 'size', 'qty', 'allocation'];
+    const 필드 = 결과.length > 0
+      ? 원하는필드.filter(k => Object.keys(결과[0]).includes(k))
+      : [];
 
     res.render('stock', {
       결과,
-      필드: 필드.slice(0, 50),
+      필드,
+      전체필드: 필드,
       현재페이지: page,
       전체페이지수: Math.ceil(totalCount / limit),
       검색어: keyword,
@@ -80,6 +91,7 @@ router.get('/search', async (req, res) => {
     res.status(500).send('서버 오류 발생');
   }
 });
+
 
 // 🔥 전체 삭제 라우터
 router.post('/delete-all', async (req, res) => {
