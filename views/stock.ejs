@@ -52,14 +52,16 @@
       <p class="text-muted">🔎 총 <strong><%= 결과.length %></strong>건의 결과가 있습니다.</p>
     <% } %>
 
-    <% const 표시필드 = ['item_code', 'item_name', 'size_color', 'qty', 'allocation']; %>
+    <% const 표시필드 = ['item_code', 'item_name', 'size', 'color', 'qty', 'allocation']; %>
     <% const headerMap = {
       item_code: '품번',
       item_name: '품명',
-      size_color: '호칭-색상',
+      size: '호칭',
+      color: '색상',
       qty: '재고수량',
       allocation: '할당'
     }; %>
+    
     
 
     <div class="table-responsive">
@@ -90,7 +92,13 @@
         </thead>
         <tbody>
           <% if (결과 && 결과.length > 0) { %>
-            <% 결과.forEach(행 => { %>
+            <% 결과.forEach(행 => {
+              if (!행.size && !행.color && typeof 행.size_color === 'string' && 행.size_color.includes('-')) {
+                const parts = 행.size_color.split('-');
+                행.size = parts[0];
+                행.color = parts[1];
+              }
+            %>
               <tr>
                 <% 표시필드.forEach(key => {
                      const rawVal = 행[key];
