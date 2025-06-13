@@ -10,6 +10,8 @@ let db;
 const connectDB = require('../database');
 connectDB.then(client => {
   db = client.db('forum');
+}).catch(err => {
+  console.error('❌ DB 연결 실패:', err);
 });
 
 // 업로드 디렉토리
@@ -20,7 +22,6 @@ const upload = multer({ dest: uploadsDir });
 // 검색 가능한 브랜드 목록
 const BRANDS = ['BYC', '트라이', '제임스딘', '스페클로', '물랑루즈'];
 
-// 한글 매핑 및 필드 정의
 const 한글 = {
   'Option ID': '옵션ID',
   'Product name': '상품명',
@@ -42,7 +43,6 @@ const DEFAULT_COLUMNS = [
 ];
 
 const IMPORT_COLUMNS = DEFAULT_COLUMNS.filter(col => col !== 'Shortage quantity');
-
 const NUMERIC_COLUMNS = [
   'Orderable quantity (real-time)',
   'Sales amount on the last 30 days',
@@ -50,7 +50,6 @@ const NUMERIC_COLUMNS = [
   'Shortage quantity'
 ];
 
-// 부족재고량 계산 함수
 function addShortage(items) {
   return items.map(item => {
     const sales30 = Number(item['Sales in the last 30 days'] || 0);
@@ -63,12 +62,11 @@ function addShortage(items) {
   });
 }
 
-// 필드 추출 함수
 function getAllFields(resultArray) {
   return resultArray[0] ? Object.keys(resultArray[0]).filter(k => k !== '_id') : [];
 }
 
-// 목록 렌더링
+// ✅ 목록 조회
 router.get('/', async (req, res) => {
   const keyword = '';
   const brand = req.query.brand || '';
@@ -82,16 +80,13 @@ router.get('/', async (req, res) => {
         newRow['Option ID'] = String(newRow['Option ID']);
       }
       NUMERIC_COLUMNS.forEach(col => {
-        if (col !== 'Option ID' && newRow[col] !== undefined && newRow[col] !== null) {
-          const num = Number(String(newRow[col]).replace(/,/g, ''));
-          newRow[col] = isNaN(num) ? 0 : num;
-        }
+        const num = Number(String(newRow[col]).replace(/,/g, ''));
+        newRow[col] = isNaN(num) ? 0 : num;
       });
       return newRow;
     });
 
     const resultWithShortage = addShortage(result);
-
     let selected = req.query.fields;
     if (selected && !Array.isArray(selected)) selected = selected.split(',');
     const fields = (selected && selected.length > 0)
@@ -114,22 +109,20 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 엑셀 업로드 처리
+// ✅ 엑셀 업로드
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
     const filePath = req.file.path;
     const workbook = xlsx.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-    const dataRows = sheetData.slice(2);  // ✅ 첫 2행 제거 (0번: 숫자, 1번: 헤더)
-    
+    const dataRows = sheetData.slice(2); // 첫 2행 제거
+
     const data = dataRows.map(row => {
       const obj = {};
-    
-      obj['Option ID'] = row[2] ?? '';
+      obj['Option ID'] = String(row[2] ?? '').trim();
       obj['Product name'] = row[4] ?? '';
       obj['Option name'] = row[5] ?? '';
-    
 
       const inventory = Number(String(row[7]).replace(/,/g, '')) || 0;
       obj['Orderable quantity (real-time)'] = inventory;
@@ -140,13 +133,12 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
       const salesCount = Number(String(row[13]).replace(/,/g, '')) || 0;
       obj['Sales in the last 30 days'] = salesCount;
 
-      // 부족재고량 계산
       const daily = salesCount / 30;
       const safety = daily * 7;
       obj['Shortage quantity'] = inventory < safety ? Math.ceil(safety - inventory) : 0;
 
       return obj;
-    });
+    }).filter(item => item['Option ID']);
 
     const bulkOps = data.map(item => ({
       updateOne: {
@@ -156,10 +148,11 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
       }
     }));
 
+    if (!db) throw new Error('DB 미연결 상태입니다.');
     if (bulkOps.length > 0) await db.collection('coupang').bulkWrite(bulkOps);
     fs.unlink(filePath, () => {});
 
-    const resultWithShortage = addShortage(data); // 보기용 재계산 (이미 DB에 저장됨)
+    const resultWithShortage = addShortage(data);
 
     res.render('coupang.ejs', {
       결과: resultWithShortage,
@@ -177,8 +170,7 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
   }
 });
 
-
-// 검색
+// ✅ 검색
 router.get('/search', async (req, res) => {
   try {
     const keyword = req.query.keyword || '';
@@ -207,10 +199,8 @@ router.get('/search', async (req, res) => {
       const newRow = { ...row };
       if (typeof newRow['Option ID'] === 'number') newRow['Option ID'] = String(newRow['Option ID']);
       NUMERIC_COLUMNS.forEach(col => {
-        if (col !== 'Option ID' && newRow[col] !== undefined && newRow[col] !== null) {
-          const num = Number(String(newRow[col]).replace(/,/g, ''));
-          newRow[col] = isNaN(num) ? 0 : num;
-        }
+        const num = Number(String(newRow[col]).replace(/,/g, ''));
+        newRow[col] = isNaN(num) ? 0 : num;
       });
       return newRow;
     });
@@ -238,7 +228,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// 전체 삭제
+// ✅ 전체 삭제
 router.post('/delete-all', checkLogin, async (req, res) => {
   try {
     await db.collection('coupang').deleteMany({});
