@@ -10,22 +10,12 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
-const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo');
 const path = require('path');
 const stockRouter = require('./routes/stock');
 const connectDB = require('./database');
 const { checkLogin, checkAdmin } = require('./middlewares/auth');
 
-// MongoDB connection
-mongoose.connect(process.env.DB_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log('✅ MongoDB connected'))
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
-  });
 
 app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
@@ -34,18 +24,25 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
 // 세션 설정
-app.use(session({
+const sessionOptions = {
   secret: '비밀키',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
+  cookie: { maxAge: 60 * 60 * 1000 }
+};
+
+if (process.env.DB_URL) {
+  sessionOptions.store = MongoStore.create({
     mongoUrl: process.env.DB_URL,
     dbName: 'forum',
     collectionName: 'sessions',
     ttl: 60 * 60
-  }),
-  cookie: { maxAge: 60 * 60 * 1000 }
-}));
+  });
+} else {
+  console.warn('⚠️ DB_URL이 없어 메모리 세션을 사용합니다.');
+}
+
+app.use(session(sessionOptions));
 
 // Passport 설정
 app.use(passport.initialize());
