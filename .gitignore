@@ -17,3 +17,5 @@ uploads/
 *.log
 .DS_Store
 .pm2/
+
+.uploads
