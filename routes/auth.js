@@ -4,9 +4,25 @@ const router = express.Router();
 const connectDB = require('../database');
 
 let db;
-connectDB.then(client => db = client.db('forum'));
+connectDB.then((client) => (db = client.db('forum')));
 
-// 회원가입 처리
+// -----------------------------
+// 1) 로그인 페이지
+// -----------------------------
+router.get('/login', (req, res) => {
+  res.render('login');          // views/login.ejs
+});
+
+// -----------------------------
+// 2) 회원가입 페이지
+// -----------------------------
+router.get('/register', (req, res) => {
+  res.render('register');       // views/register.ejs
+});
+
+// -----------------------------
+// 3) 회원가입 처리
+// -----------------------------
 router.post('/register', async (req, res) => {
   const { username, name, email, password, password2 } = req.body;
 
@@ -28,6 +44,13 @@ router.post('/register', async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   await db.collection('users').insertOne({ username, name, email, password: hashedPassword });
   res.redirect('/register-success');
+});
+
+// -----------------------------
+// 4) 회원가입 성공 페이지
+// -----------------------------
+router.get('/register-success', (req, res) => {
+  res.render('register-success'); // views/register-success.ejs
 });
 
 module.exports = router;
