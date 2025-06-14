@@ -1,11 +1,11 @@
 // jest.setup.js
 // ─────────────────────────────────────────────
-// 1) database.js 모킹
+// 1) database.js 모킹 (함수 + then)
 // ─────────────────────────────────────────────
 jest.mock("./database", () => {
   const mockClient = { db: () => ({}) };
   const mockFn = jest.fn().mockResolvedValue(mockClient);
-  mockFn.then = (fn) => fn(mockClient);
+  mockFn.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
   return mockFn;
 });
 
@@ -15,7 +15,7 @@ jest.mock("./database", () => {
 jest.mock("./config/db", () => {
   const mockClient = { db: () => ({}) };
   const mockConnect = jest.fn().mockResolvedValue(mockClient);
-  mockConnect.then = (fn) => fn(mockClient);
+  mockConnect.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
   return {
     connectDB: mockConnect,
     closeDB: jest.fn().mockResolvedValue(),
@@ -51,4 +51,4 @@ jest.mock("multer", () => {
 // ─────────────────────────────────────────────
 // 5) 글로벌 타임아웃
 // ─────────────────────────────────────────────
-jest.setTimeout(30000);
+jest.setTimeout(30000); // 30초
