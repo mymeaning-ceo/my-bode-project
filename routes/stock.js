@@ -57,7 +57,8 @@ router.get("/", async (req, res) => {
         ? 원하는필드.filter((k) => Object.keys(결과[0]).includes(k))
         : [];
 
-    res.render("stock", {
+      res.render("stock", {
+      title: "📦 재고 관리",
       결과,
       필드,
       전체필드: 필드,
@@ -122,7 +123,8 @@ router.get("/search", async (req, res) => {
         ? 원하는필드.filter((k) => Object.keys(결과[0]).includes(k))
         : [];
 
-    res.render("stock", {
+      res.render("stock", {
+      title: "📦 재고 관리",
       결과,
       필드,
       전체필드: 필드,
