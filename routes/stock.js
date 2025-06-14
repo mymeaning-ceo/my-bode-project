@@ -1,56 +1,85 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const multer = require('multer'); // 📌 파일 업로드 처리를 위한 multer
-const path = require('path');
-const { spawn } = require('child_process'); // 📌 Python 스크립트 실행을 위한 spawn
+const multer = require("multer"); // 📌 파일 업로드 처리를 위한 multer
+const path = require("path");
+const { spawn } = require("child_process"); // 📌 Python 스크립트 실행을 위한 spawn
 
 // 📁 multer 설정: uploads/ 폴더에 엑셀 파일 저장
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
     const uniqueName = `excel_${Date.now()}${path.extname(file.originalname)}`;
     cb(null, uniqueName);
-  }
+  },
 });
 const upload = multer({ storage });
 
-
 // 📦 /stock 기본 페이지
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const db = req.app.locals.db;
-  if (!db) return res.status(500).send('❌ DB 연결이 완료되지 않았습니다.');
+  if (!db) return res.status(500).send("❌ DB 연결이 완료되지 않았습니다.");
 
   const page = parseInt(req.query.page) || 1;
   const limit = 50;
   const skip = (page - 1) * limit;
 
   try {
-    const totalCount = await db.collection('stock').countDocuments();
-    const 결과 = await db.collection('stock').find().skip(skip).limit(limit).toArray();
-    const 필드 = 결과.length > 0 ? Object.keys(결과[0]) : [];
+    const totalCount = await db.collection("stock").countDocuments();
+    const latestArr = await db
+      .collection("stock")
+      .find()
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(1)
+      .toArray();
+    const latestInfo = latestArr[0];
 
-    res.render('stock', {
+    const 결과 = await db
+      .collection("stock")
+      .find()
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    const 원하는필드 = [
+      "item_code",
+      "item_name",
+      "size_color",
+      "color",
+      "size",
+      "qty",
+      "allocation",
+    ];
+    const 필드 =
+      결과.length > 0
+        ? 원하는필드.filter((k) => Object.keys(결과[0]).includes(k))
+        : [];
+
+      res.render("stock", {
+      title: "📦 재고 관리",
       결과,
-      필드: 필드.slice(0, 50), // 컬럼 최대 50개
+      필드,
+      전체필드: 필드,
       현재페이지: page,
       전체페이지수: Math.ceil(totalCount / limit),
-      검색어: '',
-      성공메시지: req.flash ? req.flash('성공메시지') : ''
+      검색어: "",
+      성공메시지: req.flash ? req.flash("성공메시지") : "",
+      latestInfo,
     });
   } catch (err) {
-    console.error('❌ /stock 오류:', err);
-    res.status(500).send('서버 오류 발생');
+    console.error("❌ /stock 오류:", err);
+    res.status(500).send("서버 오류 발생");
   }
 });
 
 // 🔍 /stock/search 검색 기능
-router.get('/search', async (req, res) => {
+router.get("/search", async (req, res) => {
   const db = req.app.locals.db;
-  if (!db) return res.status(500).send('❌ DB 연결이 완료되지 않았습니다.');
+  if (!db) return res.status(500).send("❌ DB 연결이 완료되지 않았습니다.");
 
-  const keyword = req.query.keyword || '';
+  const keyword = req.query.keyword || "";
   const page = parseInt(req.query.page) || 1;
   const limit = 50;
   const skip = (page - 1) * limit;
@@ -58,104 +87,138 @@ router.get('/search', async (req, res) => {
   try {
     const query = {
       $or: [
-        { 품명: { $regex: keyword, $options: 'i' } },
-        { 품목번: { $regex: keyword, $options: 'i' } }
-      ]
+        { item_name: { $regex: keyword, $options: "i" } },
+        { item_code: { $regex: keyword, $options: "i" } },
+      ],
     };
 
-    const totalCount = await db.collection('stock').countDocuments(query);
-    const 결과 = await db.collection('stock').find(query).skip(skip).limit(limit).toArray();
-    const 필드 = 결과.length > 0 ? Object.keys(결과[0]) : [];
+    const latestArr = await db
+      .collection("stock")
+      .find()
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(1)
+      .toArray();
+    const latestInfo = latestArr[0];
 
-    res.render('stock', {
+    const 결과 = await db
+      .collection("stock")
+      .find(query)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+    const totalCount = await db.collection("stock").countDocuments(query);
+
+    const 원하는필드 = [
+      "item_code",
+      "item_name",
+      "size_color",
+      "color",
+      "size",
+      "qty",
+      "allocation",
+    ];
+    const 필드 =
+      결과.length > 0
+        ? 원하는필드.filter((k) => Object.keys(결과[0]).includes(k))
+        : [];
+
+      res.render("stock", {
+      title: "📦 재고 관리",
       결과,
-      필드: 필드.slice(0, 50),
+      필드,
+      전체필드: 필드,
       현재페이지: page,
       전체페이지수: Math.ceil(totalCount / limit),
       검색어: keyword,
-      성공메시지: req.flash ? req.flash('성공메시지') : ''
+      성공메시지: req.flash ? req.flash("성공메시지") : "",
+      latestInfo,
     });
   } catch (err) {
-    console.error('❌ /stock/search 오류:', err);
-    res.status(500).send('서버 오류 발생');
+    console.error("❌ /stock/search 오류:", err);
+    res.status(500).send("서버 오류 발생");
   }
 });
 
 // 🔥 전체 삭제 라우터
-router.post('/delete-all', async (req, res) => {
-  const db = req.app.locals.db;
-  if (!db) return res.status(500).send('❌ DB 연결이 완료되지 않았습니다.');
-
+router.post("/upload", upload.single("excelFile"), async (req, res) => {
   try {
-    await db.collection('stock').deleteMany({});
-    if (req.flash) req.flash('성공메시지', '✅ 전체 삭제가 완료되었습니다.');
-    res.redirect('/stock');
-  } catch (err) {
-    console.error('❌ /stock/delete-all 오류:', err);
-    res.status(500).send('삭제 실패');
-  }
-});
+    console.log("✅ POST /stock/upload 라우터 진입");
 
-// 📥 엑셀 업로드 라우터
-router.post('/upload', upload.single('excelFile'), (req, res) => {
-  console.log('✅ POST /stock/upload 라우터 진입');
-
-  if (!req.file) {
-    console.log('❌ 파일이 업로드되지 않았습니다.');
-    return res.status(400).send('❌ 파일이 없습니다.');
-  }
-
-  const filePath = path.resolve(req.file.path);
-  const dbName = 'forum';
-  const collectionName = 'stock';
-
-  const python = spawn('python3', [
-    'scripts/excel_to_mongo.py',
-    filePath,
-    dbName,
-    collectionName
-  ], { shell: true }); // ✅ 경로 문제 대응
-
-  python.stdout.on('data', data => {
-    console.log(`📤 Python STDOUT: ${data.toString()}`);
-  });
-
-  python.stderr.on('data', data => {
-    console.error(`⚠️ Python STDERR: ${data.toString()}`);
-  });
-
-  python.on('error', err => {
-    console.error('🚨 Python 실행 실패:', err);
-    if (!res.headersSent) {
-      return res.status(500).send('❌ Python 실행 실패');
+    if (!req.file) {
+      console.log("❌ 파일이 업로드되지 않았습니다.");
+      return res.status(400).send("❌ 파일이 없습니다.");
     }
-  });
 
-  python.on('close', code => {
-    console.log(`📦 Python 프로세스 종료 코드: ${code}`);
-    if (res.headersSent) return;
+    const filePath = path.resolve(req.file.path);
+    const dbName = process.env.DB_NAME;
+    const collectionName = "stock";
 
-    if (code === 0) {
-      if (req.flash) req.flash('성공메시지', '✅ 엑셀 업로드가 완료되었습니다.');
-      return res.redirect('/stock');  // ✅ 성공 시 /stock 페이지로 이동
-    } else {
-      return res.status(500).send('❌ 엑셀 처리 중 오류 발생');
-    }
-  });
+    const python = spawn(
+      "python3",
+      ["scripts/excel_to_mongo.py", filePath, dbName, collectionName],
+      { shell: true },
+    );
 
-  // ⏱️ 타임아웃 보호 (10초)
-  setTimeout(() => {
-    if (!python.killed) {
-      python.kill('SIGTERM');
-      console.error('⏱️ Python 실행 시간 초과로 종료');
+    python.stdout.on("data", (data) => {
+      console.log(`📤 Python STDOUT: ${data.toString()}`);
+    });
+
+    python.stderr.on("data", (data) => {
+      console.error(`⚠️ Python STDERR: ${data.toString()}`);
+    });
+
+    python.on("error", (err) => {
+      console.error("🚨 Python 실행 실패:", err);
       if (!res.headersSent) {
-        return res.status(500).send('❌ Python 실행 시간 초과');
+        res.status(500).send("❌ Python 실행 실패");
       }
-    }
-  }, 600000);
-});
+    });
 
+    python.on("close", async (code) => {
+      console.log(`📦 Python 프로세스 종료 코드: ${code}`);
+      if (res.headersSent) return;
 
+      if (code === 0) {
+        try {
+          const db = req.app.locals.db;
+          if (db) {
+            await db.collection("stock").updateMany(
+              {},
+              {
+                $set: {
+                  createdAt: new Date(),
+                  uploadedBy: req.user ? req.user.username : "알 수 없음",
+                },
+              },
+            );
+          }
+          if (req.flash) {
+            req.flash("성공메시지", "✅ 엑셀 업로드가 완료되었습니다.");
+          }
+          return res.redirect("/stock");
+        } catch (err) {
+          console.error("❌ 업로드 후 처리 실패:", err);
+          return res.status(500).send("❌ 업로드 후 처리 실패");
+        }
+      } else {
+        return res.status(500).send("❌ 엑셀 처리 중 오류 발생");
+      }
+    });
 
+    setTimeout(() => {
+      if (!python.killed) {
+        python.kill("SIGTERM");
+        console.error("⏱️ Python 실행 시간 초과로 종료");
+        if (!res.headersSent) {
+          res.status(500).send("❌ Python 실행 시간 초과");
+        }
+      }
+    }, 60000);
+  } catch (err) {
+    console.error("❌ 업로드 처리 중 예외 발생:", err);
+    res.status(500).send("서버 오류");
+  }
+}); // <-- router.post 끝
 
 module.exports = router;

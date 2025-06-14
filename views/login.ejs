@@ -12,14 +12,14 @@
   <!-- 네비게이션 -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
     <a class="navbar-brand fw-bold text-dark" href="/">
-      <% if (logo) { %>
+      <% if (typeof logo !== 'undefined' && logo) { %>
         <img src="<%= logo %>" alt="logo" class="brand-logo">
       <% } else { %>
         🩲 내의미
       <% } %>
     </a>
     <div class="ms-auto">
-      <% if (!유저) { %>
+      <% if (typeof 유저 === 'undefined' || !유저) { %>
         <a href="/login" class="btn btn-primary">로그인</a>
       <% } else { %>
         <span class="me-3">안녕하세요, <strong><%= 유저.username %></strong>님</span>
@@ -32,7 +32,7 @@
   <div class="container mt-5">
     <h1 class="mb-4">반갑습니다 👋</h1>
 
-    <% if (!유저) { %>
+    <% if (typeof 유저 === 'undefined' || !유저) { %>
       <!-- 로그인 폼 -->
       <div class="row justify-content-center">
         <div class="col-md-6">

@@ -17,3 +17,11 @@ uploads/
 *.log
 .DS_Store
 .pm2/
+
+.uploads
+
+echo "node_modules/" >> .gitignore
+echo ".cache/" >> .gitignore
+git add .gitignore
+git commit -m "chore: update .gitignore"
+git push
