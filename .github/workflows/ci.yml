@@ -29,11 +29,14 @@ jobs:
 
       - name: Run tests
         run: npm test
-        env:
-          CI: true               # <-- CI 환경 변수
-          NODE_ENV: test
-          MONGO_URI: mongodb://localhost:27017
-          DB_NAME: testdb
-          
-          SESSION_SECRET: testsecret
-
+       env:
+        CI: true
+        NODE_ENV: test
+        MONGO_URI: mongodb://localhost:27017
+        DB_NAME: testdb
+        SESSION_SECRET: testsecret
+        # --- S3 더미 값 추가 ---
+        AWS_ACCESS_KEY_ID: dummy
+        AWS_SECRET_ACCESS_KEY: dummy
+        S3_BUCKET: dummy
+        S3_REGION: dummy
