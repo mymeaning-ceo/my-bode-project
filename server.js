@@ -62,7 +62,13 @@ connectDB().then(() => {
   // Passport
   app.use(passport.initialize());
   app.use(passport.session());
-
+  
+  // EJS 전역 변수 설정 (★ 추가)
+  app.use((req, res, next) => {
+  res.locals.유저 = req.user || null;
+  res.locals.currentUrl = req.originalUrl;
+  next();
+});
   // ────────────────────────
   // 3) 라우터
   // ────────────────────────
