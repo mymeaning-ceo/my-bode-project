@@ -58,6 +58,7 @@ connectDB().then(() => {
   app.use(express.json());
   app.use(methodOverride('_method'));
   app.use('/', require('./routes/auth'));
+  app.use('/', require('./modules/auth/routes'));
 
   // 레이아웃
   app.use(expressLayouts);
