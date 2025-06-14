@@ -21,16 +21,17 @@ jobs:
           --health-retries=5
 
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - run: npm ci
-
-      - run: npm test
-        env:
-          MONGO_URI: mongodb://localhost:27018   # 포트 수정
-          DB_NAME: testdb
-          SESSION_SECRET: testsecret
+  - uses: actions/checkout@v3
+  - uses: supercharge/mongodb-github-action@1.10.0
+    with:
+      mongodb-version: '6.0'
+      mongodb-port: 27017
+  - uses: actions/setup-node@v3
+    with:
+      node-version: 18
+  - run: npm ci
+  - run: npm test
+    env:
+      MONGO_URI: mongodb://localhost:27017
+      DB_NAME: testdb
+      SESSION_SECRET: testsecret
