@@ -8,7 +8,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const compression = require('compression');
-const expressLayouts = require('express-ejs-layouts');  // ← 한 번만
+const expressLayouts = require('express-ejs-layouts');
 const connectDB = require('./config/db');
 
 const app = express();
@@ -66,12 +66,14 @@ connectDB().then(() => {
   // ────────────────────────
   // 3) 라우터
   // ────────────────────────
-  app.use('/stock', require('./routes/stock'));            // 페이지
   app.use('/api/stock', require('./routes/api/stockApi')); // API
+  app.use('/stock', require('./routes/stock'));            // 페이지
   app.get('/', (req, res) => res.redirect('/stock'));      // 기본 루트
 
+  console.log('✅ /api/stock 라우터 등록 완료');
+
   // ────────────────────────
-  // 5) 서버 시작
+  // 4) 서버 시작
   // ────────────────────────
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => console.log(`🚀  http://localhost:${PORT}`));
