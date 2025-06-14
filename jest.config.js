@@ -2,5 +2,6 @@
 module.exports = {
     testEnvironment: "node",
     detectOpenHandles: true,
-    forceExit: true,            // 열린 핸들이 남아도 강제 종료
+    forceExit: true,
+    setupFilesAfterEnv: ["<rootDir>/jest.setup.js"], // ← 추가
   };
