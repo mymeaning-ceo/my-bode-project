@@ -1,42 +1,43 @@
-require("dotenv").config();
-const express = require("express");
-const path = require("path");
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
-const passport = require("passport");
-const methodOverride = require("method-override");
-const morgan = require("morgan");
-const helmet = require("helmet");
-const compression = require("compression");
-const connectDB = require("./config/db");
-const expressLayouts = require('express-ejs-layouts');
+require('dotenv').config();
+const express = require('express');
+const path = require('path');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const passport = require('passport');
+const methodOverride = require('method-override');
+const morgan = require('morgan');
+const helmet = require('helmet');
+const compression = require('compression');
+const expressLayouts = require('express-ejs-layouts');  // ← 한 번만
+const connectDB = require('./config/db');
+
 const app = express();
 
 // ────────────────────────
 // 1) 데이터베이스 연결
 // ────────────────────────
 connectDB().then(() => {
-  const db = require("mongoose").connection.db;
+  const db = require('mongoose').connection.db;
   app.locals.db = db;
 
   // Passport 설정
-  require("./config/passport")(passport, db);
+  require('./config/passport')(passport, db);
 
   // ────────────────────────
   // 2) 미들웨어
   // ────────────────────────
   app.use(helmet());
   app.use(compression());
-  app.use(morgan("dev"));
-  app.use(express.static(path.join(__dirname, "public")));
-  app.set("view engine", "ejs");
+  app.use(morgan('dev'));
+  app.use(express.static(path.join(__dirname, 'public')));
+  app.set('view engine', 'ejs');
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
-  app.use(methodOverride("_method"));
-  app.use(expressLayouts);
-  app.set('layout', 'layouts/main');  // 기본 레이아웃
-  const expressLayouts = require('express-ejs-layouts');
+  app.use(methodOverride('_method'));
 
+  // 레이아웃
+  app.use(expressLayouts);
+  app.set('layout', 'layouts/main');
 
   // 세션
   app.use(
@@ -47,15 +48,15 @@ connectDB().then(() => {
       store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,
         dbName: process.env.DB_NAME,
-        collectionName: "sessions",
-        ttl: 60 * 60,
+        collectionName: 'sessions',
+        ttl: 60 * 60
       }),
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 1000,
-      },
-    }),
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 1000
+      }
+    })
   );
 
   // Passport
@@ -65,17 +66,9 @@ connectDB().then(() => {
   // ────────────────────────
   // 3) 라우터
   // ────────────────────────
-  app.use("/stock", require("./routes/stock")); // 페이지
-  app.use("/api/stock", require("./routes/api/stockApi")); // API
-  app.get("/", (req, res) => res.redirect("/stock")); // 기본 루트
-  app.use(expressLayouts);
-  app.set('layout', 'layouts/main'); // 기본 레이아웃 파일
-
-  // 4) 에러 처리 (필요 시 주석 해제)
-  // ────────────────────────
-  // const { notFound, errorHandler } = require('./middlewares/errorHandler');
-  // app.use(notFound);
-  // app.use(errorHandler);
+  app.use('/stock', require('./routes/stock'));            // 페이지
+  app.use('/api/stock', require('./routes/api/stockApi')); // API
+  app.get('/', (req, res) => res.redirect('/stock'));      // 기본 루트
 
   // ────────────────────────
   // 5) 서버 시작
