@@ -17,7 +17,6 @@ jobs:
       - uses: supercharge/mongodb-github-action@1.10.0
         with:
           mongodb-version: '6.0'
-          mongodb-port: 27017
 
       - uses: actions/setup-node@v3
         with:
