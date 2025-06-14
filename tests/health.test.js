@@ -39,8 +39,8 @@ afterAll(async () => {
 });
 
 describe("GET /stock", () => {
-  it("should return 404 not found (CI 환경)", async () => {
+  it("should return 302 redirect (CI 환경)", async () => {
     const res = await request(app).get("/");
-    expect(res.statusCode).toBe(404);
+  expect(res.statusCode).toBe(302);
   });
 });
