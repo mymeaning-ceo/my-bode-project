@@ -25,7 +25,6 @@ router.get("/", checkAdmin, async (req, res) => {
 // 배너 이미지 업로드
 router.post(
   "/banner/:idx",
-  checkAdmin,
   upload.single("banner"),
   async (req, res) => {
     const imgLocation = req.file ? req.file.location : "";
@@ -41,24 +40,11 @@ router.post(
   },
 );
 
-// 배너 이미지 삭제
-router.post("/banner/:idx/delete", checkAdmin, async (req, res) => {
-  const idx = req.params.idx;
-  await db.collection("homepage").deleteOne({ key: "banner" + idx });
-  res.redirect("/admin");
-});
-
-router.post("/logo", checkAdmin, upload.single("logo"), async (req, res) => {
-  const imgLocation = req.file ? req.file.location : "";
-  await db
-    .collection("homepage")
-    .updateOne(
-      { key: "logo" },
-      { $set: { img: imgLocation, updatedAt: new Date() } },
-      { upsert: true },
-    );
-  res.redirect("/admin");
-});
+      await db.collection("banners").updateOne(
+        { idx },
+        { $set: { img: imgLocation } },
+        { upsert: true }
+      );
 
 // 로고 이미지 삭제
 router.post("/logo/delete", checkAdmin, async (req, res) => {

@@ -41,18 +41,12 @@ document.addEventListener("DOMContentLoaded", () => {
       method: "POST",
       body: formData,
     });
-    if (res.ok) {
-      bootstrap.Modal.getInstance("#uploadModal").hide();
-      alert("업로드 완료");
-      table.ajax.reload();
-    } else alert("업로드 실패");
   });
 
   $("#btnDeleteAll").on("click", async () => {
     if (!confirm("정말 모든 데이터를 삭제하시겠습니까?")) return;
     const res = await fetch("/api/stock", { method: "DELETE" });
     if (res.ok) {
-      alert("삭제 완료");
       table.ajax.reload();
     } else alert("삭제 실패");
   });
