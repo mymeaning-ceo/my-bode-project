@@ -26,7 +26,30 @@ connectDB().then(() => {
   // ────────────────────────
   // 2) 미들웨어
   // ────────────────────────
-  app.use(helmet());
+ 
+ app.use(
+   helmet({
+     contentSecurityPolicy: {
+      directives: {
+         defaultSrc: ["'self'"],
+         scriptSrc: [
+           "'self'",
+           "https://code.jquery.com",
+           "https://cdn.jsdelivr.net",
+           "https://cdn.datatables.net"
+         ],
+         styleSrc: [
+           "'self'",
+           "'unsafe-inline'",
+           "https://cdn.jsdelivr.net",
+           "https://cdn.datatables.net"
+         ],
+         fontSrc: ["'self'", "https://cdn.jsdelivr.net", "data:"],
+         imgSrc: ["'self'", "data:"]
+       }
+     }
+   })
+ );
   app.use(compression());
   app.use(morgan('dev'));
   app.use(express.static(path.join(__dirname, 'public')));
@@ -62,7 +85,7 @@ connectDB().then(() => {
   // Passport
   app.use(passport.initialize());
   app.use(passport.session());
-  
+
   // EJS 전역 변수 설정 (★ 추가)
   app.use((req, res, next) => {
   res.locals.유저 = req.user || null;
