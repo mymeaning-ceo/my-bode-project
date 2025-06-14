@@ -152,7 +152,7 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     }
 
     const filePath = path.resolve(req.file.path);
-    const dbName = 'forum';
+    const dbName = 'fprocess.env.DB_NAME
     const collectionName = 'stock';
 
     const python = spawn('python3', [
