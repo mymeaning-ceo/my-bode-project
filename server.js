@@ -9,9 +9,6 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const compression = require('compression');
 const connectDB = require('./config/db');
-const routes = require('./routes');
-const { notFound, errorHandler } = require('./middlewares/errorHandler');
-const { loadPermissions, permissionsMiddleware } = require('./middlewares/auth');
 
 const app = express();
 
@@ -24,9 +21,6 @@ connectDB().then(() => {
 
   // Passport 설정
   require('./config/passport')(passport, db);
-
-  // 권한 로딩
-  loadPermissions(db);
 
   // ────────────────────────
   // 2) 미들웨어
@@ -64,29 +58,19 @@ connectDB().then(() => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // EJS 글로벌 변수
-  app.use((req, res, next) => {
-    res.locals.user = req.user || null;
-    res.locals.currentUrl = req.originalUrl;
-    next();
-  });
-
-  // 권한 체크
-  app.use(permissionsMiddleware);
-
   // ────────────────────────
   // 3) 라우터
   // ────────────────────────
-  app.use('/', routes);
-  app.use('/stock', require('./routes/stock'));          // 📄 페이지(간소화)
-  app.use('/api/stock', require('./routes/api/stockApi')); // 📄 DataTables·업로드·삭제 API
-  app.use('/', routes);                                   // 기존 라우터(index.js)
+  app.use('/stock', require('./routes/stock'));          // 페이지(간소화)
+  app.use('/api/stock', require('./routes/api/stockApi')); // DataTables·업로드·삭제 API
+  app.get('/', (req, res) => res.redirect('/stock'));     // 기본 루트
 
   // ────────────────────────
-  // 4) 에러 처리
+  // 4) 에러 처리 (필요 시 주석 해제)
   // ────────────────────────
-  app.use(notFound);
-  app.use(errorHandler);
+  // const { notFound, errorHandler } = require('./middlewares/errorHandler');
+  // app.use(notFound);
+  // app.use(errorHandler);
 
   // ────────────────────────
   // 5) 서버 시작
