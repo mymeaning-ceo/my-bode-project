@@ -27,6 +27,9 @@ jest.mock("./config/db", () => {
 // ─────────────────────────────────────────────
 jest.mock("./upload", () => ({
   ensureBucket: jest.fn().mockResolvedValue(),
+  single: () => (req, res, next) => next(),  // ← 추가
+  array: () => (req, res, next) => next(),   // ← 추가
+  fields: () => (req, res, next) => next(),  // ← 추가
 }));
 
 // ─────────────────────────────────────────────
