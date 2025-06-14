@@ -18,15 +18,8 @@
         🩲 내의미
       <% } %>
     </a>
-    ...
-    <% if (typeof 유저 === 'undefined' || !유저) { %>
-      <!-- 로그인 폼 -->
-    <% } else { %>
-      <!-- 로그인된 사용자용 메뉴 -->
-    <% } %>
-    </a>
     <div class="ms-auto">
-      <% if (!유저) { %>
+      <% if (typeof 유저 === 'undefined' || !유저) { %>
         <a href="/login" class="btn btn-primary">로그인</a>
       <% } else { %>
         <span class="me-3">안녕하세요, <strong><%= 유저.username %></strong>님</span>
@@ -39,7 +32,7 @@
   <div class="container mt-5">
     <h1 class="mb-4">반갑습니다 👋</h1>
 
-    <% if (!유저) { %>
+    <% if (typeof 유저 === 'undefined' || !유저) { %>
       <!-- 로그인 폼 -->
       <div class="row justify-content-center">
         <div class="col-md-6">
