@@ -57,6 +57,7 @@ connectDB().then(() => {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
   app.use(methodOverride('_method'));
+  app.use('/', require('./routes/auth'));
 
   // 레이아웃
   app.use(expressLayouts);
@@ -95,8 +96,15 @@ connectDB().then(() => {
   // ────────────────────────
   // 3) 라우터
   // ────────────────────────
-  app.use('/api/stock', require('./routes/api/stockApi')); // API
-  app.use('/stock', require('./routes/stock'));            // 페이지
+  app.use('/api/stock', require('./routes/api/stockApi')); // 재고 API
+  app.use('/stock', require('./routes/stock'));            // 재고 페이지
+  
+  app.use('/', require('./routes/auth'));                  // 로그인/회원가입
+  app.use('/admin', require('./routes/admin'));            // 관리자
+  app.use('/board', require('./routes/board'));            // 게시판
+  app.use('/coupang', require('./routes/coupang'));        // 쿠팡 재고
+  app.use('/coupang/add', require('./routes/coupangAdd')); // 쿠팡 매출/광고비
+  app.use('/help', require('./routes/help'));              // 도움말
   app.get('/', (req, res) => res.redirect('/stock'));      // 기본 루트
 
   console.log('✅ /api/stock 라우터 등록 완료');
