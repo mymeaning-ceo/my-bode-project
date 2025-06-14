@@ -127,21 +127,6 @@ router.get('/search', async (req, res) => {
 
 
 // 🔥 전체 삭제 라우터
-router.post('/delete-all', async (req, res) => {
-  const db = req.app.locals.db;
-  if (!db) return res.status(500).send('❌ DB 연결이 완료되지 않았습니다.');
-
-  try {
-    await db.collection('stock').deleteMany({});
-    if (req.flash) req.flash('성공메시지', '✅ 전체 삭제가 완료되었습니다.');
-    res.redirect('/stock');
-  } catch (err) {
-    console.error('❌ /stock/delete-all 오류:', err);
-    res.status(500).send('삭제 실패');
-  }
-});
-
-// 📥 엑셀 업로드 라우터
 router.post('/upload', upload.single('excelFile'), async (req, res) => {
   try {
     console.log('✅ POST /stock/upload 라우터 진입');
@@ -214,16 +199,11 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
         }
       }
     }, 60000);
+    
   } catch (err) {
-    if (err instanceof multer.MulterError) {
-      console.error('❌ Multer 에러:', err);
-      return res.status(400).send('업로드 실패: ' + err.message);
-    }
- 
-
-});
-
-
-
+    console.error('❌ 업로드 처리 중 예외 발생:', err);
+    res.status(500).send('서버 오류');
+  }
+});  // <-- router.post 끝
 
 module.exports = router;
