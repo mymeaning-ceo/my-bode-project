@@ -42,9 +42,9 @@ jobs:
           S3_BUCKET: dummy
           S3_REGION: dummy
 
-      # 6) Heroku CLI 설치 (버전 고정)
+      # 6) Heroku CLI 설치 (v2.0.0)
       - name: Setup Heroku CLI
-        uses: heroku/setup-heroku@v2.0.1
+        uses: heroku/setup-heroku@v2.0.0
         with:
           heroku-api-key: ${{ secrets.HEROKU_API_KEY }}
 
