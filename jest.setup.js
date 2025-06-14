@@ -15,7 +15,7 @@ jest.mock("./database", () => {
 jest.mock("./config/db", () => {
   const mockClient = { db: () => ({}) };
   const mockConnect = jest.fn().mockResolvedValue(mockClient);
-  mockConnect.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
+  mockConnect.then = (fn) => fn(mockClient);
   return {
     connectDB: mockConnect,
     closeDB: jest.fn().mockResolvedValue(),
@@ -23,13 +23,13 @@ jest.mock("./config/db", () => {
 });
 
 // ─────────────────────────────────────────────
-// 3) upload.js 모킹 (S3 설정 우회)
+// 3) upload.js 모킹 (S3 설정 우회 + single/array/fields 지원)
 // ─────────────────────────────────────────────
 jest.mock("./upload", () => ({
   ensureBucket: jest.fn().mockResolvedValue(),
-  single: () => (req, res, next) => next(),  // ← 추가
-  array: () => (req, res, next) => next(),   // ← 추가
-  fields: () => (req, res, next) => next(),  // ← 추가
+  single: () => (req, res, next) => next(),
+  array: () => (req, res, next) => next(),
+  fields: () => (req, res, next) => next(),
 }));
 
 // ─────────────────────────────────────────────
