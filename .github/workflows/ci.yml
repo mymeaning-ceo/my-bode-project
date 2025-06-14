@@ -44,7 +44,7 @@ jobs:
 
       # 6) Heroku CLI 설치 (v2.0.0)
       - name: Setup Heroku CLI
-        uses: heroku/setup-heroku@v2.0.0
+        uses: heroku/setup-heroku@v1
         with:
           heroku-api-key: ${{ secrets.HEROKU_API_KEY }}
 
