@@ -61,7 +61,7 @@ connectDB().then(() => {
   // ────────────────────────
   // 3) 라우터
   // ────────────────────────
-  app.use('/', routes);
+  // app.use('/', routes);
   app.use('/stock', require('./routes/stock'));          // 📄 페이지(간소화)
   app.use('/api/stock', require('./routes/api/stockApi')); // 📄 DataTables·업로드·삭제 API
   app.use('/', routes);                                   // 기존 라우터(index.js)
