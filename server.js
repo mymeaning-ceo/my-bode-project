@@ -61,9 +61,10 @@ connectDB().then(() => {
   // ────────────────────────
   // 3) 라우터
   // ────────────────────────
-  app.use('/stock', require('./routes/stock'));          // 페이지(간소화)
-  app.use('/api/stock', require('./routes/api/stockApi')); // DataTables·업로드·삭제 API
-  app.get('/', (req, res) => res.redirect('/stock'));     // 기본 루트
+  app.use('/', routes);
+  app.use('/stock', require('./routes/stock'));          // 📄 페이지(간소화)
+  app.use('/api/stock', require('./routes/api/stockApi')); // 📄 DataTables·업로드·삭제 API
+  app.use('/', routes);                                   // 기존 라우터(index.js)
 
   // ────────────────────────
   // 4) 에러 처리 (필요 시 주석 해제)
