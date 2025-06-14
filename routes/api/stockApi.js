@@ -1,4 +1,5 @@
-routconst express = require('express');
+// routes/api/stockApi.js
+const express = require('express');
 const router = express.Router();
 const stockCtrl = require('../../controllers/stockController');
 
@@ -10,4 +11,4 @@ router.delete('/', async (req, res) => {
   res.json({ message: '삭제 완료' });
 });
 
-module.exports = router;es/api/stockApi.js
+module.exports = router;
