@@ -12,11 +12,18 @@
   <!-- 네비게이션 -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
     <a class="navbar-brand fw-bold text-dark" href="/">
-      <% if (logo) { %>
+      <% if (typeof logo !== 'undefined' && logo) { %>
         <img src="<%= logo %>" alt="logo" class="brand-logo">
       <% } else { %>
         🩲 내의미
       <% } %>
+    </a>
+    ...
+    <% if (typeof 유저 === 'undefined' || !유저) { %>
+      <!-- 로그인 폼 -->
+    <% } else { %>
+      <!-- 로그인된 사용자용 메뉴 -->
+    <% } %>
     </a>
     <div class="ms-auto">
       <% if (!유저) { %>
