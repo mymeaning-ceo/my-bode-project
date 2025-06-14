@@ -9,7 +9,6 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const compression = require('compression');
 const connectDB = require('./config/db');
-const routes = require('./routes');
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 const { loadPermissions, permissionsMiddleware } = require('./middlewares/auth');
 
@@ -79,8 +78,7 @@ connectDB().then(() => {
   // ────────────────────────
   // app.use('/', routes);
   app.use('/stock', require('./routes/stock'));          // 📄 페이지(간소화)
-  app.use('/api/stock', require('./routes/api/stockApi')); // 📄 DataTables·업로드·삭제 API
-  app.use('/', routes);                                   // 기존 라우터(index.js)
+  app.use('/api/stock', require('./routes/api/stockApi')); // 📄 DataTables·업로드·삭제 API                         // 기존 라우터(index.js)
 
   // ────────────────────────
   // 4) 에러 처리
