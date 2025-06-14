@@ -18,14 +18,20 @@ jobs:
         with:
           mongodb-version: '6.0'
 
+      # Node 설정 + npm 캐시
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'npm'           # <-- 캐시 활성화
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - run: npm test
+      - name: Run tests
+        run: npm test
         env:
+          CI: true               # <-- CI 환경 변수
+          NODE_ENV: test
           MONGO_URI: mongodb://localhost:27017
           DB_NAME: testdb
           
