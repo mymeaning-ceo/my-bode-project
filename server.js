@@ -91,6 +91,7 @@ connectDB().then(() => {
   app.use((req, res, next) => {
   res.locals.유저 = req.user || null;
   res.locals.currentUrl = req.originalUrl;
+  res.locals.logo = '';            // ← 기본값
   next();
 });
   // ────────────────────────
@@ -98,7 +99,7 @@ connectDB().then(() => {
   // ────────────────────────
   app.use('/api/stock', require('./routes/api/stockApi')); // 재고 API
   app.use('/stock', require('./routes/stock'));            // 재고 페이지
-  
+
   app.use('/', require('./routes/auth'));                  // 로그인/회원가입
   app.use('/admin', require('./routes/admin'));            // 관리자
   app.use('/board', require('./routes/board'));            // 게시판
