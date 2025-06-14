@@ -1,6 +1,6 @@
 // jest.setup.js
 // ─────────────────────────────────────────────
-// 1) database.js 모킹 (함수 + then)
+// 1) database.js 모킹
 // ─────────────────────────────────────────────
 jest.mock("./database", () => {
   const mockClient = { db: () => ({}) };
@@ -30,21 +30,25 @@ jest.mock("./upload", () => ({
 }));
 
 // ─────────────────────────────────────────────
-// 4) multer 모킹 (업로드 미들웨어 우회)
+// 4) multer 모킹 (single/array/fields/diskStorage 전부)
 // ─────────────────────────────────────────────
 jest.mock("multer", () => {
-  const dummy = () => ({
+  const dummyMiddleware = () => ({
     single: () => (req, res, next) => next(),
     array: () => (req, res, next) => next(),
     fields: () => (req, res, next) => next(),
   });
-  dummy.single = () => (req, res, next) => next();
-  dummy.array = () => (req, res, next) => next();
-  dummy.fields = () => (req, res, next) => next();
-  return dummy;
+
+  // 개별 메서드
+  dummyMiddleware.single = () => (req, res, next) => next();
+  dummyMiddleware.array = () => (req, res, next) => next();
+  dummyMiddleware.fields = () => (req, res, next) => next();
+  dummyMiddleware.diskStorage = () => ({});
+
+  return dummyMiddleware;
 });
 
 // ─────────────────────────────────────────────
-// 5) 글로벌 타임아웃 설정
+// 5) 글로벌 타임아웃
 // ─────────────────────────────────────────────
-jest.setTimeout(30000); // 30초
+jest.setTimeout(30000);
