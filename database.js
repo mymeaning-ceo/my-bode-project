@@ -7,7 +7,6 @@ if (!url) {
   module.exports = async () => {
     throw new Error('MONGO_URI not provided');
   };
-  // return;  // ← 완전히 삭제
 }
 
 // ─────────────────────────────────────────
