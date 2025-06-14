@@ -6,9 +6,13 @@ const fs = require("fs");
 const path = require("path");
 const { checkLogin } = require("../middlewares/auth");
 
+// ─────────────────────────────────────────
+// 1) DB 연결
+// ─────────────────────────────────────────
+const { connectDB } = require("../config/db");
+
 let db;
-const connectDB = require("../database");
-connectDB
+connectDB()
   .then((client) => {
     db = client.db("forum");
   })
