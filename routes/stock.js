@@ -152,7 +152,7 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
     }
 
     const filePath = path.resolve(req.file.path);
-    const dbName = 'fprocess.env.DB_NAME
+    const dbName = 'fprocess.env.DB_NAME'
     const collectionName = 'stock';
 
     const python = spawn('python3', [
@@ -219,9 +219,7 @@ router.post('/upload', upload.single('excelFile'), async (req, res) => {
       console.error('❌ Multer 에러:', err);
       return res.status(400).send('업로드 실패: ' + err.message);
     }
-  }, 600000);
-
-});
+  }
 
 
 
