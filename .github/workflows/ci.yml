@@ -28,4 +28,6 @@ jobs:
         env:
           MONGO_URI: mongodb://localhost:27017
           DB_NAME: testdb
+          
           SESSION_SECRET: testsecret
+

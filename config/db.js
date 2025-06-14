@@ -1,5 +1,5 @@
 // config/db.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
@@ -8,17 +8,17 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000
+      socketTimeoutMS: 45000,
     });
     console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
   } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
+    console.error("❌ MongoDB connection error:", err.message);
     setTimeout(connectDB, 5000); // 5초 후 재시도
   }
 };
 
-mongoose.connection.on('disconnected', () => {
-  console.warn('⚠️ MongoDB disconnected. Reconnecting...');
+mongoose.connection.on("disconnected", () => {
+  console.warn("⚠️ MongoDB disconnected. Reconnecting...");
 });
 
 module.exports = connectDB;
