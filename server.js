@@ -1,280 +1,133 @@
-require('dotenv').config({ path: __dirname + '/.env' });
-const express = require('express');
-const app = express();
-const session = require('express-session');
-const { MongoClient, ObjectId } = require('mongodb');
-const methodOverride = require('method-override');
-const bcrypt = require('bcrypt');
-const multer = require('multer');
-const { spawn } = require('child_process');
-const fs = require('fs');
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
-const mongoose = require('mongoose');
-const MongoStore = require('connect-mongo');
-const path = require('path');
-const stockRouter = require('./routes/stock');
-const connectDB = require('./database');
-const { checkLogin, checkAdmin } = require('./middlewares/auth');
+// ─────────────────────────────────────────────────────────────
+// server.js
+//   - Express 앱 초기화 함수(initApp) 정의
+//   - 직접 실행 시(app.listen) 서버 기동
+//   - 테스트에서는 앱 객체만 가져가도록 분리
+// ─────────────────────────────────────────────────────────────
 
-// MongoDB connection
-mongoose.connect(process.env.DB_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log('✅ MongoDB connected'))
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
+require("dotenv").config();
+const express = require("express");
+const path = require("path");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
+const passport = require("passport");
+const methodOverride = require("method-override");
+const morgan = require("morgan");
+const helmet = require("helmet");
+const compression = require("compression");
+const expressLayouts = require("express-ejs-layouts");
+const { connectDB } = require("./config/db"); // DB 연결 함수
+
+const app = express();
+
+/**
+ * 앱 초기화 함수
+ * 1) MongoDB 연결
+ * 2) 미들웨어·라우터 설정
+ * 3) 초기화된 app 반환
+ */
+async function initApp() {
+  // 1) 데이터베이스 연결
+  const db = await connectDB();        // connectDB() 성공 시 mongoose.connection.db 반환
+  app.locals.db = db;
+
+  // Passport 설정
+  require("./config/passport")(passport, db);
+
+  // 2) 보안·성능 관련 미들웨어
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: [
+            "'self'",
+            "https://code.jquery.com",
+            "https://cdn.jsdelivr.net",
+            "https://cdn.datatables.net"
+          ],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "https://cdn.jsdelivr.net",
+            "https://cdn.datatables.net"
+          ],
+          fontSrc: ["'self'", "https://cdn.jsdelivr.net", "data:"],
+          imgSrc: ["'self'", "data:"]
+        }
+      }
+    })
+  );
+  app.use(compression());
+  app.use(morgan("dev"));
+
+  // 3) 정적 파일·파서
+  app.use(express.static(path.join(__dirname, "public")));
+  app.set("view engine", "ejs");
+  app.use(express.urlencoded({ extended: false }));
+  app.use(express.json());
+  app.use(methodOverride("_method"));
+
+  // 4) 레이아웃
+  app.use(expressLayouts);
+  app.set("layout", "layouts/main");
+
+  // 5) 세션
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+        dbName: process.env.DB_NAME,
+        collectionName: "sessions",
+        ttl: 60 * 60
+      }),
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 1000
+      }
+    })
+  );
+
+  // 6) Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // 7) EJS 전역 변수
+  app.use((req, res, next) => {
+    res.locals.유저 = req.user || null;
+    res.locals.currentUrl = req.originalUrl;
+    res.locals.logo = "";
+    next();
   });
 
-app.use(express.static(__dirname + '/public'));
-app.set('view engine', 'ejs');
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-// ─────────────────────────────────────────────
-// 1) 전역 locals 주입 미들웨어 (라우터 등록 전에 위치)
-// ─────────────────────────────────────────────
-app.use((req, res, next) => {
-  res.locals.유저 = req.user || null;      // 로그인 사용자 정보
-  res.locals.currentUrl = req.path || '';  // 현재 URL
-  next();
-});
-app.use(methodOverride('_method'));
-app.use('/api/stock', require('./routes/stockApi')); // ← JSON API
-app.use('/stock',     require('./routes/stock'));    // ← 화면 렌더링
+  // 8) 라우터
+  app.use("/api/stock", require("./routes/api/stockApi"));
+  app.use("/stock", require("./routes/stock"));
+  app.use("/", require("./routes/auth"));
+  app.use("/admin", require("./routes/admin"));
+  app.use("/board", require("./routes/board"));
+  app.use("/coupang", require("./routes/coupang"));
+  app.use("/coupang/add", require("./routes/coupangAdd"));
+  app.use("/help", require("./routes/help"));
+  app.get("/", (req, res) => res.redirect("/stock"));
 
-// 세션 설정
-app.use(session({
-  secret: '비밀키',
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.DB_URL,
-    dbName: 'forum',
-    collectionName: 'sessions',
-    ttl: 60 * 60
-  }),
-  cookie: { maxAge: 60 * 60 * 1000 }
-}));
+  console.log("✅ /api/stock 라우터 등록 완료");
+  return app; // 초기화 완료된 app 반환
+}
 
-// Passport 설정
-app.use(passport.initialize());
-app.use(passport.session());
-
-// 메뉴 라벨 정의
-const menuLabels = {
-  '/stock': '재고 관리',
-  '/coupang': '쿠팡 재고',
-  '/coupang/add': '매출/광고비',
-  '/list': '게시판',
-  '/write': '글 작성',
-  '/list/write': '글 작성',
-  '/admin': '관리자',
-  '/ocr': 'OCR',
-  '/voucher': '전표 입력'
-};
-
-let db;
-let permissions = {};
-
-async function loadPermissions() {
-  if (!db) return;
-  const docs = await db.collection('permissions').find().toArray();
-  permissions = {};
-  docs.forEach(d => {
-    permissions[d.view] = {
-      loginRequired: d.loginRequired,
-      allowedUsers: d.allowedUsers || []
-    };
+/**
+ * 직접 실행(node server.js)일 때만 서버 기동
+ * 테스트(require) 시에는 실행되지 않음
+ */
+if (require.main === module) {
+  initApp().then(() => {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`🚀  http://localhost:${PORT}`));
   });
 }
 
-global.loadPermissions = loadPermissions;
-
-// 접근 권한 체크 미들웨어
-app.use(async (req, res, next) => {
-  const config = permissions[req.path];
-  if (!config) return next();
-  if (config.loginRequired && !req.isAuthenticated()) {
-    return res.redirect('/login?redirect=' + req.path);
-  }
-  if (config.allowedUsers.length > 0 && (!req.isAuthenticated() || !config.allowedUsers.includes(String(req.user._id)))) {
-    return res.status(403).send('권한이 없습니다.');
-  }
-  next();
-});
-
-// 로고/배너 로드
-app.use(async (req, res, next) => {
-  if (!db) return next();
-  try {
-    const logoConfig = await db.collection('homepage').findOne({ key: 'logo' });
-    res.locals.logo = logoConfig?.img || '';
-    const banners = [];
-    for (let i = 1; i <= 4; i++) {
-      const doc = await db.collection('homepage').findOne({ key: 'banner' + i });
-      if (doc?.img) banners.push(doc.img);
-    }
-    res.locals.banners = banners;
-  } catch (err) {
-    console.error(err);
-    res.locals.logo = '';
-    res.locals.banners = [];
-  }
-  next();
-});
-
-
-// DB 연결 후 서버 시작
-connectDB.then(client => {
-  db = client.db('forum');
-  app.locals.db = db;
-  loadPermissions();
-
-  app.use('/', require('./routes/post'));
-  app.use('/stock', stockRouter);
-  app.use('/admin', require('./routes/admin'));
-  app.use('/shop', require('./routes/shop'));
-  app.use('/board/sub', require('./routes/board'));
-  app.use('/search', require('./routes/search'));
-  app.use('/coupang', require('./routes/coupang'));
-  app.use('/coupang/add', require('./routes/coupangAdd'));
-  app.use('/voucher', require('./routes/voucher'));
-  app.use('/ocr', require('./routes/ocr'));
-  app.use('/help', require('./routes/help'));
-  app.use('/', require('./routes/auth'));
-  
-
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`✅ http://localhost:${PORT} 에서 서버 실행중`);
-  });
-}).catch(console.error);
-
-// 인증 라우트들
-app.get('/secure', checkLogin, (req, res) => res.send('로그인 사용자'));
-app.get('/', (req, res) => res.render('index.ejs', { banners: res.locals.banners }));
-app.get('/dashboard', checkLogin, (req, res) => {
-  const menus = Object.keys(permissions).filter(v => {
-    const p = permissions[v];
-    if (p.loginRequired && !req.isAuthenticated()) return false;
-    if (p.allowedUsers.length > 0 && (!req.isAuthenticated() || !p.allowedUsers.includes(String(req.user._id)))) return false;
-    return true;
-  });
-  res.render('dashboard.ejs', { banners: res.locals.banners, menus, menuLabels });
-});
-
-// Passport 전략
-passport.use(new LocalStrategy(async (username, password, cb) => {
-  const result = await db.collection('user').findOne({ username });
-  if (!result) return cb(null, false, { message: '아이디 없음' });
-  const match = await bcrypt.compare(password, result.password);
-  if (!match) return cb(null, false, { message: '비번 불일치' });
-  return cb(null, result);
-}));
-
-passport.serializeUser((user, done) => {
-  process.nextTick(() => {
-    done(null, { id: user._id, username: user.username });
-  });
-});
-
-passport.deserializeUser(async (user, done) => {
-  const result = await db.collection('user').findOne({ _id: new ObjectId(user.id) });
-  delete result.password;
-  process.nextTick(() => done(null, result));
-});
-
-
-app.get('/login', (요청, 응답) => {
-  응답.render('login.ejs', { redirectTo: 요청.query.redirect || '/' });
-})
-
-app.post('/login', (요청, 응답, next) => {
-  passport.authenticate('local', (error, user, info) => {
-    if (error) return 응답.status(500).json(error);
-    if (!user) return 응답.status(401).json(info.message);
-
-    요청.logIn(user, (err) => {
-      if (err) return next(err);
-      응답.redirect('/dashboard');  // ✅ 로그인 후 이동할 페이지
-    });
-  })(요청, 응답, next);
-});
-
-app.get('/mypage', checkLogin, (요청, 응답) => {
-  응답.render('mypage.ejs', { 유저: 요청.user });
-});
-
-app.post('/mypage/password', checkLogin, async (req, res) => {
-  const { password, password2 } = req.body
-  if (password !== password2) {
-    return res.status(400).send('비밀번호가 일치하지 않습니다.')
-  }
-  const hash = await bcrypt.hash(password, 10)
-  await db.collection('user').updateOne(
-    { _id: new ObjectId(req.user._id) },
-    { $set: { password: hash } }
-  )
-  res.send('<script>alert("비밀번호가 변경되었습니다.");location.href="/mypage";</script>')
-})
-
-app.get('/profile', checkLogin, (req, res) => {
-  res.render('profile.ejs', { 유저: req.user });
-});
-
-app.post('/profile', checkLogin, async (req, res) => {
-  const { password, password2, email, phone } = req.body;
-  const update = {};
-  if (password) {
-    if (password !== password2) {
-      return res.status(400).send('비밀번호가 일치하지 않습니다.');
-    }
-    update.password = await bcrypt.hash(password, 10);
-  }
-  if (typeof email !== 'undefined') update.email = email;
-  if (typeof phone !== 'undefined') update.phone = phone;
-  if (Object.keys(update).length > 0) {
-    await db.collection('user').updateOne(
-      { _id: new ObjectId(req.user._id) },
-      { $set: update }
-    );
-  }
-  res.send('<script>alert("정보가 수정되었습니다.");location.href="/profile";</script>');
-});
-
-app.get('/register', (요청, 응답) => {
-  응답.render('register.ejs')
-})
-
-app.post('/register', async (요청, 응답) => {
-  const { username, password, password2 } = 요청.body;
-
-  // 비밀번호 불일치 확인
-  if (password !== password2) {
-    return 응답.status(400).send('비밀번호가 일치하지 않습니다.');
-  }
-
-  // 아이디 중복 확인
-  let 기존유저 = await db.collection('user').findOne({ username });
-  if (기존유저) {
-    return 응답.status(400).send('이미 존재하는 아이디입니다.');
-  }
-
-  // 비밀번호 해시 후 저장
-  let 해시 = await bcrypt.hash(password, 10);
-  await db.collection('user').insertOne({
-    username,
-    password: 해시
-  });
-
-  응답.redirect('/');
-});
-
-app.get('/logout', (req, res, next) => {
-  req.logout(err => {
-    if (err) return next(err);
-    res.redirect('/login');
-  });
-});
-
+module.exports = { app, initApp };

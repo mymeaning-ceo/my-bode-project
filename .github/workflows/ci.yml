@@ -1,0 +1,51 @@
+name: CI-CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # MongoDB 설치
+      - uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: '6.0'
+
+      # Node 설정 + npm 캐시
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # 의존성 설치
+      - name: Install dependencies
+        run: npm ci
+
+      # 테스트 실행
+      - name: Run tests
+        run: npm test
+        env:
+          CI: true
+          NODE_ENV: test
+          MONGO_URI: mongodb://localhost:27017
+          DB_NAME: testdb
+          SESSION_SECRET: testsecret
+          AWS_ACCESS_KEY_ID: dummy
+          AWS_SECRET_ACCESS_KEY: dummy
+          S3_BUCKET: dummy
+          S3_REGION: dummy
+
+      # Heroku 배포
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.13.15
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: your-heroku-app-name
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
