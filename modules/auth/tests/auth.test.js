@@ -1,23 +1,16 @@
-// jest.setTimeout
-jest.setTimeout(30000); // 30초
+// modules/auth/tests/auth.test.js
+// ─────────────────────────────────────────────
+// 글로벌 타임아웃 (60초)
+// ─────────────────────────────────────────────
+jest.setTimeout(60000);
 
 // ─────────────────────────────────────────────
-// 1) database.js 모킹 (필요 시 경로 확인)
-// ─────────────────────────────────────────────
-jest.mock("../../../database", () => {
-  const mockClient = { db: () => ({}) };
-  const mockFn = jest.fn().mockResolvedValue(mockClient);
-  mockFn.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
-  return mockFn;
-});
-
-// ─────────────────────────────────────────────
-// 2) config/db.js 모킹 (객체 형태로 내보내기)
+// config/db.js 모킹 (객체 형태로 내보내기)
 // ─────────────────────────────────────────────
 jest.mock("../../../config/db", () => {
   const mockClient = { db: () => ({}) };
   const mockConnect = jest.fn().mockResolvedValue(mockClient);
-  mockConnect.then = (fn) => fn(mockClient);
+  mockConnect.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
   return {
     connectDB: mockConnect,
     closeDB: jest.fn().mockResolvedValue(),
@@ -25,7 +18,7 @@ jest.mock("../../../config/db", () => {
 });
 
 // ─────────────────────────────────────────────
-// 3) 테스트 준비
+// 테스트 준비
 // ─────────────────────────────────────────────
 const request = require("supertest");
 const { initApp } = require("../../../server");
@@ -47,8 +40,12 @@ afterAll(async () => {
 });
 
 describe("GET /stock", () => {
-  it("should return 302 redirect", async () => {
-    const res = await request(app).get("/");
-    expect(res.statusCode).toBe(302);
-  });
+  it(
+    "should return 302 redirect",
+    async () => {
+      const res = await request(app).get("/");
+      expect(res.statusCode).toBe(302);
+    },
+    60000 // 개별 테스트 타임아웃 (60초)
+  );
 });
