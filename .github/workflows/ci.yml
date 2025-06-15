@@ -13,13 +13,13 @@ jobs:
 
     env:
       HEROKU_APP_NAME: mymeaning-backend
-      HEROKU_EMAIL:    andro3817@naver.com   # 필요 시 Secrets 로 교체
+      HEROKU_EMAIL:    andro3817@naver.com
 
     steps:
       # 1) 코드 체크아웃 (전체 히스토리)
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0          # ← shallow clone 문제 해결
+          fetch-depth: 0
 
       # 2) Node + 캐시
       - uses: actions/setup-node@v3
@@ -55,7 +55,15 @@ jobs:
           EOF
           heroku auth:whoami || true
 
-      # 7) Git push 배포
+      # 7) 빌드팩 순서 설정 (Node.js → Python)
+      - name: Configure Heroku buildpacks
+        run: |
+          heroku buildpacks:clear -a $HEROKU_APP_NAME
+          heroku buildpacks:add --index 1 heroku/nodejs -a $HEROKU_APP_NAME
+          heroku buildpacks:add --index 2 heroku/python -a $HEROKU_APP_NAME
+          heroku buildpacks -a $HEROKU_APP_NAME
+
+      # 8) Git push 배포
       - name: Deploy to Heroku
         run: |
           heroku git:remote -a $HEROKU_APP_NAME
