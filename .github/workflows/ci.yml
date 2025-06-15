@@ -14,6 +14,7 @@ jobs:
     # Job 전체에서 사용할 환경 변수
     env:
       HEROKU_APP_NAME: mymeaning-backend
+      HEROKU_EMAIL:    andro3817@naver.com   # 필요 시 Secrets 로 교체
 
     steps:
       # 1) 코드 체크아웃
@@ -38,16 +39,19 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      # 6) Heroku 로그인 (API Key 사용)
+      # 6) Heroku 로그인 (.netrc에 이메일+API Key 저장)
       - name: Login to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_EMAIL:   ${{ env.HEROKU_EMAIL }}
         run: |
           cat <<EOF > ~/.netrc
           machine api.heroku.com
-            login $HEROKU_API_KEY
+            login $HEROKU_EMAIL
+            password $HEROKU_API_KEY
           machine git.heroku.com
-            login $HEROKU_API_KEY
+            login $HEROKU_EMAIL
+            password $HEROKU_API_KEY
           EOF
           heroku auth:whoami || true
 
