@@ -3,9 +3,9 @@ name: CI-CD
 
 on:
   push:
-    branches: [main]           # main 브랜치에 push 시 실행
+    branches: [main]
   pull_request:
-    branches: [main]           # main 대상으로 PR 생성·업데이트 시 실행
+    branches: [main]
 
 jobs:
   build-test-deploy:
@@ -47,16 +47,12 @@ jobs:
       - name: Setup Heroku CLI
         uses: heroku/actions/setup-heroku@v2
         with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_api_key:  ${{ secrets.HEROKU_API_KEY }}
           heroku_email:    ${{ secrets.HEROKU_EMAIL }}
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}   # mymeaning-backend
 
-      # 7) Heroku 배포
+      # 7) Git push 방식으로 배포
       - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.13.15
-        with:
-          heroku_api_key:  ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}   # mymeaning-backend
-          heroku_email:    ${{ secrets.HEROKU_EMAIL }}
-          branch: main
-          usedocker: false
+        run: |
+          heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+          git push heroku HEAD:main --force
