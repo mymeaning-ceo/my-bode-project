@@ -1,146 +1,28 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer"); // 📌 파일 업로드 처리를 위한 multer
+const multer = require("multer");
 const path = require("path");
-const { spawn } = require("child_process"); // 📌 Python 스크립트 실행을 위한 spawn
+const { spawn } = require("child_process");
 
-// 📁 multer 설정: uploads/ 폴더에 엑셀 파일 저장
+// ───────────────────────────────────────────
+// 1. Multer 설정
+// ───────────────────────────────────────────
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = `excel_${Date.now()}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  },
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, `excel_${Date.now()}${path.extname(file.originalname)}`),
 });
 const upload = multer({ storage });
 
-// 📦 /stock 기본 페이지
-router.get("/", async (req, res) => {
-  const db = req.app.locals.db;
-  if (!db) return res.status(500).send("❌ DB 연결이 완료되지 않았습니다.");
+// ───────────────────────────────────────────
+// 2. /stock 기본 페이지 (생략)
+// ───────────────────────────────────────────
 
-  const page = parseInt(req.query.page) || 1;
-  const limit = 50;
-  const skip = (page - 1) * limit;
+// 🔍 /stock/search (생략)
 
-  try {
-    const totalCount = await db.collection("stock").countDocuments();
-    const latestArr = await db
-      .collection("stock")
-      .find()
-      .sort({ createdAt: -1, _id: -1 })
-      .limit(1)
-      .toArray();
-    const latestInfo = latestArr[0];
-
-    const 결과 = await db
-      .collection("stock")
-      .find()
-      .sort({ createdAt: -1, _id: -1 })
-      .skip(skip)
-      .limit(limit)
-      .toArray();
-
-    const 원하는필드 = [
-      "item_code",
-      "item_name",
-      "size_color",
-      "color",
-      "size",
-      "qty",
-      "allocation",
-    ];
-    const 필드 =
-      결과.length > 0
-        ? 원하는필드.filter((k) => Object.keys(결과[0]).includes(k))
-        : [];
-
-      res.render("stock", {
-      title: "📦 재고 관리",
-      결과,
-      필드,
-      전체필드: 필드,
-      현재페이지: page,
-      전체페이지수: Math.ceil(totalCount / limit),
-      검색어: "",
-      성공메시지: req.flash ? req.flash("성공메시지") : "",
-      latestInfo,
-    });
-  } catch (err) {
-    console.error("❌ /stock 오류:", err);
-    res.status(500).send("서버 오류 발생");
-  }
-});
-
-// 🔍 /stock/search 검색 기능
-router.get("/search", async (req, res) => {
-  const db = req.app.locals.db;
-  if (!db) return res.status(500).send("❌ DB 연결이 완료되지 않았습니다.");
-
-  const keyword = req.query.keyword || "";
-  const page = parseInt(req.query.page) || 1;
-  const limit = 50;
-  const skip = (page - 1) * limit;
-
-  try {
-    const query = {
-      $or: [
-        { item_name: { $regex: keyword, $options: "i" } },
-        { item_code: { $regex: keyword, $options: "i" } },
-      ],
-    };
-
-    const latestArr = await db
-      .collection("stock")
-      .find()
-      .sort({ createdAt: -1, _id: -1 })
-      .limit(1)
-      .toArray();
-    const latestInfo = latestArr[0];
-
-    const 결과 = await db
-      .collection("stock")
-      .find(query)
-      .sort({ createdAt: -1, _id: -1 })
-      .skip(skip)
-      .limit(limit)
-      .toArray();
-    const totalCount = await db.collection("stock").countDocuments(query);
-
-    const 원하는필드 = [
-      "item_code",
-      "item_name",
-      "size_color",
-      "color",
-      "size",
-      "qty",
-      "allocation",
-    ];
-    const 필드 =
-      결과.length > 0
-        ? 원하는필드.filter((k) => Object.keys(결과[0]).includes(k))
-        : [];
-
-      res.render("stock", {
-      title: "📦 재고 관리",
-      결과,
-      필드,
-      전체필드: 필드,
-      현재페이지: page,
-      전체페이지수: Math.ceil(totalCount / limit),
-      검색어: keyword,
-      성공메시지: req.flash ? req.flash("성공메시지") : "",
-      latestInfo,
-    });
-  } catch (err) {
-    console.error("❌ /stock/search 오류:", err);
-    res.status(500).send("서버 오류 발생");
-  }
-});
-
-// 🔥 전체 삭제 라우터
+// ───────────────────────────────────────────
+// 3. /stock/upload (엑셀 업로드)
+// ───────────────────────────────────────────
 router.post("/upload", upload.single("excelFile"), async (req, res) => {
   try {
     console.log("✅ POST /stock/upload 라우터 진입");
@@ -151,28 +33,29 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
     }
 
     const filePath = path.resolve(req.file.path);
-    const dbName = process.env.DB_NAME;
+    const dbName = process.env.DB_NAME || "mydb";
     const collectionName = "stock";
+    const PY_SCRIPT = path.join(__dirname, "../scripts/excel_to_mongo.py"); // ← 수정
 
     const python = spawn(
-      "python3",
-      ["scripts/excel_to_mongo.py", filePath, dbName, collectionName],
-      { shell: true },
+      "python",
+      ["-u", PY_SCRIPT, filePath, dbName, collectionName],
+      {
+        shell: true,
+        env: { ...process.env, PYTHONIOENCODING: "utf-8" },
+      }
     );
 
-    python.stdout.on("data", (data) => {
-      console.log(`📤 Python STDOUT: ${data.toString()}`);
-    });
-
-    python.stderr.on("data", (data) => {
-      console.error(`⚠️ Python STDERR: ${data.toString()}`);
-    });
+    python.stdout.on("data", (data) =>
+      console.log(`📤 Python STDOUT: ${data.toString()}`)
+    );
+    python.stderr.on("data", (data) =>
+      console.error(`⚠️ Python STDERR: ${data.toString()}`)
+    );
 
     python.on("error", (err) => {
       console.error("🚨 Python 실행 실패:", err);
-      if (!res.headersSent) {
-        res.status(500).send("❌ Python 실행 실패");
-      }
+      if (!res.headersSent) res.status(500).send("❌ Python 실행 실패");
     });
 
     python.on("close", async (code) => {
@@ -183,19 +66,17 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
         try {
           const db = req.app.locals.db;
           if (db) {
-            await db.collection("stock").updateMany(
+            await db.collection(collectionName).updateMany(
               {},
               {
                 $set: {
                   createdAt: new Date(),
                   uploadedBy: req.user ? req.user.username : "알 수 없음",
                 },
-              },
+              }
             );
           }
-          if (req.flash) {
-            req.flash("성공메시지", "✅ 엑셀 업로드가 완료되었습니다.");
-          }
+          if (req.flash) req.flash("성공메시지", "✅ 엑셀 업로드가 완료되었습니다.");
           return res.redirect("/stock");
         } catch (err) {
           console.error("❌ 업로드 후 처리 실패:", err);
@@ -206,19 +87,18 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
       }
     });
 
+    // 60초 타임아웃
     setTimeout(() => {
       if (!python.killed) {
         python.kill("SIGTERM");
         console.error("⏱️ Python 실행 시간 초과로 종료");
-        if (!res.headersSent) {
-          res.status(500).send("❌ Python 실행 시간 초과");
-        }
+        if (!res.headersSent) res.status(500).send("❌ Python 실행 시간 초과");
       }
     }, 60000);
   } catch (err) {
     console.error("❌ 업로드 처리 중 예외 발생:", err);
     res.status(500).send("서버 오류");
   }
-}); // <-- router.post 끝
+});
 
 module.exports = router;
