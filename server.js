@@ -50,9 +50,16 @@ async function initApp() {
   app.set("view engine", "ejs");
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
-  app.use(methodOverride("_method"));
+  app.use(methodOverride("_method"))
+  app.use((req, res, next) => {
+  res.locals.currentUrl = req.originalUrl;
+  next();
+});
 
+
+  
   app.use(expressLayouts);
+  
   app.set("layout", "layouts/main");
 
   app.use(
