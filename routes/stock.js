@@ -15,12 +15,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ───────────────────────────────────────────
-// 2. /stock 기본 페이지 (생략)
-// ───────────────────────────────────────────
-
-// 🔍 /stock/search (생략)
-
-// ───────────────────────────────────────────
 // 3. /stock/upload (엑셀 업로드)
 // ───────────────────────────────────────────
 router.post("/upload", upload.single("excelFile"), async (req, res) => {
@@ -33,16 +27,20 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
     }
 
     const filePath = path.resolve(req.file.path);
-    const dbName = process.env.DB_NAME || "mydb";
+    const dbName = process.env.DB_NAME || "forum";       // ← DB 이름
     const collectionName = "stock";
-    const PY_SCRIPT = path.join(__dirname, "../scripts/excel_to_mongo.py"); // ← 수정
+    const PY_SCRIPT = path.join(__dirname, "../scripts/excel_to_mongo.py");
 
     const python = spawn(
       "python",
       ["-u", PY_SCRIPT, filePath, dbName, collectionName],
       {
         shell: true,
-        env: { ...process.env, PYTHONIOENCODING: "utf-8" },
+        env: {
+          ...process.env,
+          PYTHONIOENCODING: "utf-8",
+          MONGO_URI: process.env.MONGO_URI,              // ← URI 전달
+        },
       }
     );
 
