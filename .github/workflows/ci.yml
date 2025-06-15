@@ -11,6 +11,10 @@ jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
 
+    # Job 전체에서 사용할 환경 변수
+    env:
+      HEROKU_APP_NAME: mymeaning-backend
+
     steps:
       # 1) 코드 체크아웃
       - uses: actions/checkout@v3
@@ -49,8 +53,6 @@ jobs:
 
       # 7) Git push 방식 배포
       - name: Deploy to Heroku
-        env:
-          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
           heroku git:remote -a $HEROKU_APP_NAME
           git push heroku HEAD:main --force
