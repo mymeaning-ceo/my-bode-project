@@ -29,14 +29,25 @@ jobs:
         env:
           NODE_ENV: test
 
-      # 5) Heroku CLI 설치 + 로그인
-      - name: Setup Heroku CLI
-        uses: jctaveras/setup-heroku@v1
-        with:
-          email:   ${{ secrets.HEROKU_EMAIL }}
-          api_key: ${{ secrets.HEROKU_API_KEY }}
+      # 5) Heroku CLI 설치 (공식 스크립트)
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
 
-      # 6) Git push 방식 배포
+      # 6) Heroku 로그인 (API Key 사용)
+      - name: Login to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          cat <<EOF > ~/.netrc
+          machine api.heroku.com
+            login $HEROKU_API_KEY
+          machine git.heroku.com
+            login $HEROKU_API_KEY
+          EOF
+          heroku auth:whoami || true
+
+      # 7) Git push 방식 배포
       - name: Deploy to Heroku
         run: |
           heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
