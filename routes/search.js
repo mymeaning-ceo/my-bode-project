@@ -1,13 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-const connectDB = require("../database"); // 데이터베이스 연결 모듈 경로 확인
-let db;
-connectDB.then((client) => {
-  db = client.db("forum"); // DB 이름 확인
-});
-
+// 🔹 검색 라우트 (GET /search?val=...&page=...)
 router.get("/", async (req, res) => {
+  const db = req.app.locals.db; // 서버에서 저장한 DB 인스턴스 사용
   const val = req.query.val?.trim();
   if (!val) return res.redirect("/list");
 
@@ -42,21 +38,26 @@ router.get("/", async (req, res) => {
     { $count: "total" },
   ];
 
-  const result = await db.collection("post").aggregate(pipeline).toArray();
-  const countResult = await db
-    .collection("post")
-    .aggregate(countPipeline)
-    .toArray();
+  try {
+    const result = await db.collection("post").aggregate(pipeline).toArray();
+    const countResult = await db
+      .collection("post")
+      .aggregate(countPipeline)
+      .toArray();
 
-  const total = countResult[0]?.total || 0;
-  const totalPage = Math.ceil(total / limit);
+    const total = countResult[0]?.total || 0;
+    const totalPage = Math.ceil(total / limit);
 
-  res.render("search.ejs", {
-    글목록: result,
-    현재페이지: page,
-    전체페이지: totalPage,
-    val,
-  });
+    res.render("search.ejs", {
+      글목록: result,
+      현재페이지: page,
+      전체페이지: totalPage,
+      val,
+    });
+  } catch (err) {
+    console.error("❌ 검색 오류:", err);
+    res.status(500).send("서버 오류");
+  }
 });
 
 module.exports = router;

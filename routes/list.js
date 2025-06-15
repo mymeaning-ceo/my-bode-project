@@ -5,9 +5,7 @@ const { checkLogin } = require("../middlewares/auth");
 const upload = require("../upload.js");
 const moment = require("moment");
 
-// ─────────────────────────────────────────
-// 게시글 목록 (GET /post, /post/:page)
-// ─────────────────────────────────────────
+// 🔹 게시글 목록 (GET /list, /list/:page)
 router.get(["/", "/:page"], checkLogin, async (req, res) => {
   const db = req.app.locals.db;
   try {
@@ -42,7 +40,7 @@ router.get(["/", "/:page"], checkLogin, async (req, res) => {
       );
     });
 
-    res.render("post/list.ejs", {
+    res.render("list.ejs", {
       글목록: result,
       유저: req.user,
       현재페이지: page,
@@ -55,16 +53,12 @@ router.get(["/", "/:page"], checkLogin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
-// 글쓰기 페이지 (GET /post/write)
-// ─────────────────────────────────────────
+// 🔹 글쓰기 페이지
 router.get("/write", checkLogin, (req, res) => {
-  res.render("post/write.ejs", { 유저: req.user });
+  res.render("write.ejs", { 유저: req.user });
 });
 
-// ─────────────────────────────────────────
-// 게시글 등록 (POST /post/add)
-// ─────────────────────────────────────────
+// 🔹 게시글 등록
 router.post("/add", upload.single("img1"), checkLogin, async (req, res) => {
   const db = req.app.locals.db;
   try {
@@ -77,16 +71,14 @@ router.post("/add", upload.single("img1"), checkLogin, async (req, res) => {
       username: req.user.username,
       createdAt: new Date(),
     });
-    res.redirect("/post");
+    res.redirect("/list");
   } catch (e) {
     console.error("📌 게시글 등록 오류:", e);
     res.status(500).send("서버 오류");
   }
 });
 
-// ─────────────────────────────────────────
-// 게시글 상세 보기 (GET /post/detail/:id)
-// ─────────────────────────────────────────
+// 🔹 게시글 상세 보기
 router.get("/detail/:id", checkLogin, async (req, res) => {
   const db = req.app.locals.db;
   try {
@@ -101,7 +93,7 @@ router.get("/detail/:id", checkLogin, async (req, res) => {
       .sort({ createdAt: 1 })
       .toArray();
 
-    res.render("post/detail.ejs", {
+    res.render("detail.ejs", {
       게시물: result,
       유저: req.user,
       댓글: comments,
@@ -112,9 +104,7 @@ router.get("/detail/:id", checkLogin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
-// 게시글 수정 페이지 (GET /post/edit/:id)
-// ─────────────────────────────────────────
+// 🔹 게시글 수정
 router.get("/edit/:id", checkLogin, async (req, res) => {
   const db = req.app.locals.db;
   try {
@@ -122,17 +112,15 @@ router.get("/edit/:id", checkLogin, async (req, res) => {
       _id: new ObjectId(req.params.id),
       user: req.user._id,
     });
+
     if (!result) return res.status(403).send("수정 권한이 없습니다.");
-    res.render("post/edit.ejs", { result });
+    res.render("edit.ejs", { result });
   } catch (e) {
     console.error("❌ 수정 페이지 오류:", e);
     res.status(500).send("서버 오류");
   }
 });
 
-// ─────────────────────────────────────────
-// 게시글 수정 (PUT /post/edit)
-// ─────────────────────────────────────────
 router.put("/edit", checkLogin, async (req, res) => {
   const db = req.app.locals.db;
   try {
@@ -152,16 +140,14 @@ router.put("/edit", checkLogin, async (req, res) => {
     if (result.matchedCount === 0)
       return res.status(403).send("수정 권한이 없습니다.");
 
-    res.redirect("/post");
+    res.redirect("/list");
   } catch (e) {
     console.error("❌ 수정 중 오류 발생:", e);
     res.status(500).send("수정 실패");
   }
 });
 
-// ─────────────────────────────────────────
-// 게시글 삭제 (DELETE /post/delete?docid=...)
-// ─────────────────────────────────────────
+// 🔹 게시글 삭제
 router.delete("/delete", checkLogin, async (req, res) => {
   const db = req.app.locals.db;
   try {
@@ -186,9 +172,7 @@ router.delete("/delete", checkLogin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
-// 댓글 작성 (POST /post/comment/add)
-// ─────────────────────────────────────────
+// 🔹 댓글 작성
 router.post("/comment/add", checkLogin, async (req, res) => {
   const db = req.app.locals.db;
   try {
@@ -199,16 +183,14 @@ router.post("/comment/add", checkLogin, async (req, res) => {
       username: req.user.username,
       createdAt: new Date(),
     });
-    res.redirect("/post/detail/" + req.body.postId);
+    res.redirect("/detail/" + req.body.postId);
   } catch (e) {
     console.error("❌ 댓글 등록 오류:", e);
     res.status(500).send("서버 오류");
   }
 });
 
-// ─────────────────────────────────────────
-// 댓글 수정 (PUT /post/comment/edit)
-// ─────────────────────────────────────────
+// 🔹 댓글 수정
 router.put("/comment/edit", checkLogin, async (req, res) => {
   const db = req.app.locals.db;
   try {
@@ -232,9 +214,7 @@ router.put("/comment/edit", checkLogin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
-// 댓글 삭제 (DELETE /post/comment/delete?id=...)
-// ─────────────────────────────────────────
+// 🔹 댓글 삭제
 router.delete("/comment/delete", checkLogin, async (req, res) => {
   const db = req.app.locals.db;
   try {
@@ -248,6 +228,7 @@ router.delete("/comment/delete", checkLogin, async (req, res) => {
 
     res.sendStatus(200);
   } catch (e) {
+
     console.error("❌ 댓글 삭제 오류:", e);
     res.status(500).send("서버 오류");
   }

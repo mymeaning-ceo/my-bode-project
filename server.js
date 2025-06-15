@@ -9,17 +9,21 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
 const expressLayouts = require("express-ejs-layouts");
-const flash = require("connect-flash");               // ★ 추가
+const flash = require("connect-flash");
 const { connectDB } = require("./config/db");
+const mainRouter = require("./routes");
 
 const app = express();
 
 async function initApp() {
+  // 1. MongoDB 연결
   const db = await connectDB();
   app.locals.db = db;
 
+  // 2. Passport 설정
   require("./config/passport")(passport, db);
 
+  // 3. 보안 & 성능 미들웨어
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -35,23 +39,17 @@ async function initApp() {
   );
   app.use(compression());
   app.use(morgan("dev"));
+
+  // 4. 기본 설정
   app.use(express.static(path.join(__dirname, "public")));
   app.set("view engine", "ejs");
+  app.use(expressLayouts);
+  app.set("layout", "layouts/main");
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
-  app.use(methodOverride("_method"))
-  app.use((req, res, next) => {
-  res.locals.currentUrl = req.originalUrl;
-  next();
-});
-
-
-  
   app.use(methodOverride("_method"));
-  app.use(expressLayouts);
-  
-  app.set("layout", "layouts/main");
 
+  // 5. 세션, Passport, Flash
   app.use(
     session({
       secret: process.env.SESSION_SECRET,
@@ -70,12 +68,11 @@ async function initApp() {
       },
     })
   );
-
   app.use(passport.initialize());
   app.use(passport.session());
-  app.use(flash());                                   // ★ 추가
+  app.use(flash());
 
-  // 전역 변수
+  // 6. 전역 변수
   app.use((req, res, next) => {
     res.locals.유저 = req.user || null;
     res.locals.currentUrl = req.originalUrl;
@@ -85,26 +82,23 @@ async function initApp() {
     next();
   });
 
-  // 라우터
-  app.use("/board", require("./routes/board"));
-  app.use("/coupang", require("./routes/coupang"));
-  app.use("/coupang/add", require("./routes/coupangAdd"));
-  app.use("/help", require("./routes/help"));
+  // 7. 라우터 연결
+  app.use("/", mainRouter);
 
-  // 기본/대시보드
+  // 8. 기본 경로 처리
   app.get("/", (req, res) => res.redirect("/dashboard"));
   app.get("/dashboard", (req, res) =>
     res.sendFile(path.join(__dirname, "public", "dashboard.html"))
   );
 
-  console.log("✅ /api/stock 라우터 등록 완료");
+  console.log("✅ 서버 초기화 완료");
   return app;
 }
 
 if (require.main === module) {
   initApp().then(() => {
     const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`🚀  http://localhost:${PORT}`));
+    app.listen(PORT, () => console.log(`🚀 서버 실행 중: http://localhost:${PORT}`));
   });
 }
 

@@ -1,23 +1,24 @@
-require('dotenv').config(); // ⭐ 환경변수 먼저 로드
-const { MongoClient } = require('mongodb');
+require("dotenv").config(); // ⭐ 환경변수 먼저 로드
+const { MongoClient } = require("mongodb");
 
 const url = process.env.MONGO_URI;
 if (!url) {
-  console.error('❌ MONGO_URI 환경변수가 설정되지 않았습니다.');
-  module.exports = async () => {
-    throw new Error('MONGO_URI not provided');
+  console.error("❌ MONGO_URI 환경변수가 설정되지 않았습니다.");
+  const connectDB = async () => {
+    throw new Error("MONGO_URI not provided");
   };
+  module.exports = { connectDB };
   return;
 }
 
 // ─────────────────────────────────────────
 // 테스트 환경: 목(Mock) 클라이언트 반환
 // ─────────────────────────────────────────
-if (process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === "test") {
   const mockDb = {}; // 필요한 최소 인터페이스
-  const mockFn = async () => mockDb;
-  mockFn.then = (fn) => fn(mockDb); // connectDB.then(...) 호환
-  module.exports = mockFn;
+  const connectDB = async () => mockDb;
+  connectDB.then = (fn) => fn(mockDb); // connectDB.then(...) 호환
+  module.exports = { connectDB };
   return;
 }
 
@@ -32,11 +33,12 @@ const client = new MongoClient(url);
  */
 const connectDB = async () => {
   await client.connect();
-  console.log('✅ MongoDB 연결 성공');
-  return client.db(process.env.DB_NAME || 'forum'); // DB 객체 반환
+  console.log("✅ MongoDB 연결 성공");
+  return client.db(process.env.DB_NAME || "forum"); // DB 객체 반환
 };
 
 // connectDB.then(...) 패턴 호환
 connectDB.then = (fn) => connectDB().then(fn);
 
-module.exports = connectDB;
+// 객체 형태로 내보내기
+module.exports = { connectDB };

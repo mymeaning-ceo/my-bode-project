@@ -1,15 +1,19 @@
 jest.setTimeout(30000); // 30초
 
-// database.js 모킹 (함수 + then)
-jest.mock("../database", () => {
+// ─────────────────────────────────────────
+// 1) database.js 모킹
+// ─────────────────────────────────────────
+jest.mock("../../database", () => {
   const mockClient = { db: () => ({}) };
   const mockFn = jest.fn().mockResolvedValue(mockClient);
   mockFn.then = (fn) => fn(mockClient);
   return mockFn;
 });
 
-// config/db.js 모킹
-jest.mock("../config/db", () => {
+// ─────────────────────────────────────────
+// 2) config/db.js 모킹
+// ─────────────────────────────────────────
+jest.mock("../../config/db", () => {
   const mockClient = { db: () => ({}) };
   const mockConnect = jest.fn().mockResolvedValue(mockClient);
   mockConnect.then = (fn) => fn(mockClient);
@@ -20,8 +24,8 @@ jest.mock("../config/db", () => {
 });
 
 const request = require("supertest");
-const { initApp } = require("../server");
-const { closeDB } = require("../config/db");
+const { initApp } = require("../../server");
+const { closeDB } = require("../../config/db");
 
 let app;
 
@@ -41,6 +45,6 @@ afterAll(async () => {
 describe("GET /stock", () => {
   it("should return 302 redirect (CI 환경)", async () => {
     const res = await request(app).get("/");
-  expect(res.statusCode).toBe(302);
+    expect(res.statusCode).toBe(302);
   });
 });

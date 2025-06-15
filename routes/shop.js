@@ -1,24 +1,63 @@
-const router = require("express").Router();
+const express = require("express");
+const router = express.Router();
 
-let connectDB = require("./../database.js");
+// 🔹 검색 라우트 (GET /search?val=...&page=...)
+router.get("/", async (req, res) => {
+  const db = req.app.locals.db; // 서버에서 저장한 DB 인스턴스 사용
+  const val = req.query.val?.trim();
+  if (!val) return res.redirect("/list");
 
-let db;
+  const page = parseInt(req.query.page || "1");
+  const limit = 5;
+  const skip = (page - 1) * limit;
 
-connectDB
-  .then((client) => {
-    console.log("DB연결성공");
-    db = client.db("forum");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+  const pipeline = [
+    {
+      $search: {
+        index: "title_index",
+        text: {
+          query: val,
+          path: "title",
+        },
+      },
+    },
+    { $skip: skip },
+    { $limit: limit },
+  ];
 
-router.get("/shirts", (요청, 응답) => {
-  응답.send("셔츠 파는 페이지입니다");
-});
+  const countPipeline = [
+    {
+      $search: {
+        index: "title_index",
+        text: {
+          query: val,
+          path: "title",
+        },
+      },
+    },
+    { $count: "total" },
+  ];
 
-router.get("/pants", (요청, 응답) => {
-  응답.send("바지 파는 페이지입니다");
+  try {
+    const result = await db.collection("post").aggregate(pipeline).toArray();
+    const countResult = await db
+      .collection("post")
+      .aggregate(countPipeline)
+      .toArray();
+
+    const total = countResult[0]?.total || 0;
+    const totalPage = Math.ceil(total / limit);
+
+    res.render("search.ejs", {
+      글목록: result,
+      현재페이지: page,
+      전체페이지: totalPage,
+      val,
+    });
+  } catch (err) {
+    console.error("❌ 검색 오류:", err);
+    res.status(500).send("서버 오류");
+  }
 });
 
 module.exports = router;

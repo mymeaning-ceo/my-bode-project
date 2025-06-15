@@ -4,39 +4,40 @@ const multer = require("multer");
 const xlsx = require("xlsx");
 const fs = require("fs");
 const path = require("path");
-
-// Tesseract.js를 이용해 Tesseract OCR 엔진을 사용한다
 const { createWorker } = require("tesseract.js");
 const { ObjectId } = require("mongodb");
 
-const connectDB = require("../database");
-let db;
-connectDB.then((client) => {
-  db = client.db("forum");
-});
-
+// ─────────────────────────────────────────
+// Multer 설정
+// ─────────────────────────────────────────
 const uploadsDir = path.join(__dirname, "../uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 const upload = multer({ dest: uploadsDir });
 
-// 전표 목록을 조회한다. 저장된 필드 중 "매출금액"의 합계를 계산하여 화면에 전달한다.
+// ─────────────────────────────────────────
+// 전표 목록 조회
+// ─────────────────────────────────────────
 router.get("/", async (req, res) => {
-  const list = db
-    ? await db.collection("vouchers").find().sort({ createdAt: -1 }).toArray()
-    : [];
-  const rows = db
-    ? await db
-        .collection("voucherRecords")
-        .find()
-        .sort({ 전표일자: -1 })
-        .toArray()
-    : [];
-  // 새로운 필드명에 맞춰 총액을 계산한다.
+  const db = req.app.locals.db;
+  const list = await db
+    .collection("vouchers")
+    .find()
+    .sort({ createdAt: -1 })
+    .toArray();
+  const rows = await db
+    .collection("voucherRecords")
+    .find()
+    .sort({ 전표일자: -1 })
+    .toArray();
   const total = list.reduce((acc, v) => acc + (v["매출금액"] || 0), 0);
   res.render("voucher.ejs", { list, rows, total, logs: null });
 });
 
+// ─────────────────────────────────────────
+// 전표 이미지 OCR 업로드
+// ─────────────────────────────────────────
 router.post("/upload", upload.single("image"), async (req, res) => {
+  const db = req.app.locals.db;
   if (!req.file) return res.status(400).send("전표 이미지를 업로드해주세요.");
 
   const logs = [];
@@ -49,59 +50,67 @@ router.post("/upload", upload.single("image"), async (req, res) => {
     },
   });
   const lang = process.env.TESS_LANG || "kor+eng";
+
   try {
     await worker.load();
-    // 언어 데이터는 환경변수 TESS_LANG 로 지정 가능
     await worker.loadLanguage(lang);
     await worker.initialize(lang);
     await worker.setParameters({
       tessedit_pageseg_mode: "6",
       user_defined_dpi: "300",
     });
+
     const {
       data: { text },
     } = await worker.recognize(req.file.path);
     logs.push("✅ OCR 인식 완료");
     await worker.terminate();
     fs.unlink(req.file.path, () => {});
+
     const fields = await parseVoucher(text);
-    if (fields && db) {
+    if (fields) {
       await db
         .collection("vouchers")
         .insertOne({ ...fields, createdAt: new Date() });
     }
-    const list = db
-      ? await db.collection("vouchers").find().sort({ createdAt: -1 }).toArray()
-      : [];
-    const excelRows = db
-      ? await db
-          .collection("voucherRecords")
-          .find()
-          .sort({ 전표일자: -1 })
-          .toArray()
-      : [];
+
+    const list = await db
+      .collection("vouchers")
+      .find()
+      .sort({ createdAt: -1 })
+      .toArray();
+    const excelRows = await db
+      .collection("voucherRecords")
+      .find()
+      .sort({ 전표일자: -1 })
+      .toArray();
     const total = list.reduce((acc, v) => acc + (v["매출금액"] || 0), 0);
     res.render("voucher.ejs", { list, rows: excelRows, total, logs });
   } catch (err) {
     console.error("Voucher OCR error:", err);
     fs.unlink(req.file.path, () => {});
     logs.push("❌ 전표 처리 실패");
-    const list = db
-      ? await db.collection("vouchers").find().sort({ createdAt: -1 }).toArray()
-      : [];
-    const excelRows = db
-      ? await db
-          .collection("voucherRecords")
-          .find()
-          .sort({ 전표일자: -1 })
-          .toArray()
-      : [];
+
+    const list = await db
+      .collection("vouchers")
+      .find()
+      .sort({ createdAt: -1 })
+      .toArray();
+    const excelRows = await db
+      .collection("voucherRecords")
+      .find()
+      .sort({ 전표일자: -1 })
+      .toArray();
     const total = list.reduce((acc, v) => acc + (v["매출금액"] || 0), 0);
     res.render("voucher.ejs", { list, rows: excelRows, total, logs });
   }
 });
 
+// ─────────────────────────────────────────
+// 엑셀 업로드
+// ─────────────────────────────────────────
 router.post("/excel", upload.single("excelFile"), async (req, res) => {
+  const db = req.app.locals.db;
   try {
     if (!req.file)
       return res.status(400).send("엑셀 파일이 업로드되지 않았습니다.");
@@ -119,16 +128,16 @@ router.post("/excel", upload.single("excelFile"), async (req, res) => {
     if (rows.length > 0) await db.collection("voucherRecords").insertMany(rows);
     fs.unlink(req.file.path, () => {});
 
-    const list = db
-      ? await db.collection("vouchers").find().sort({ createdAt: -1 }).toArray()
-      : [];
-    const excelRows = db
-      ? await db
-          .collection("voucherRecords")
-          .find()
-          .sort({ 전표일자: -1 })
-          .toArray()
-      : [];
+    const list = await db
+      .collection("vouchers")
+      .find()
+      .sort({ createdAt: -1 })
+      .toArray();
+    const excelRows = await db
+      .collection("voucherRecords")
+      .find()
+      .sort({ 전표일자: -1 })
+      .toArray();
     const total = list.reduce((acc, v) => acc + (v["매출금액"] || 0), 0);
     res.render("voucher.ejs", { list, rows: excelRows, total, logs: null });
   } catch (err) {
@@ -137,7 +146,11 @@ router.post("/excel", upload.single("excelFile"), async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────
+// 선택 삭제
+// ─────────────────────────────────────────
 router.post("/delete-selected", async (req, res) => {
+  const db = req.app.locals.db;
   try {
     const ids = Array.isArray(req.body.ids) ? req.body.ids : [req.body.ids];
     if (ids && ids.length > 0) {
@@ -152,15 +165,18 @@ router.post("/delete-selected", async (req, res) => {
   }
 });
 
-// OCR로 추출한 텍스트(ID)를 전표 데이터로 변환하여 저장
+// ─────────────────────────────────────────
+// OCR 텍스트 → 전표 데이터 변환
+// ─────────────────────────────────────────
 router.post("/import/:id", async (req, res) => {
-  if (!db) return res.status(500).send("DB 연결 실패");
+  const db = req.app.locals.db;
   const { id } = req.params;
   try {
     const doc = await db
       .collection("ocrtexts")
       .findOne({ _id: new ObjectId(id) });
     if (!doc) return res.status(404).send("OCR 데이터가 없습니다.");
+
     const fields = await parseVoucher(doc.text);
     if (fields) {
       await db
@@ -175,11 +191,14 @@ router.post("/import/:id", async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────
+// GPT를 이용해 전표 텍스트 파싱
+// ─────────────────────────────────────────
 async function parseVoucher(text) {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) return null;
-    // 새롭게 정의된 필드를 GPT에게 요청한다.
+
     const prompt = `다음 전표 내용에서 전표 매출일, 공급 세액, 세함가, 상품명, 품명, 출고수량, 매출단가, 매출금액을 JSON으로 반환해 주세요.\n${text}`;
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
