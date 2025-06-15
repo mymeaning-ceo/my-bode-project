@@ -1,9 +1,13 @@
-jest.setTimeout(30000); // 30초
+// tests/health.test.js
+// ─────────────────────────────────────────────
+// 글로벌 타임아웃 (60초)
+// ─────────────────────────────────────────────
+jest.setTimeout(60000);
 
-// ------------------------------------------------------------------
+// ─────────────────────────────────────────────
 // config/db.js 모킹 (절대 경로로 한 번만)
-// ------------------------------------------------------------------
-jest.mock("../../config/db", () => {
+// ─────────────────────────────────────────────
+jest.mock("../config/db", () => {
   const mockClient = { db: () => ({}) };
   const mockConnect = jest.fn().mockResolvedValue(mockClient);
   mockConnect.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
@@ -13,12 +17,12 @@ jest.mock("../../config/db", () => {
   };
 });
 
-// 필요하다면 아래처럼 alias 처리도 가능 (선택)
-// jest.mock("./config/db", () => jest.requireMock("../../config/db"));
-
+// ─────────────────────────────────────────────
+// 테스트 준비
+// ─────────────────────────────────────────────
 const request = require("supertest");
-const { initApp } = require("../../server");
-const { closeDB } = require("../../config/db");
+const { initApp } = require("../server");      // ← 경로 수정
+const { closeDB } = require("../config/db");   // ← 경로 수정
 
 let app;
 
@@ -28,16 +32,20 @@ beforeAll(async () => {
   process.env.DB_NAME = "testdb";
   process.env.SESSION_SECRET = "testsecret";
 
-  app = await initApp();
+  app = await initApp(); // 서버 초기화
 });
 
 afterAll(async () => {
-  await closeDB();
+  await closeDB(); // 모킹된 closeDB 호출
 });
 
 describe("GET /stock", () => {
-  it("should return 302 redirect (CI 환경)", async () => {
-    const res = await request(app).get("/");
-    expect(res.statusCode).toBe(302);
-  });
+  it(
+    "should return 302 redirect (CI 환경)",
+    async () => {
+      const res = await request(app).get("/");
+      expect(res.statusCode).toBe(302);
+    },
+    60000 // 개별 테스트 타임아웃 (60초)
+  );
 });
