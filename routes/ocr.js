@@ -1,53 +1,33 @@
-const express = require("express");
-const router = express.Router();
-const multer = require("multer");
-const fs = require("fs");
 const path = require("path");
-const vision = require("@google-cloud/vision");
-const visionClient = new vision.ImageAnnotatorClient();
-const connectDB = require("../database");
+ const vision = require("@google-cloud/vision");
+ const router = require("express").Router();
 
-let db;
-connectDB.then((client) => {
-  db = client.db("forum");
-});
+-// ✅ (삭제) 더 이상 Native Driver 모듈이 없음
+-const connectDB = require("../database");
+-let db;
+-connectDB.then((client) => { db = client; });
 
-const uploadsDir = path.join(__dirname, "../uploads");
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
-const upload = multer({ dest: uploadsDir });
++// ✅ (추가) server.js에서 이미 연결된 DB 사용
++const getDB = (req) => req.app.locals.db;
 
-router.get("/", (req, res) => {
-  res.render("ocr.ejs", { text: null, id: null });
-});
+ const visionClient = new vision.ImageAnnotatorClient();
 
-router.post("/", upload.single("image"), async (req, res) => {
-  if (!req.file) return res.status(400).send("이미지를 업로드해주세요.");
+ // ─────────────────────────────
+ //  OCR 업로드/처리 라우트 예시
+ // ─────────────────────────────
+ router.post("/ocr/upload", upload.single("file"), async (req, res) => {
+   try {
+-    const result = await db.collection("ocr").insertOne({
++    const result = await getDB(req).collection("ocr").insertOne({
+       filename: req.file.filename,
+       text: extractedText,
+       createdAt: new Date(),
+     });
+     res.json({ success: true, id: result.insertedId });
+   } catch (err) {
+     console.error("❌ OCR 저장 오류:", err);
+     res.status(500).json({ error: "서버 오류" });
+   }
+ });
 
-  try {
-    // 구글 비전 OCR 호출
-    const [result] = await visionClient.textDetection(req.file.path);
-    const text = result.fullTextAnnotation
-      ? result.fullTextAnnotation.text
-      : "";
-
-    // 업로드된 이미지 파일 삭제
-    fs.unlink(req.file.path, () => {});
-
-    // DB 저장
-    let insertedId = null;
-    if (db) {
-      const insertResult = await db
-        .collection("ocrtexts")
-        .insertOne({ text, createdAt: new Date() });
-      insertedId = insertResult.insertedId;
-    }
-
-    res.render("ocr.ejs", { text, id: insertedId });
-  } catch (err) {
-    console.error("OCR error:", err);
-    fs.unlink(req.file.path, () => {});
-    res.status(500).send("텍스트 추출 실패");
-  }
-});
-
-module.exports = router;
+ module.exports = router;
