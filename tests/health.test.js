@@ -1,27 +1,20 @@
 jest.setTimeout(30000); // 30초
 
-// ─────────────────────────────────────────
-// 1) database.js 모킹
-// ─────────────────────────────────────────
-jest.mock("../../database", () => {
-  const mockClient = { db: () => ({}) };
-  const mockFn = jest.fn().mockResolvedValue(mockClient);
-  mockFn.then = (fn) => fn(mockClient);
-  return mockFn;
-});
-
-// ─────────────────────────────────────────
-// 2) config/db.js 모킹
-// ─────────────────────────────────────────
+// ------------------------------------------------------------------
+// config/db.js 모킹 (절대 경로로 한 번만)
+// ------------------------------------------------------------------
 jest.mock("../../config/db", () => {
   const mockClient = { db: () => ({}) };
   const mockConnect = jest.fn().mockResolvedValue(mockClient);
-  mockConnect.then = (fn) => fn(mockClient);
+  mockConnect.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
   return {
     connectDB: mockConnect,
     closeDB: jest.fn().mockResolvedValue(),
   };
 });
+
+// 필요하다면 아래처럼 alias 처리도 가능 (선택)
+// jest.mock("./config/db", () => jest.requireMock("../../config/db"));
 
 const request = require("supertest");
 const { initApp } = require("../../server");
