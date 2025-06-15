@@ -8,8 +8,9 @@ const { checkLogin } = require("../middlewares/auth");
 
 let db;
 const connectDB = require("../database");
-connectDB.then((client) => {
-  db = client.db("forum");
+connectDB()
+  .then((clientDb) => {
+    db = clientDb; // 이미 db 객체
 });
 
 const uploadsDir = path.join(__dirname, "../uploads");

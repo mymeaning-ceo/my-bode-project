@@ -13,8 +13,8 @@ const { connectDB } = require("../config/db");
 
 let db;
 connectDB()
-  .then((client) => {
-    db = client.db("forum");
+  .then((clientDb) => {
+    db = clientDb; // 이미 db 객체
   })
   .catch((err) => {
     console.error("❌ DB 연결 실패:", err);

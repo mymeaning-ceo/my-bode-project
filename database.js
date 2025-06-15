@@ -7,15 +7,16 @@ if (!url) {
   module.exports = async () => {
     throw new Error('MONGO_URI not provided');
   };
+  return;
 }
 
 // ─────────────────────────────────────────
 // 테스트 환경: 목(Mock) 클라이언트 반환
 // ─────────────────────────────────────────
 if (process.env.NODE_ENV === 'test') {
-  const mockClient = { db: () => ({}) };
-  const mockFn = async () => mockClient;
-  mockFn.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
+  const mockDb = {}; // 필요한 최소 인터페이스
+  const mockFn = async () => mockDb;
+  mockFn.then = (fn) => fn(mockDb); // connectDB.then(...) 호환
   module.exports = mockFn;
   return;
 }
@@ -27,12 +28,12 @@ const client = new MongoClient(url);
 
 /**
  * connectDB()
- *  - 성공 시 MongoClient 인스턴스 반환
+ *  - 성공 시 **DB 객체**(MongoClient.db) 반환
  */
 const connectDB = async () => {
   await client.connect();
   console.log('✅ MongoDB 연결 성공');
-  return client;
+  return client.db(process.env.DB_NAME || 'forum'); // DB 객체 반환
 };
 
 // connectDB.then(...) 패턴 호환

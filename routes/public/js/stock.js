@@ -1,53 +1,57 @@
-document.addEventListener("DOMContentLoaded", () => {
+// public/js/stock.js
+$(document).ready(function () {
+  // DataTable 초기화
   const table = $("#stockTable").DataTable({
-    serverSide: true,
-    processing: true,
-    pageLength: 50,
-    ajax: (data, cb) => {
-      const page = data.start / data.length + 1;
-      const keyword = $("#keyword").val();
-      fetch(
-        `/api/stock?page=${page}&limit=${data.length}&keyword=${encodeURIComponent(keyword)}`,
-      )
-        .then((r) => r.json())
-        .then((json) => {
-          const rows = json.data.map((r) => [
-            r.item_code,
-            r.item_name,
-            r.color,
-            r.size,
-            `<span class="${r.qty <= 10 ? "low-stock" : ""}">${r.qty?.toLocaleString("ko-KR") ?? ""}</span>`,
-            r.allocation,
-          ]);
-          cb({
-            data: rows,
-            recordsTotal: json.total,
-            recordsFiltered: json.total,
-          });
-        });
-    },
+    paging: true,
+    searching: false,
+    info: false,
   });
 
-  $("#btnSearch").on("click", () => table.ajax.reload());
-  $("#btnRefresh").on("click", () => {
-    $("#keyword").val("");
-    table.ajax.reload();
+  // 검색 버튼
+  $("#btnSearch").on("click", function () {
+    const keyword = $("#keyword").val().trim();
+    window.location.href = `/stock/search?keyword=${encodeURIComponent(keyword)}`;
   });
 
-  $("#uploadForm").on("submit", async (e) => {
+  // 새로고침 버튼
+  $("#btnRefresh").on("click", function () {
+    window.location.href = "/stock/";
+  });
+
+  // 전체 삭제
+  $("#btnDeleteAll").on("click", function () {
+    if (confirm("정말 전체 삭제하시겠습니까?")) {
+      $.post("/stock/delete-all")
+        .done(() => location.reload())
+        .fail((xhr) => alert(xhr.responseText));
+    }
+  });
+
+  // 엑셀 업로드
+  $("#uploadForm").on("submit", function (e) {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const res = await fetch("/api/stock/upload", {
-      method: "POST",
-      body: formData,
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: "/stock/upload",   // 서버 라우터와 일치
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: () => {
+        alert("업로드 성공!");
+        location.reload();
+      },
+      error: (xhr) => {
+        alert("업로드 실패: " + xhr.responseText);
+      },
     });
   });
 
-  $("#btnDeleteAll").on("click", async () => {
-    if (!confirm("정말 모든 데이터를 삭제하시겠습니까?")) return;
-    const res = await fetch("/api/stock", { method: "DELETE" });
-    if (res.ok) {
-      table.ajax.reload();
-    } else alert("삭제 실패");
+  // ─────────────────────────────────────────
+  // ARIA 경고 제거: 모달이 열릴 때 aria-hidden 삭제
+  // ─────────────────────────────────────────
+  $('#uploadModal').on('shown.bs.modal', function () {
+    $(this).removeAttr('aria-hidden');
   });
 });
