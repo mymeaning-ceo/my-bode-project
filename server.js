@@ -86,10 +86,6 @@ async function initApp() {
   });
 
   // 라우터
-  app.use("/api/stock", require("./routes/api/stockApi"));
-  app.use("/stock", require("./routes/stock"));
-  app.use("/", require("./routes/auth"));
-  app.use("/admin", require("./routes/admin"));
   app.use("/board", require("./routes/board"));
   app.use("/coupang", require("./routes/coupang"));
   app.use("/coupang/add", require("./routes/coupangAdd"));
