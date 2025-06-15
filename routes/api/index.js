@@ -1,0 +1,18 @@
+/**
+ * routes/api/index.js
+ * -------------------
+ * API 엔드포인트를 한 곳에서 모아주는 라우터
+ * 예) /api/stock → routes/api/stockApi.js
+ */
+
+const express = require("express");
+const router = express.Router();
+
+// 재고(Stock) API
+router.use("/stock", require("./stockApi"));
+
+// TODO: 다른 API 라우터 추가 시 아래와 같이 등록
+// router.use("/user", require("./userApi"));
+// router.use("/order", require("./orderApi"));
+
+module.exports = router;
