@@ -19,8 +19,12 @@ const connectDB = async () => {
     await mongoose.connect(uri, {
       dbName: process.env.DB_NAME || "testdb",
     });
+
+    // 연결이 완전히 열릴 때까지 대기
+    await new Promise((resolve) => mongoose.connection.once("open", resolve));
+
     console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
-    return mongoose.connection.db;
+    return mongoose.connection.db; // 이제 db가 정의됨
   } catch (err) {
     console.error("❌ MongoDB connection error:", err.message);
 

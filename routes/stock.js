@@ -5,6 +5,17 @@ const path = require("path");
 const { spawn } = require("child_process");
 
 // ───────────────────────────────────────────
+// 0. GET /stock (페이지 표시)
+// ───────────────────────────────────────────
+router.get("/", (req, res) => {
+  // stock.ejs를 렌더링
+  res.render("stock", {
+    title: "재고 관리",
+    user: req.user, // 필요 시 전달
+  });
+});
+
+// ───────────────────────────────────────────
 // 1. Multer 설정
 // ───────────────────────────────────────────
 const storage = multer.diskStorage({
@@ -15,7 +26,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ───────────────────────────────────────────
-// 3. /stock/upload (엑셀 업로드)
+// 2. POST /stock/upload (엑셀 업로드)
 // ───────────────────────────────────────────
 router.post("/upload", upload.single("excelFile"), async (req, res) => {
   try {
@@ -27,7 +38,7 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
     }
 
     const filePath = path.resolve(req.file.path);
-    const dbName = process.env.DB_NAME || "forum";       // ← DB 이름
+    const dbName = process.env.DB_NAME || "forum";
     const collectionName = "stock";
     const PY_SCRIPT = path.join(__dirname, "../scripts/excel_to_mongo.py");
 
@@ -39,7 +50,7 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
         env: {
           ...process.env,
           PYTHONIOENCODING: "utf-8",
-          MONGO_URI: process.env.MONGO_URI,              // ← URI 전달
+          MONGO_URI: process.env.MONGO_URI,
         },
       }
     );

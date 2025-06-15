@@ -7,20 +7,8 @@ const path = require("path");
 const { checkLogin } = require("../middlewares/auth");
 
 // ─────────────────────────────────────────
-// 1) DB 연결
+// 1) Multer 설정
 // ─────────────────────────────────────────
-const { connectDB } = require("../config/db");
-
-let db;
-connectDB()
-  .then((clientDb) => {
-    db = clientDb; // 이미 db 객체
-  })
-  .catch((err) => {
-    console.error("❌ DB 연결 실패:", err);
-  });
-
-// 업로드 디렉토리
 const uploadsDir = path.join(__dirname, "../uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 const upload = multer({ dest: uploadsDir });
@@ -70,14 +58,9 @@ function addShortage(items) {
   });
 }
 
-function getAllFields(resultArray) {
-  return resultArray[0]
-    ? Object.keys(resultArray[0]).filter((k) => k !== "_id")
-    : [];
-}
-
 // ✅ 목록 조회
 router.get("/", async (req, res) => {
+  const db = req.app.locals.db; // DB 인스턴스 재사용
   const keyword = "";
   const brand = req.query.brand || "";
   try {
@@ -126,6 +109,7 @@ router.get("/", async (req, res) => {
 
 // ✅ 엑셀 업로드
 router.post("/upload", upload.single("excelFile"), async (req, res) => {
+  const db = req.app.locals.db;
   try {
     const filePath = req.file.path;
     const workbook = xlsx.readFile(filePath);
@@ -166,7 +150,6 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
       },
     }));
 
-    if (!db) throw new Error("DB 미연결 상태입니다.");
     if (bulkOps.length > 0) await db.collection("coupang").bulkWrite(bulkOps);
     fs.unlink(filePath, () => {});
 
@@ -190,6 +173,7 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
 
 // ✅ 검색
 router.get("/search", async (req, res) => {
+  const db = req.app.locals.db;
   try {
     const keyword = req.query.keyword || "";
     const brand = req.query.brand || "";
@@ -254,6 +238,7 @@ router.get("/search", async (req, res) => {
 
 // ✅ 전체 삭제
 router.post("/delete-all", checkLogin, async (req, res) => {
+  const db = req.app.locals.db;
   try {
     await db.collection("coupang").deleteMany({});
     res.redirect("/coupang");

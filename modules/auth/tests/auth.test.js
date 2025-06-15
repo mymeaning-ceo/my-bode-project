@@ -1,14 +1,19 @@
+// jest.setTimeout
 jest.setTimeout(30000); // 30초
 
-// database.js 모킹
+// ─────────────────────────────────────────────
+// 1) database.js 모킹 (필요 시 경로 확인)
+// ─────────────────────────────────────────────
 jest.mock("../../../database", () => {
   const mockClient = { db: () => ({}) };
   const mockFn = jest.fn().mockResolvedValue(mockClient);
-  mockFn.then = (fn) => fn(mockClient);
+  mockFn.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
   return mockFn;
 });
 
-// config/db.js 모킹
+// ─────────────────────────────────────────────
+// 2) config/db.js 모킹 (객체 형태로 내보내기)
+// ─────────────────────────────────────────────
 jest.mock("../../../config/db", () => {
   const mockClient = { db: () => ({}) };
   const mockConnect = jest.fn().mockResolvedValue(mockClient);
@@ -19,6 +24,9 @@ jest.mock("../../../config/db", () => {
   };
 });
 
+// ─────────────────────────────────────────────
+// 3) 테스트 준비
+// ─────────────────────────────────────────────
 const request = require("supertest");
 const { initApp } = require("../../../server");
 const { closeDB } = require("../../../config/db");
@@ -31,11 +39,11 @@ beforeAll(async () => {
   process.env.DB_NAME = "testdb";
   process.env.SESSION_SECRET = "testsecret";
 
-  app = await initApp();
+  app = await initApp(); // 서버 초기화
 });
 
 afterAll(async () => {
-  await closeDB();
+  await closeDB(); // 모킹된 closeDB 호출
 });
 
 describe("GET /stock", () => {

@@ -1,23 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { connectDB } = require("../config/db"); // 구조분해 할당
 const multer = require("multer");
 const path = require("path");
 
 // ─────────────────────────────────────────
-// 1) DB 연결
-// ─────────────────────────────────────────
-let db;
-connectDB()
-  .then((clientDb) => {
-    db = clientDb; // 이미 db 객체
-  })
-  .catch((err) => {
-    console.error("❌ DB 연결 실패:", err);
-  });
-
-// ─────────────────────────────────────────
-// 2) Multer 설정 (예시)
+// 1) Multer 설정
 // ─────────────────────────────────────────
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
@@ -27,29 +14,26 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ─────────────────────────────────────────
-// 3) 예시 라우트: 배너 업로드
+// 2) 배너 업로드 라우트
 // ─────────────────────────────────────────
-router.post(
-  "/banner/:idx",
-  upload.single("banner"),
-  async (req, res) => {
-    try {
-      const idx = req.params.idx;
-      const imgLocation = req.file ? req.file.path : "";
+router.post("/banner/:idx", upload.single("banner"), async (req, res) => {
+  try {
+    const db = req.app.locals.db; // 서버에서 저장한 DB 인스턴스 사용
+    const idx = req.params.idx;
+    const imgLocation = req.file ? req.file.path : "";
 
-      await db.collection("banners").updateOne(
-        { idx },
-        { $set: { img: imgLocation } },
-        { upsert: true }
-      );
+    await db.collection("banners").updateOne(
+      { idx },
+      { $set: { img: imgLocation } },
+      { upsert: true }
+    );
 
-      res.redirect("/admin/banners");
-    } catch (err) {
-      console.error("❌ 배너 업로드 실패:", err);
-      res.status(500).send("서버 오류");
-    }
+    res.redirect("/admin/banners");
+  } catch (err) {
+    console.error("❌ 배너 업로드 실패:", err);
+    res.status(500).send("서버 오류");
   }
-);
+});
 
 // 필요에 따라 추가 라우트...
 
