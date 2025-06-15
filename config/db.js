@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 
 const mongoose = require("mongoose");
-
+console.log("DEBUG MONGO_URI:", process.env.MONGO_URI);
 let reconnectTimer = null;
 
 /**
