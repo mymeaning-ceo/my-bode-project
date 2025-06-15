@@ -1,23 +1,26 @@
+// routes/auth.js
 const express = require("express");
 const bcrypt = require("bcrypt");
 const passport = require("passport");
+
 const router = express.Router();
-const { connectDB } = require("../config/db");
 
-// DB 연결
-let db;
-connectDB()
-  .then((clientDb) => {
-    db = clientDb;
-  })
-  .catch((err) => console.error("❌ DB 연결 실패:", err));
+// ────────────────────────────────────────────────
+// 1) app.locals.db 가져오는 헬퍼 (중복 연결 방지)
+// ────────────────────────────────────────────────
+const getDB = (req) => {
+  if (!req.app.locals.db) {
+    throw new Error("DB 연결이 아직 초기화되지 않았습니다.");
+  }
+  return req.app.locals.db;
+};
 
-// 로그인 페이지
+// ─────────── 로그인 페이지 ───────────
 router.get("/login", (req, res) => {
   res.render("login");
 });
 
-// 로그인 처리
+// ─────────── 로그인 처리 ───────────
 router.post(
   "/login",
   passport.authenticate("local", {
@@ -27,21 +30,23 @@ router.post(
   })
 );
 
-// 로그아웃
+// ─────────── 로그아웃 ───────────
 router.get("/logout", (req, res) => {
   req.logout(() => res.redirect("/login"));
 });
 
-// 회원가입 페이지
+// ─────────── 회원가입 페이지 ───────────
 router.get("/register", (req, res) => {
   res.render("register");
 });
 
-// 회원가입 처리
+// ─────────── 회원가입 처리 ───────────
 router.post("/register", async (req, res) => {
   const { username, name, email, password, password2 } = req.body;
+  const db = getDB(req); // ← 단일 커넥션 사용
 
   try {
+    // ① 유효성 검사
     if (!username || !name || !email || !password || !password2) {
       req.flash("error", "모든 항목을 입력해주세요.");
       return res.redirect("/register");
@@ -55,12 +60,14 @@ router.post("/register", async (req, res) => {
       return res.redirect("/register");
     }
 
+    // ② 중복 아이디 확인
     const userExists = await db.collection("users").findOne({ username });
     if (userExists) {
       req.flash("error", "이미 사용 중인 아이디입니다.");
       return res.redirect("/register");
     }
 
+    // ③ 비밀번호 해시 후 저장
     const hashedPassword = await bcrypt.hash(password, 10);
     await db.collection("users").insertOne({
       username,
@@ -79,7 +86,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// 회원가입 성공 페이지 (선택)
+// ─────────── 회원가입 성공 페이지 (선택) ───────────
 router.get("/register-success", (req, res) => {
   res.render("register-success");
 });
