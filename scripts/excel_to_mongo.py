@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from typing import Union, IO
 
 # ─────────────────────────────────────────────
-# ① .env 파일에서 환경변수 불러오기 (DB_URL 포함)
+# ① .env 파일에서 환경변수 불러오기 (MONGO_URI 포함)
 # ─────────────────────────────────────────────
 load_dotenv()
 
@@ -159,9 +159,9 @@ def main():
         sys.exit(1)
 
     file_path, db_name, collection_name = sys.argv[1:4]
-    mongo_uri = os.getenv("DB_URL")
+    mongo_uri = os.getenv("MONGO_URI")
     if not mongo_uri:
-        print("❌ 환경 변수 DB_URL이 설정되지 않았습니다.")
+        print("❌ 환경 변수 MONGO_URI이 설정되지 않았습니다.")
         sys.exit(1)
 
     try:
