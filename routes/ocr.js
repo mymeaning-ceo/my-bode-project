@@ -1,33 +1,54 @@
 const path = require("path");
- const vision = require("@google-cloud/vision");
- const router = require("express").Router();
+const vision = require("@google-cloud/vision");
+const multer = require("multer");
+const router = require("express").Router();
 
--// ✅ (삭제) 더 이상 Native Driver 모듈이 없음
--const connectDB = require("../database");
--let db;
--connectDB.then((client) => { db = client; });
+// 이미 server.js에서 MongoDB를 연결했다면:
+const getDB = (req) => req.app.locals.db;
 
-+// ✅ (추가) server.js에서 이미 연결된 DB 사용
-+const getDB = (req) => req.app.locals.db;
+// ────────────────
+// Multer 설정
+// ────────────────
+const storage = multer.diskStorage({
+  destination: (req, file, cb) =>
+    cb(null, path.join(__dirname, "..", "uploads")),
+  filename: (req, file, cb) =>
+    cb(null, `${Date.now()}-${file.originalname}`),
+});
+const upload = multer({ storage });
 
- const visionClient = new vision.ImageAnnotatorClient();
+// ────────────────
+// Google Vision 클라이언트
+// ────────────────
+const visionClient = new vision.ImageAnnotatorClient();
 
- // ─────────────────────────────
- //  OCR 업로드/처리 라우트 예시
- // ─────────────────────────────
- router.post("/ocr/upload", upload.single("file"), async (req, res) => {
-   try {
--    const result = await db.collection("ocr").insertOne({
-+    const result = await getDB(req).collection("ocr").insertOne({
-       filename: req.file.filename,
-       text: extractedText,
-       createdAt: new Date(),
-     });
-     res.json({ success: true, id: result.insertedId });
-   } catch (err) {
-     console.error("❌ OCR 저장 오류:", err);
-     res.status(500).json({ error: "서버 오류" });
-   }
- });
+// ─────────────────────────────
+//  OCR 업로드/처리 라우트
+// ─────────────────────────────
+router.post("/ocr/upload", upload.single("file"), async (req, res) => {
+  try {
+    // 1) Vision API로 텍스트 추출
+    const [result] = await visionClient.textDetection(req.file.path);
+    const extractedText = result.fullTextAnnotation?.text || "";
 
- module.exports = router;
+    // 2) DB에 저장
+    const db = getDB(req);
+    const insertResult = await db.collection("ocr").insertOne({
+      filename: req.file.filename,
+      text: extractedText,
+      createdAt: new Date(),
+    });
+
+    // 3) 응답
+    res.json({
+      success: true,
+      id: insertResult.insertedId,
+      text: extractedText,
+    });
+  } catch (err) {
+    console.error("❌ OCR 저장 오류:", err);
+    res.status(500).json({ error: "서버 오류" });
+  }
+});
+
+module.exports = router;
