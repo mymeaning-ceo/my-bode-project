@@ -1,28 +1,25 @@
-# node_modules (라이브러리)
-node_modules/
-
-# 환경 변수 (민감 정보)
+# --- Secrets / Credentials ---
 .env
-.ssh
+.env.*
+*.pem
+*.key
+*.crt
+.ssh/
+.bash_history
+.wget-hsts
 
-# VS Code 서버 설정
-.vscode-server/
+# --- Build & Cache ---
+node_modules/
+.cache/
+dist/
+coverage/
 
-# 학습된 데이터 파일
-*.traineddata
+# --- Archives ---
+*.zip
+*.tar
+*.tgz
 
-# 파일 업로드 디렉토리
-uploads/
-
-# 로그, 캐시 등
-*.log
+# --- OS / Editor ---
 .DS_Store
-.pm2/
-
-.uploads
-
-echo "node_modules/" >> .gitignore
-echo ".cache/" >> .gitignore
-git add .gitignore
-git commit -m "chore: update .gitignore"
-git push
+Thumbs.db
+.vscode/
