@@ -18,17 +18,17 @@ const connectDB = async () => {
   try {
     await mongoose.connect(uri, {
       dbName: process.env.DB_NAME || "testdb",
+      serverSelectionTimeoutMS: 5000,
     });
 
     // 연결이 완전히 열릴 때까지 대기
     await new Promise((resolve) => mongoose.connection.once("open", resolve));
 
     console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
-    return mongoose.connection.db; // 이제 db가 정의됨
+    return mongoose.connection.db;
   } catch (err) {
     console.error("❌ MongoDB connection error:", err.message);
 
-    // 테스트 환경이 아닐 때만 재연결 시도
     if (process.env.NODE_ENV !== "test") {
       reconnectTimer = setTimeout(connectDB, 5000);
     }
