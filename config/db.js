@@ -17,7 +17,8 @@ const connectDB = async () => {
 
   try {
     await mongoose.connect(uri, {
-      dbName: process.env.DB_NAME || "testdb",
+      dbName: process.env.DB_NAME ||,
+    serverSelectionTimeoutMS: 5000 "testdb",
     });
 
     // 연결이 완전히 열릴 때까지 대기
