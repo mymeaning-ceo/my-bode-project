@@ -21,14 +21,34 @@ router.get("/login", (req, res) => {
 });
 
 // ─────────── 로그인 처리 ───────────
-router.post(
-  "/login",
-  passport.authenticate("local", {
-    successRedirect: "/dashboard",
-    failureRedirect: "/login",
-    failureFlash: true,
-  })
-);
+router.post("/login", async (req, res, next) => {
+  const db = getDB(req);
+  const { username, password } = req.body;
+
+  try {
+    const user = await db
+      .collection("users")
+      .findOne({ username: new RegExp(`^${username}$`, "i") });
+
+    if (!user) {
+      req.flash("error", "아이디 없음");
+      return res.redirect("/login");
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      req.flash("error", "비밀번호 불일치");
+      return res.redirect("/login");
+    }
+
+    req.login(user, (err) => {
+      if (err) return next(err);
+      return res.redirect("/dashboard");
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // ─────────── 로그아웃 ───────────
 router.get("/logout", (req, res) => {
