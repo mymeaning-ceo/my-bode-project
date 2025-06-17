@@ -1,21 +1,22 @@
-
-# ────────────────────────────
-# Dockerfile
-# ────────────────────────────
+# 베이스 이미지
 FROM node:18-alpine
 
-# 1) 앱 디렉터리 생성
+# 앱 디렉터리
 WORKDIR /usr/src/app
 
-# 2) 패키지 파일 복사 및 의존성 설치
+# 의존성 설치
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev \
+    && addgroup -S app && adduser -S app -G app
 
-# 3) 소스 코드 복사
+# 소스 복사
 COPY . .
 
-# 4) 환경 변수(포트) 설정
-ENV PORT=3000
+# 환경 변수
+ENV PORT=3080
 
-# 5) 앱 실행
+# 루트 권한 제거
+USER app
+
+# 실행 명령
 CMD ["npm", "run", "start"]
