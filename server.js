@@ -70,10 +70,24 @@ async function initApp() {
   app.use(flash());
 
   // 6. 전역 변수
-  app.use((req, res, next) => {
+  app.use(async (req, res, next) => {
+    try {
+      const db = req.app.locals.db;
+      const logoDoc = await db.collection("homepage").findOne({ key: "logo" });
+      const bannerDocs = await db
+        .collection("homepage")
+        .find({ key: /^banner/ })
+        .sort({ key: 1 })
+        .toArray();
+      res.locals.logo = logoDoc?.img || "";
+      res.locals.banners = bannerDocs.map((b) => b.img);
+    } catch (err) {
+      console.error("❌ 로고/배너 조회 실패:", err);
+      res.locals.logo = "";
+      res.locals.banners = [];
+    }
     res.locals.유저 = req.user || null;
     res.locals.currentUrl = req.originalUrl;
-    res.locals.logo = "";
     res.locals.error = req.flash("error");
     res.locals.success = req.flash("success");
     next();
@@ -91,7 +105,11 @@ async function initApp() {
       "/list": "\ud83d\udccb \uac8c\uc2dc\uad8c \ubaa9\ub85d",
       "/write": "\u270d \uae00 \uc791\uc131",
     };
-    res.render("dashboard.ejs", { menus, menuLabels, banners: [] });
+    res.render("dashboard.ejs", {
+      menus,
+      menuLabels,
+      banners: res.locals.banners,
+    });
   });
 
   console.log("✅ 서버 초기화 완료");
