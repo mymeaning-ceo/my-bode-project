@@ -65,6 +65,7 @@
   },
   "description": "This project requires several environment variables to run:",
   "directories": {
-    "lib": "lib"
+    "lib": "lib",
+    "test": "tests"
   }
 }
