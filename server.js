@@ -8,7 +8,6 @@ const methodOverride = require("method-override");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
-const expressLayouts = require("express-ejs-layouts");
 const flash = require("connect-flash");
 const { connectDB } = require("./config/db");
 const mainRouter = require("./routes");
@@ -43,8 +42,6 @@ async function initApp() {
   // 4. 기본 설정
   app.use(express.static(path.join(__dirname, "public")));
   app.set("view engine", "ejs");
-  app.use(expressLayouts);
-  app.set("layout", "layouts/main");
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
   app.use(methodOverride("_method"));
@@ -87,9 +84,15 @@ async function initApp() {
 
   // 8. 기본 경로 처리
   app.get("/", (req, res) => res.redirect("/dashboard"));
-  app.get("/dashboard", (req, res) =>
-    res.sendFile(path.join(__dirname, "public", "dashboard.html"))
-  );
+  app.get("/dashboard", (req, res) => {
+    const menus = ["/stock", "/list", "/write"];
+    const menuLabels = {
+      "/stock": "\ud83d\udce6 \uc7ac\uace0 \uad00\ub9ac",
+      "/list": "\ud83d\udccb \uac8c\uc2dc\uad8c \ubaa9\ub85d",
+      "/write": "\u270d \uae00 \uc791\uc131",
+    };
+    res.render("dashboard.ejs", { menus, menuLabels, banners: [] });
+  });
 
   console.log("✅ 서버 초기화 완료");
   return app;
