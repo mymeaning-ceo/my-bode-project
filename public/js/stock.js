@@ -21,7 +21,10 @@ $(document).ready(function () {
   // 전체 삭제
   $("#btnDeleteAll").on("click", function () {
     if (confirm("정말 전체 삭제하시겠습니까?")) {
-      $.post("/stock/delete-all")
+      $.ajax({
+        url: "/api/stock",
+        type: "DELETE",
+      })
         .done(() => location.reload())
         .fail((xhr) => alert(xhr.responseText));
     }
