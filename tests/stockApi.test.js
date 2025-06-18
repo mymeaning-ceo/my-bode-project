@@ -1,12 +1,14 @@
 jest.setTimeout(60000);
 
 // Mock DB connection
-const mockCollection = { updateMany: jest.fn().mockResolvedValue() };
+const mockCollection = {
+  updateMany: jest.fn().mockResolvedValue(),
+  deleteMany: jest.fn().mockResolvedValue(),
+};
 jest.mock("../config/db", () => {
   const mockDb = { collection: jest.fn(() => mockCollection) };
-  const mockClient = { db: () => mockDb };
-  const mockConnect = jest.fn().mockResolvedValue(mockClient);
-  mockConnect.then = (fn) => fn(mockClient);
+  const mockConnect = jest.fn().mockResolvedValue(mockDb);
+  mockConnect.then = (fn) => fn(mockDb);
   return { connectDB: mockConnect, closeDB: jest.fn().mockResolvedValue() };
 });
 
@@ -32,7 +34,7 @@ jest.mock("child_process", () => {
 const request = require("supertest");
 const path = require("path");
 const { initApp } = require("../server");
-const { closeDB } = require("../config/db");
+const { connectDB, closeDB } = require("../config/db");
 
 let app;
 
@@ -57,5 +59,19 @@ describe("POST /api/stock/upload", () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ status: "success" });
+  });
+});
+
+describe("DELETE /api/stock", () => {
+  it("should delete all stock data", async () => {
+    const res = await request(app).delete("/api/stock");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ message: "삭제 완료" });
+
+    const db = connectDB.mock.results[0].value;
+    const mockCollection = db.collection.mock.results[0].value;
+    expect(db.collection).toHaveBeenCalledWith("stock");
+    expect(mockCollection.deleteMany).toHaveBeenCalledWith({});
   });
 });
