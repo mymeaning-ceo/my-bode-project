@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const { ObjectId } = require("mongodb");
-const { checkLogin } = require("../middlewares/auth");
-const upload = require("../upload.js");
+
+const upload = require("../../upload.js");
 const moment = require("moment");
 
 // 🔹 게시글 목록 (GET /list, /list/:page)
-router.get(["/", "/:page"], checkLogin, async (req, res) => {
+router.get(["/", "/:page"], async (req, res) => {
   const db = req.app.locals.db;
   try {
     const page = parseInt(req.params.page || "1");
@@ -54,12 +54,12 @@ router.get(["/", "/:page"], checkLogin, async (req, res) => {
 });
 
 // 🔹 글쓰기 페이지
-router.get("/write", checkLogin, (req, res) => {
+router.get("/write", (req, res) => {
   res.render("write.ejs", { 유저: req.user });
 });
 
 // 🔹 게시글 등록
-router.post("/add", upload.single("img1"), checkLogin, async (req, res) => {
+router.post("/add", upload.single("img1"), async (req, res) => {
   const db = req.app.locals.db;
   try {
     const imgLocation = req.file ? req.file.location : "";
@@ -79,7 +79,7 @@ router.post("/add", upload.single("img1"), checkLogin, async (req, res) => {
 });
 
 // 🔹 게시글 상세 보기
-router.get("/detail/:id", checkLogin, async (req, res) => {
+router.get("/detail/:id", async (req, res) => {
   const db = req.app.locals.db;
   try {
     const result = await db
@@ -105,7 +105,7 @@ router.get("/detail/:id", checkLogin, async (req, res) => {
 });
 
 // 🔹 게시글 수정
-router.get("/edit/:id", checkLogin, async (req, res) => {
+router.get("/edit/:id", async (req, res) => {
   const db = req.app.locals.db;
   try {
     const result = await db.collection("post").findOne({
@@ -121,7 +121,7 @@ router.get("/edit/:id", checkLogin, async (req, res) => {
   }
 });
 
-router.put("/edit", checkLogin, async (req, res) => {
+router.put("/edit", async (req, res) => {
   const db = req.app.locals.db;
   try {
     const result = await db.collection("post").updateOne(
@@ -148,7 +148,7 @@ router.put("/edit", checkLogin, async (req, res) => {
 });
 
 // 🔹 게시글 삭제
-router.delete("/delete", checkLogin, async (req, res) => {
+router.delete("/delete", async (req, res) => {
   const db = req.app.locals.db;
   try {
     const postId = req.query.docid;
@@ -173,7 +173,7 @@ router.delete("/delete", checkLogin, async (req, res) => {
 });
 
 // 🔹 댓글 작성
-router.post("/comment/add", checkLogin, async (req, res) => {
+router.post("/comment/add", async (req, res) => {
   const db = req.app.locals.db;
   try {
     await db.collection("comment").insertOne({
@@ -191,7 +191,7 @@ router.post("/comment/add", checkLogin, async (req, res) => {
 });
 
 // 🔹 댓글 수정
-router.put("/comment/edit", checkLogin, async (req, res) => {
+router.put("/comment/edit", async (req, res) => {
   const db = req.app.locals.db;
   try {
     const result = await db.collection("comment").updateOne(
@@ -215,7 +215,7 @@ router.put("/comment/edit", checkLogin, async (req, res) => {
 });
 
 // 🔹 댓글 삭제
-router.delete("/comment/delete", checkLogin, async (req, res) => {
+router.delete("/comment/delete", async (req, res) => {
   const db = req.app.locals.db;
   try {
     const result = await db.collection("comment").deleteOne({

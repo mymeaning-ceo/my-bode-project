@@ -10,7 +10,10 @@ const helmet = require("helmet");
 const compression = require("compression");
 const flash = require("connect-flash");
 const { connectDB } = require("./config/db");
-const mainRouter = require("./routes");
+const webRouter = require("./routes/web");
+const apiRouter = require("./routes/api");
+const { checkAuth } = require("./middlewares/auth");
+const errorHandler = require("./middlewares/errorHandler");
 
 const app = express();
 
@@ -95,11 +98,21 @@ async function initApp() {
   });
 
   // 7. 라우터 연결
-  app.use("/", mainRouter);
+  app.use("/api", apiRouter);
+  app.use("/", webRouter);
+
+  // 개발 시 라우트 목록 출력
+  if (process.env.NODE_ENV !== "production") {
+    app._router.stack
+      .filter((r) => r.route)
+      .forEach((r) =>
+        console.log(`[ROUTE] ${Object.keys(r.route.methods)} ${r.route.path}`)
+      );
+  }
 
   // 8. 기본 경로 처리
   app.get("/", (req, res) => res.redirect("/dashboard"));
-  app.get("/dashboard", (req, res) => {
+  app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
     const menuLabels = {
       "/stock": "\ud83d\udce6 \uc7ac\uace0 \uad00\ub9ac",
@@ -112,6 +125,9 @@ async function initApp() {
       banners: res.locals.banners,
     });
   });
+
+  // 9. 에러 핸들러
+  app.use(errorHandler);
 
   console.log("✅ 서버 초기화 완료");
   return app;

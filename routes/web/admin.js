@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../upload.js');
-const { checkAdmin } = require('../middlewares/auth');
+const upload = require('../../upload.js');
+const { checkAdmin } = require('../../middlewares/auth');
 
 // ─────────────────────────────────────────
 // 관리자 메인 페이지

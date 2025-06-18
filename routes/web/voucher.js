@@ -10,7 +10,7 @@ const { ObjectId } = require("mongodb");
 // ─────────────────────────────────────────
 // Multer 설정
 // ─────────────────────────────────────────
-const uploadsDir = path.join(__dirname, "../uploads");
+const uploadsDir = path.join(__dirname, "../../uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 const upload = multer({ dest: uploadsDir });
 
