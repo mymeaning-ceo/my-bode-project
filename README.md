@@ -3,6 +3,8 @@
 This project requires several environment variables to run:
 
 - `MONGO_URI` – MongoDB connection string
+- `DB_NAME` – MongoDB database name used by the application
+- `SESSION_SECRET` – Secret string used to sign session cookies
 - `S3_KEY` – AWS S3 access key
 - `S3_SECRET` – AWS S3 secret key
 - `S3_REGION` – AWS S3 region where the bucket resides
@@ -10,9 +12,7 @@ This project requires several environment variables to run:
   automatically create this bucket if it does not exist (your AWS credentials
   must allow bucket creation).
 
-Create a `.env` file in the project root and define these values before starting
-the server. Make sure the file is saved as **UTF-8 without BOM** so that
-`dotenv` can read it correctly.
+Copy `.env.example` to `.env` in the project root and define these values before starting the server. Make sure the file is saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
 
 ## Python scripts
 
