@@ -5,6 +5,9 @@ $(document).ready(function () {
     paging: true,
     searching: false,
     info: false,
+    pageLength: 50,
+    lengthChange: false,
+    columnDefs: [{ targets: '_all', className: 'text-center' }],
     ajax: {
       url: "/api/stock",
       dataSrc: "data",
@@ -34,14 +37,6 @@ $(document).ready(function () {
     table.ajax.url("/api/stock").load();
   });
 
-  // 전체 삭제
-  $("#btnDeleteAll").on("click", function () {
-    if (confirm("정말 전체 삭제하시겠습니까?")) {
-      $.post("/stock/delete-all")
-        .done(() => location.reload())
-        .fail((xhr) => alert(xhr.responseText));
-    }
-  });
 
   // 엑셀 업로드
   $("#uploadForm").on("submit", function (e) {
@@ -64,10 +59,4 @@ $(document).ready(function () {
     });
   });
 
-  // ─────────────────────────────────────────
-  // ARIA 경고 제거: 모달이 열릴 때 aria-hidden 삭제
-  // ─────────────────────────────────────────
-  $('#uploadModal').on('shown.bs.modal', function () {
-    $(this).removeAttr('aria-hidden');
-  });
 });
