@@ -12,6 +12,7 @@ const flash = require("connect-flash");
 const { connectDB } = require("./config/db");
 const webRouter = require("./routes/web");
 const apiRouter = require("./routes/api");
+const stockRouter = require("./routes/api/stockApi");
 const { checkAuth } = require("./middlewares/auth");
 const errorHandler = require("./middlewares/errorHandler");
 
@@ -98,6 +99,7 @@ async function initApp() {
   });
 
   // 7. 라우터 연결
+  app.use("/stock", stockRouter);
   app.use("/api", apiRouter);
   app.use("/", webRouter);
 
