@@ -8,9 +8,9 @@ jest.setTimeout(60000);
 // config/db.js 모킹 (절대 경로로 한 번만)
 // ─────────────────────────────────────────────
 jest.mock("../config/db", () => {
-  const mockClient = { db: () => ({}) };
-  const mockConnect = jest.fn().mockResolvedValue(mockClient);
-  mockConnect.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
+  const mockDb = { collection: jest.fn() };
+  const mockConnect = jest.fn().mockResolvedValue(mockDb);
+  mockConnect.then = (fn) => fn(mockDb); // connectDB.then(...) 호환
   return {
     connectDB: mockConnect,
     closeDB: jest.fn().mockResolvedValue(),

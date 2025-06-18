@@ -4,9 +4,8 @@ jest.setTimeout(60000);
 const mockCollection = { updateMany: jest.fn().mockResolvedValue() };
 jest.mock("../config/db", () => {
   const mockDb = { collection: jest.fn(() => mockCollection) };
-  const mockClient = { db: () => mockDb };
-  const mockConnect = jest.fn().mockResolvedValue(mockClient);
-  mockConnect.then = (fn) => fn(mockClient);
+  const mockConnect = jest.fn().mockResolvedValue(mockDb);
+  mockConnect.then = (fn) => fn(mockDb);
   return { connectDB: mockConnect, closeDB: jest.fn().mockResolvedValue() };
 });
 
