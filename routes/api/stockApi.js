@@ -4,9 +4,6 @@ const router = express.Router();
 const stockCtrl = require("../../controllers/stockController");
 
 router.get("/", stockCtrl.getStockData);
-router.get("/view", (req, res) => {
-  res.render("stock");
-});
 router.post("/upload", stockCtrl.upload, stockCtrl.uploadExcelApi);
 router.delete("/", async (req, res) => {
   const db = req.app.locals.db;
