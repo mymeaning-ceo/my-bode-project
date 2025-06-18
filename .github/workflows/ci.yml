@@ -54,7 +54,6 @@ jobs:
             password $HEROKU_API_KEY
           EOF
           heroku auth:whoami
-
       # 7) 빌드팩 설정 (Node.js → Python)
       - name: Configure Heroku buildpacks
         env:
@@ -65,7 +64,6 @@ jobs:
           heroku buildpacks:set heroku/nodejs -a $HEROKU_APP_NAME || true
           heroku buildpacks:add --index 2 heroku/python -a $HEROKU_APP_NAME || true
           heroku buildpacks -a $HEROKU_APP_NAME
-
       # 8) Git push 배포
       - name: Deploy to Heroku
         env:
