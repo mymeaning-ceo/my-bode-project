@@ -4,7 +4,7 @@ const router = express.Router();
 const stockCtrl = require("../../controllers/stockController");
 
 router.get("/", stockCtrl.getStockData);
-router.post("/upload", stockCtrl.upload, stockCtrl.uploadExcel);
+router.post("/upload", stockCtrl.upload, stockCtrl.uploadExcelApi);
 router.delete("/", async (req, res) => {
   const db = req.app.locals.db;
   await db.collection("stock").deleteMany({});
