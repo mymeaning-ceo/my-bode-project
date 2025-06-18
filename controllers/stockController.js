@@ -123,13 +123,15 @@ exports.uploadExcel = asyncHandler(async (req, res) => {
   });
 
   // 60초 타임아웃
-  setTimeout(() => {
+  const timeout = setTimeout(() => {
     if (!python.killed) {
       python.kill("SIGTERM");
       console.error("⏱️ Python 실행 시간 초과로 종료");
       if (!res.headersSent) res.status(500).send("❌ Python 실행 시간 초과");
     }
   }, 60000);
+
+  python.on("close", () => clearTimeout(timeout));
 });
 
 // Excel upload API (JSON response)
@@ -200,11 +202,13 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
   });
 
   // 60초 타임아웃
-  setTimeout(() => {
+  const timeout = setTimeout(() => {
     if (!python.killed) {
       python.kill("SIGTERM");
       console.error("⏱️ Python 실행 시간 초과로 종료");
       if (!res.headersSent) res.status(500).json({ status: "error", message: "Python 실행 시간 초과" });
     }
   }, 60000);
+
+  python.on("close", () => clearTimeout(timeout));
 });
