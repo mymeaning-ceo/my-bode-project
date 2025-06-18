@@ -40,7 +40,7 @@ router.get(["/", "/:page"], async (req, res) => {
       );
     });
 
-    res.render("list.ejs", {
+  res.render("post/list.ejs", {
       글목록: result,
       유저: req.user,
       현재페이지: page,
@@ -55,7 +55,7 @@ router.get(["/", "/:page"], async (req, res) => {
 
 // 🔹 글쓰기 페이지
 router.get("/write", (req, res) => {
-  res.render("write.ejs", { 유저: req.user });
+  res.render("post/write.ejs", { 유저: req.user });
 });
 
 // 🔹 게시글 등록
@@ -93,7 +93,7 @@ router.get("/detail/:id", async (req, res) => {
       .sort({ createdAt: 1 })
       .toArray();
 
-    res.render("detail.ejs", {
+    res.render("post/detail.ejs", {
       게시물: result,
       유저: req.user,
       댓글: comments,
@@ -114,7 +114,7 @@ router.get("/edit/:id", async (req, res) => {
     });
 
     if (!result) return res.status(403).send("수정 권한이 없습니다.");
-    res.render("edit.ejs", { result });
+    res.render("post/edit.ejs", { result });
   } catch (e) {
     console.error("❌ 수정 페이지 오류:", e);
     res.status(500).send("서버 오류");
