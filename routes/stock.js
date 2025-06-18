@@ -21,4 +21,11 @@ router.post(
   stockCtrl.uploadExcel
 );
 
+// 전체 삭제
+router.post("/delete-all", async (req, res) => {
+  const db = req.app.locals.db;
+  await db.collection("stock").deleteMany({});
+  res.send("삭제 완료");
+});
+
 module.exports = router;

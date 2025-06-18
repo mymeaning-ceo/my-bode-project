@@ -12,7 +12,7 @@ module.exports = (passport, db) => {
       try {
         // 대소문자 무시 정규식 조회
         const user = await db
-          .collection("users")
+          .collection("user")
           .findOne({ username: new RegExp(`^${username}$`, "i") });
 
         console.log("DEBUG user:", user);
@@ -49,7 +49,7 @@ module.exports = (passport, db) => {
   passport.deserializeUser(async (id, done) => {
     try {
       const dbUser = await db
-        .collection("users")
+        .collection("user")
         .findOne({ _id: new ObjectId(id) });
 
       console.log("deserializeUser:", dbUser?.username);
