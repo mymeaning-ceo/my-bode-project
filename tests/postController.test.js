@@ -7,6 +7,7 @@ const mockCollection = {
   skip: jest.fn().mockReturnThis(),
   limit: jest.fn().mockReturnThis(),
   toArray: jest.fn().mockResolvedValue([]),
+  findOne: jest.fn().mockResolvedValue(null),
 };
 
 jest.mock('../config/db', () => {
