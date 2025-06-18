@@ -53,8 +53,9 @@ async function initApp() {
       resave: false,
       saveUninitialized: false,
       store: MongoStore.create({
-        mongoUrl: process.env.MONGO_URI,
-        dbName: process.env.DB_NAME,
+        mongoUrl:
+          process.env.MONGO_URI || "mongodb://localhost:27017/testdb",
+        dbName: process.env.DB_NAME || "testdb",
         collectionName: "sessions",
         ttl: 60 * 60,
       }),
