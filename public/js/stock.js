@@ -5,17 +5,33 @@ $(document).ready(function () {
     paging: true,
     searching: false,
     info: false,
+    ajax: {
+      url: "/api/stock",
+      dataSrc: "data",
+    },
+    columns: [
+      { data: "item_code" },
+      { data: "item_name" },
+      { data: "color" },
+      { data: "size" },
+      { data: "qty" },
+      { data: "allocation" },
+    ],
   });
 
   // 검색 버튼
   $("#btnSearch").on("click", function () {
     const keyword = $("#keyword").val().trim();
-    window.location.href = `/stock/search?keyword=${encodeURIComponent(keyword)}`;
+    const url = keyword
+      ? `/api/stock?keyword=${encodeURIComponent(keyword)}`
+      : "/api/stock";
+    table.ajax.url(url).load();
   });
 
   // 새로고침 버튼
   $("#btnRefresh").on("click", function () {
-    window.location.href = "/stock/";
+    $("#keyword").val("");
+    table.ajax.url("/api/stock").load();
   });
 
   // 전체 삭제
