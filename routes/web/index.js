@@ -1,16 +1,28 @@
-const express = require("express");
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const { checkAuth } = require('../../middlewares/auth');
+
 const router = express.Router();
+const routesDir = __dirname;
 
-router.use("/stock", require("../stock"));
-router.use("/", require("../auth"));
-router.use("/admin", require("../admin"));
-router.use("/board", require("../board"));
-router.use("/coupang/add", require("../coupangAdd"));
-router.use("/coupang", require("../coupang"));
-router.use("/help", require("../help"));
-router.use("/list", require("../list")); // ← 추가
-router.use("/post", require("../post"));
+const protectedRoutes = new Set(['stock', 'admin', 'board', 'coupangAdd', 'list', 'post']);
 
-// TODO: 추가 웹 라우터 등록
+fs.readdirSync(routesDir)
+  .filter((file) => file !== 'index.js' && file.endsWith('.js'))
+  .forEach((file) => {
+    const modulePath = path.join(routesDir, file);
+    const routeModule = require(modulePath);
+    const name = path.basename(file, '.js');
+    let mountPath = '/' + name;
+    if (name === 'auth') mountPath = '/';
+    if (name === 'coupangAdd') mountPath = '/coupang/add';
+
+    if (protectedRoutes.has(name)) {
+      router.use(mountPath, checkAuth, routeModule);
+    } else {
+      router.use(mountPath, routeModule);
+    }
+  });
 
 module.exports = router;

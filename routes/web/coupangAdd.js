@@ -4,12 +4,11 @@ const multer = require("multer");
 const xlsx = require("xlsx");
 const fs = require("fs");
 const path = require("path");
-const { checkLogin } = require("../middlewares/auth");
 
 // ─────────────────────────────────────────
 // Multer 설정
 // ─────────────────────────────────────────
-const uploadsDir = path.join(__dirname, "../uploads");
+const uploadsDir = path.join(__dirname, "../../uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 const upload = multer({
   dest: uploadsDir,
@@ -74,7 +73,7 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
 // ─────────────────────────────────────────
 // 전체 삭제 (POST /coupang/add/delete-all)
 // ─────────────────────────────────────────
-router.post("/delete-all", checkLogin, async (req, res) => {
+router.post("/delete-all", async (req, res) => {
   const db = req.app.locals.db;
   try {
     await db.collection("coupangAdd").deleteMany({});

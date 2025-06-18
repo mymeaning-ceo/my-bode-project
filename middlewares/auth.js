@@ -4,8 +4,13 @@ function checkLogin(req, res, next) {
   next();
 }
 
+// Alias used by routers that require authentication
+function checkAuth(req, res, next) {
+  checkLogin(req, res, next);
+}
+
 function checkAdmin(req, res, next) {
   next();
 }
 
-module.exports = { checkLogin, checkAdmin };
+module.exports = { checkLogin, checkAdmin, checkAuth };

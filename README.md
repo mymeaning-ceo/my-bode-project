@@ -23,3 +23,15 @@ pip install -r requirements.txt
 ```
 
 The `requirements.txt` file lists the minimal packages (`pandas` and `openpyxl`) needed to parse Excel files.
+
+## Router structure
+
+Routes are organized under the `routes/` directory. `server.js` mounts two routers directly:
+
+- `/api` handled by `routes/api/index.js`
+- `/` handled by `routes/web/index.js`
+
+`routes/web/index.js` automatically reads every `.js` file in the same folder and mounts it. Some routes like `post` or `admin` are guarded with an auth check. `routes/api/index.js` currently exposes `/stock` endpoints through `stockApi.js`.
+
+This layout keeps API and web routes separate while avoiding an extra routing layer.
+

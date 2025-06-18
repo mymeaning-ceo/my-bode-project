@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const stockCtrl = require("../controllers/stockController");
+const stockCtrl = require("../../controllers/stockController");
 
 // ───────────────────────────────────────────
 // 0. GET /stock (페이지 표시)
