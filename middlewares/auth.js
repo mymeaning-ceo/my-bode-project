@@ -1,15 +1,11 @@
+// Permission checks have been disabled to allow access to all routes.
+// These middleware functions now simply pass control to the next handler.
 function checkLogin(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect("/login");
+  next();
 }
 
 function checkAdmin(req, res, next) {
-  if (req.isAuthenticated() && req.user?.username === "admin") {
-    return next();
-  }
-  res.status(403).send("관리자만 접근 가능합니다.");
+  next();
 }
 
 module.exports = { checkLogin, checkAdmin };
