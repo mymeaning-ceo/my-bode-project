@@ -27,7 +27,7 @@ router.post("/login", async (req, res, next) => {
 
   try {
     const user = await db
-      .collection("users")
+      .collection("user")
       .findOne({ username: new RegExp(`^${username}$`, "i") });
 
     if (!user) {
@@ -81,7 +81,7 @@ router.post("/register", async (req, res) => {
     }
 
     // ② 중복 아이디 확인
-    const userExists = await db.collection("users").findOne({ username });
+    const userExists = await db.collection("user").findOne({ username });
     if (userExists) {
       req.flash("error", "이미 사용 중인 아이디입니다.");
       return res.redirect("/register");
@@ -89,7 +89,7 @@ router.post("/register", async (req, res) => {
 
     // ③ 비밀번호 해시 후 저장
     const hashedPassword = await bcrypt.hash(password, 10);
-    await db.collection("users").insertOne({
+    await db.collection("user").insertOne({
       username,
       name,
       email,
