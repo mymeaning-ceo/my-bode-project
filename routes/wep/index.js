@@ -5,8 +5,8 @@ router.use("/stock", require("../stock"));
 router.use("/", require("../auth"));
 router.use("/admin", require("../admin"));
 router.use("/board", require("../board"));
-router.use("/coupang", require("../coupang"));
 router.use("/coupang/add", require("../coupangAdd"));
+router.use("/coupang", require("../coupang"));
 router.use("/help", require("../help"));
 router.use("/list", require("../list")); // ← 추가
 router.use("/post", require("../post"));
