@@ -3,9 +3,25 @@
 // 1) config/db.js 모킹
 // ─────────────────────────────────────────────
 jest.mock("./config/db", () => {
-  const mockClient = { db: () => ({}) };
-  const mockConnect = jest.fn().mockResolvedValue(mockClient);
-  mockConnect.then = (fn) => fn(mockClient); // connectDB.then(...) 호환
+  const mockCollection = {
+    findOne: jest.fn().mockResolvedValue(null),
+    find: jest.fn().mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      toArray: jest.fn().mockResolvedValue([]),
+    }),
+    deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 }),
+    updateMany: jest.fn().mockResolvedValue({}),
+    countDocuments: jest.fn().mockResolvedValue(0),
+  };
+
+  const mockDb = {
+    collection: jest.fn(() => mockCollection),
+  };
+
+  const mockConnect = jest.fn().mockResolvedValue(mockDb);
+  mockConnect.then = (fn) => fn(mockDb); // connectDB.then(...) 호환
   return {
     connectDB: mockConnect,
     closeDB: jest.fn().mockResolvedValue(),
