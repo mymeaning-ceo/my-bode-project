@@ -60,9 +60,10 @@ jobs:
         env:
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
-          heroku buildpacks:clear -a $HEROKU_APP_NAME
-          heroku buildpacks:add --index 1 heroku/nodejs -a $HEROKU_APP_NAME
-          heroku buildpacks:add --index 2 heroku/python -a $HEROKU_APP_NAME
+          # Ensure Node is the primary buildpack and add Python as secondary.
+          # Ignore errors if the buildpacks are already configured.
+          heroku buildpacks:set heroku/nodejs -a $HEROKU_APP_NAME || true
+          heroku buildpacks:add --index 2 heroku/python -a $HEROKU_APP_NAME || true
           heroku buildpacks -a $HEROKU_APP_NAME
 
       # 8) Git push 배포
