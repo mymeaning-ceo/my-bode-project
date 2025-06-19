@@ -14,7 +14,7 @@
   <div class="container py-5">
     <div class="mx-auto p-4 bg-white shadow-sm rounded" style="max-width: 600px;">
       <h4 class="mb-4 text-center fw-bold">✏️ 글 수정</h4>
-      <form action="/edit?_method=PUT" method="POST">
+      <form action="/post/edit?_method=PUT" method="POST">
         <input type="hidden" name="id" value="<%= result._id %>">
         <div class="mb-3">
           <label for="title" class="form-label">제목</label>

@@ -51,9 +51,9 @@
       <% } %>
       <div class="card-body">
         <h5 class="card-title mb-2">
-          <a href="/detail/<%= item._id %>" class="text-decoration-none"><%= item.title %></a>
+          <a href="/post/detail/<%= item._id %>" class="text-decoration-none"><%= item.title %></a>
           <% if (유저 && String(유저._id) === String(item.user)) { %>
-            <a href="/edit/<%= item._id %>" class="action-icon text-secondary" title="수정">✏️</a>
+            <a href="/post/edit/<%= item._id %>" class="action-icon text-secondary" title="수정">✏️</a>
             <a href="#" class="action-icon text-danger delete" data-id="<%= item._id %>" title="삭제">🗑️</a>
           <% } %>
         </h5>
@@ -103,7 +103,7 @@
       btn.addEventListener('click', function () {
         const id = this.dataset.id;
         if (confirm('정말 삭제하시겠습니까?')) {
-          fetch('/delete?docid=' + encodeURIComponent(id), { method: 'DELETE' })
+          fetch('/post/delete?docid=' + encodeURIComponent(id), { method: 'DELETE' })
             .then(res => res.ok ? location.reload() : alert('삭제 실패'));
         }
       });
