@@ -17,7 +17,7 @@
         <h4 class="card-title fw-bold mb-3">
           <%= 게시물.title %>
           <% if (유저 && String(유저._id) === String(게시물.user)) { %>
-            <a href="/edit/<%= 게시물._id %>" class="action-icon text-secondary" title="수정">✏️</a>
+            <a href="/post/edit/<%= 게시물._id %>" class="action-icon text-secondary" title="수정">✏️</a>
             <a href="#" class="action-icon text-danger delete" data-id="<%= 게시물._id %>" title="삭제">🗑️</a>
           <% } %>
         </h4>
@@ -47,7 +47,7 @@
       document.querySelectorAll('.delete').forEach(btn => {
         btn.addEventListener('click', () => {
           if (!confirm('정말 삭제하시겠습니까?')) return;
-          fetch('/delete?docid=' + btn.dataset.id, { method: 'DELETE' })
+          fetch('/post/delete?docid=' + btn.dataset.id, { method: 'DELETE' })
             .then(res => res.ok ? location.href = '/list' : alert('삭제 실패'));
         });
       });
@@ -56,7 +56,7 @@
     <div class="mt-4" id="comments" style="max-width: 600px; margin:0 auto;">
       <h5 class="mb-3">댓글</h5>
       <% if (유저) { %>
-        <form action="/comment/add" method="POST" class="mb-3">
+        <form action="/post/comment/add" method="POST" class="mb-3">
           <input type="hidden" name="postId" value="<%= 게시물._id %>" />
           <div class="input-group">
             <input type="text" class="form-control" name="content" placeholder="댓글을 입력하세요" required />
@@ -89,7 +89,7 @@
     document.querySelectorAll('.delete-comment').forEach(btn => {
       btn.addEventListener('click', () => {
         if (!confirm('삭제하시겠습니까?')) return;
-        fetch('/comment/delete?id=' + btn.dataset.id, { method: 'DELETE' })
+        fetch('/post/comment/delete?id=' + btn.dataset.id, { method: 'DELETE' })
           .then(res => res.ok ? location.reload() : alert('삭제 실패'));
       });
     });
@@ -99,7 +99,7 @@
         const el = document.querySelector('.comment-content[data-id="' + id + '"]');
         const newContent = prompt('댓글 수정', el.textContent.trim());
         if (!newContent) return;
-        fetch('/comment/edit', {
+        fetch('/post/comment/edit', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id, content: newContent })

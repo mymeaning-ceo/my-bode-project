@@ -50,8 +50,8 @@
         <div class="white-box mb-3 p-3 border rounded bg-white">
           <div class="list-box">
             <h4>
-              <a href="/detail/<%= 글목록[i]._id %>"><%= 글목록[i].title %></a>
-              <a href="/edit/<%= 글목록[i]._id %>">✏️</a>
+              <a href="/post/detail/<%= 글목록[i]._id %>"><%= 글목록[i].title %></a>
+              <a href="/post/edit/<%= 글목록[i]._id %>">✏️</a>
               <span class="delete text-danger ms-2" style="cursor:pointer;" data-id="<%= 글목록[i]._id %>">🗑</span>
             </h4>
             <p><%= 글목록[i].content %></p>
@@ -88,7 +88,7 @@
         e.preventDefault();
         const id = btn.dataset.id;
 
-        fetch('/delete?docid=' + encodeURIComponent(id), {
+        fetch('/post/delete?docid=' + encodeURIComponent(id), {
           method: 'DELETE'
         })
         .then(response => {
