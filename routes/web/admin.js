@@ -16,9 +16,7 @@ function getViewNames() {
     .filter((name) => !['nav', 'error', 'layouts'].includes(name));
 }
 
-// ─────────────────────────────────────────
 // 관리자 메인 페이지
-// ─────────────────────────────────────────
 router.get('/', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -40,9 +38,7 @@ router.get('/', checkAdmin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
 // 배너 업로드 및 삭제
-// ─────────────────────────────────────────
 router.post('/banner/:idx', checkAdmin, upload.single('banner'), async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -73,9 +69,7 @@ router.post('/banner/:idx/delete', checkAdmin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
 // 로고 업로드 및 삭제
-// ─────────────────────────────────────────
 router.post('/logo', checkAdmin, upload.single('logo'), async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -105,9 +99,7 @@ router.post('/logo/delete', checkAdmin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
 // 사용자 목록 및 삭제
-// ─────────────────────────────────────────
 router.get('/users', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -136,9 +128,7 @@ router.post('/users/delete', checkAdmin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
 // 페이지 권한 설정
-// ─────────────────────────────────────────
 router.get('/permissions', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
