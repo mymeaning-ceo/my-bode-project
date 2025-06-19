@@ -6,7 +6,13 @@ const { checkAuth } = require('../../middlewares/auth');
 const router = express.Router();
 const routesDir = __dirname;
 
-const protectedRoutes = new Set(['stock', 'admin', 'board', 'coupangAdd', 'list', 'post']);
+const protectedRoutes = new Set([
+  'stock',
+  'admin',
+  'board',
+  'coupangAdd',
+  'post',
+]);
 
 fs.readdirSync(routesDir)
   .filter((file) => file !== 'index.js' && file.endsWith('.js'))
@@ -14,15 +20,23 @@ fs.readdirSync(routesDir)
     const modulePath = path.join(routesDir, file);
     const routeModule = require(modulePath);
     const name = path.basename(file, '.js');
-    let mountPath = '/' + name;
-    if (name === 'auth') mountPath = '/';
-    if (name === 'coupangAdd') mountPath = '/coupang/add';
 
-    if (protectedRoutes.has(name)) {
-      router.use(mountPath, checkAuth, routeModule);
-    } else {
-      router.use(mountPath, routeModule);
+    let mountPaths = ['/' + name];
+    if (name === 'auth') {
+      mountPaths = ['/'];
+    } else if (name === 'coupangAdd') {
+      mountPaths = ['/coupang/add'];
+    } else if (name === 'post') {
+      mountPaths = ['/' + name, '/list', '/'];
     }
+
+    mountPaths.forEach((mountPath) => {
+      if (protectedRoutes.has(name)) {
+        router.use(mountPath, checkAuth, routeModule);
+      } else {
+        router.use(mountPath, routeModule);
+      }
+    });
   });
 
 module.exports = router;
