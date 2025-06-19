@@ -16,12 +16,12 @@
   <div class="container my-4">
     <div class="row">
       <div class="col-md-3 mb-3">
-        <a href="/admin/permissions" class="btn btn-outline-secondary w-100 mb-3">접근 권한 설정</a>
-        <a href="/admin/users" class="btn btn-outline-secondary w-100 mb-3">사용자 관리</a>
-        <ul class="list-group" id="adminMenu">
-          <li class="list-group-item <%= activeTab === 'bannerSection' ? 'active' : '' %>" data-target="bannerSection">배너 이미지 관리</li>
-          <li class="list-group-item <%= activeTab === 'logoSection' ? 'active' : '' %>" data-target="logoSection">브랜드 로고 관리</li>
-        </ul>
+        <div class="list-group" id="adminMenu">
+          <a href="/admin?tab=bannerSection" class="list-group-item list-group-item-action <%= activeTab === 'bannerSection' ? 'active' : '' %>" data-target="bannerSection">배너 이미지 관리</a>
+          <a href="/admin?tab=logoSection" class="list-group-item list-group-item-action <%= activeTab === 'logoSection' ? 'active' : '' %>" data-target="logoSection">브랜드 로고 관리</a>
+          <a href="/admin/permissions" class="list-group-item list-group-item-action">접근 권한 설정</a>
+          <a href="/admin/users" class="list-group-item list-group-item-action">사용자 관리</a>
+        </div>
       </div>
       <div class="col-md-9">
         <div id="bannerSection" class="admin-section <%= activeTab === 'bannerSection' ? '' : 'd-none' %>">
@@ -68,11 +68,12 @@
     </div>
 
     <script>
-      document.querySelectorAll('#adminMenu .list-group-item').forEach(item => {
-        item.addEventListener('click', () => {
-          document.querySelectorAll('#adminMenu .list-group-item').forEach(li => li.classList.remove('active'));
-          item.classList.add('active');
-          const target = item.dataset.target;
+      document.querySelectorAll('#adminMenu a[data-target]').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.querySelectorAll('#adminMenu a').forEach(a => a.classList.remove('active'));
+          link.classList.add('active');
+          const target = link.dataset.target;
           document.querySelectorAll('.admin-section').forEach(sec => sec.classList.add('d-none'));
           document.getElementById(target).classList.remove('d-none');
           const url = new URL(window.location);
