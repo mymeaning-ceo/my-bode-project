@@ -70,7 +70,7 @@ $(document).ready(function () {
       contentType: false,
       success: () => {
         alert("업로드 성공!");
-        location.reload();
+        table.ajax.reload(null, false); // 페이지 유지한 채 데이터만 갱신
       },
       error: (xhr) => {
         alert("업로드 실패: " + xhr.responseText);
