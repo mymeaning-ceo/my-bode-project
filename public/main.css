@@ -153,6 +153,22 @@ input[type="file"]::-webkit-file-upload-button {
   align-items: center;
 }
 
+@media (max-width: 575.98px) {
+  .action-form {
+    flex-wrap: wrap;
+  }
+  .action-form form {
+    flex: 1 1 100%;
+  }
+  .btn-upload,
+  .btn-reset {
+    width: 100%;
+  }
+  .action-form input[type="file"] {
+    width: 100%;
+  }
+}
+
 .btn-upload,
 .btn-reset {
   min-width: 130px;
@@ -180,4 +196,21 @@ input[type="file"]::-webkit-file-upload-button {
 table.auto-width {
   margin-left: auto;
   margin-right: auto;
+}
+
+/* DataTables pagination */
+.dataTables_wrapper .dataTables_paginate {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.dataTables_wrapper .dataTables_paginate .page-link {
+  border-radius: 0.25rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .page-item.active .page-link {
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
 }

@@ -5,8 +5,9 @@ $(document).ready(function () {
     serverSide: true,
     processing: true,
     paging: true,
+    pagingType: 'numbers',
     searching: false,
-    info: false,
+    info: true,
     pageLength: 50,
     lengthChange: false,
     columnDefs: [
@@ -26,6 +27,11 @@ $(document).ready(function () {
         }
       }
     ],
+    language: {
+      paginate: { previous: '이전', next: '다음' },
+      info: '총 _TOTAL_건 중 _START_ ~ _END_',
+      infoEmpty: '데이터가 없습니다'
+    },
     ajax: {
       url: "/api/stock",
       type: "GET",
