@@ -17,30 +17,31 @@ exports.renderStockPage = asyncHandler(async (req, res) => {
   res.render('stock');
 });
 
-// DataTables API
+// DataTables API (server-side pagination)
 exports.getStockData = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
-  const page   = parseInt(req.query.page, 10) || 1;
-  const limit  = parseInt(req.query.limit, 10) || 50;
-  const skip   = (page - 1) * limit;
+  // DataTables parameters
+  const start  = parseInt(req.query.start, 10) || 0;
+  const length = parseInt(req.query.length, 10) || 50;
   const draw   = parseInt(req.query.draw, 10) || 1;
-  const keyword = req.query.keyword || '';
+  const searchVal = req.query.search ? req.query.search.value : '';
 
-  const query = keyword
+  const query = searchVal
     ? {
         $or: [
-          { item_name: { $regex: keyword, $options: 'i' } },
-          { item_code: { $regex: keyword, $options: 'i' } }
+          { item_name: { $regex: searchVal, $options: 'i' } },
+          { item_code: { $regex: searchVal, $options: 'i' } }
         ]
       }
     : {};
 
   const [rows, total] = await Promise.all([
-    db.collection('stock')
+    db
+      .collection('stock')
       .find(query)
       .sort({ createdAt: -1, _id: -1 })
-      .skip(skip)
-      .limit(limit)
+      .skip(start)
+      .limit(length)
       .toArray(),
     db.collection('stock').countDocuments(query)
   ]);
