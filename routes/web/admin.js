@@ -28,7 +28,12 @@ router.get('/', checkAdmin, async (req, res) => {
       const doc = await db.collection('homepage').findOne({ key: 'banner' + i });
       banners.push(doc?.img || '');
     }
-    res.render('admin/index.ejs', { banners, logo: logoDoc?.img || '' });
+    const activeTab = req.query.tab || 'bannerSection';
+    res.render('admin/index.ejs', {
+      banners,
+      logo: logoDoc?.img || '',
+      activeTab,
+    });
   } catch (err) {
     console.error('❌ 관리자 페이지 오류:', err);
     res.status(500).send('서버 오류');
@@ -48,7 +53,7 @@ router.post('/banner/:idx', checkAdmin, upload.single('banner'), async (req, res
       { $set: { img: imgLocation, updatedAt: new Date() } },
       { upsert: true }
     );
-    res.redirect('/admin');
+    res.redirect('/admin?tab=bannerSection');
   } catch (err) {
     console.error('❌ 배너 업로드 실패:', err);
     res.status(500).send('서버 오류');
@@ -59,7 +64,7 @@ router.post('/banner/:idx/delete', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
     await db.collection('homepage').deleteOne({ key: 'banner' + req.params.idx });
-    res.redirect('/admin');
+    res.redirect('/admin?tab=bannerSection');
   } catch (err) {
     console.error('❌ 배너 삭제 실패:', err);
     res.status(500).send('서버 오류');
@@ -78,7 +83,7 @@ router.post('/logo', checkAdmin, upload.single('logo'), async (req, res) => {
       { $set: { img: imgLocation, updatedAt: new Date() } },
       { upsert: true }
     );
-    res.redirect('/admin');
+    res.redirect('/admin?tab=logoSection');
   } catch (err) {
     console.error('❌ 로고 업로드 실패:', err);
     res.status(500).send('서버 오류');
@@ -89,7 +94,7 @@ router.post('/logo/delete', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
     await db.collection('homepage').deleteOne({ key: 'logo' });
-    res.redirect('/admin');
+    res.redirect('/admin?tab=logoSection');
   } catch (err) {
     console.error('❌ 로고 삭제 실패:', err);
     res.status(500).send('서버 오류');

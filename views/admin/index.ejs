@@ -19,12 +19,12 @@
         <a href="/admin/permissions" class="btn btn-outline-secondary w-100 mb-3">접근 권한 설정</a>
         <a href="/admin/users" class="btn btn-outline-secondary w-100 mb-3">사용자 관리</a>
         <ul class="list-group" id="adminMenu">
-          <li class="list-group-item active" data-target="bannerSection">배너 이미지 관리</li>
-          <li class="list-group-item" data-target="logoSection">브랜드 로고 관리</li>
+          <li class="list-group-item <%= activeTab === 'bannerSection' ? 'active' : '' %>" data-target="bannerSection">배너 이미지 관리</li>
+          <li class="list-group-item <%= activeTab === 'logoSection' ? 'active' : '' %>" data-target="logoSection">브랜드 로고 관리</li>
         </ul>
       </div>
       <div class="col-md-9">
-        <div id="bannerSection" class="admin-section">
+        <div id="bannerSection" class="admin-section <%= activeTab === 'bannerSection' ? '' : 'd-none' %>">
           <h1 class="mb-3">배너 이미지 관리</h1>
           <% for (let i = 1; i <= 4; i++) { const img = banners[i-1]; %>
             <div class="mb-4">
@@ -47,7 +47,7 @@
           <% } %>
         </div>
 
-        <div id="logoSection" class="admin-section d-none">
+        <div id="logoSection" class="admin-section <%= activeTab === 'logoSection' ? '' : 'd-none' %>">
           <h2 class="mb-3">브랜드 로고 관리</h2>
           <% if (logo) { %>
             <img src="<%= logo %>" class="img-fluid mb-3" style="max-height:100px" alt="logo">
@@ -75,6 +75,9 @@
           const target = item.dataset.target;
           document.querySelectorAll('.admin-section').forEach(sec => sec.classList.add('d-none'));
           document.getElementById(target).classList.remove('d-none');
+          const url = new URL(window.location);
+          url.searchParams.set('tab', target);
+          history.replaceState(null, '', url);
         });
       });
 
