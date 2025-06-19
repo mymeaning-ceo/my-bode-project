@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const xlsx = require("xlsx");
+const safeReadXlsx = require("../../lib/safeReadXlsx");
 const fs = require("fs");
 const path = require("path");
 
@@ -10,7 +11,7 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 const upload = multer({ dest: uploadsDir });
 
 function parseExcel(filePath) {
-  const workbook = xlsx.readFile(filePath);
+  const workbook = safeReadXlsx(filePath);
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 }).slice(2);
   return rows

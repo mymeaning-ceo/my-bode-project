@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const xlsx = require("xlsx");
+const safeReadXlsx = require("../../lib/safeReadXlsx");
 const fs = require("fs");
 const path = require("path");
 const { checkAuth } = require("../../middlewares/auth");
@@ -112,7 +113,7 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
   const db = req.app.locals.db;
   try {
     const filePath = req.file.path;
-    const workbook = xlsx.readFile(filePath);
+    const workbook = safeReadXlsx(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
     const dataRows = sheetData.slice(2); // 첫 2행 제거
