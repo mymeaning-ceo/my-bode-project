@@ -16,12 +16,11 @@
   <div class="container my-5">
     <h2 class="mb-4 fw-bold">🛒 쿠팡재고</h2>
     <div class="alert alert-info mb-4">
-      <p class="mb-1">헤더를 클릭하면 원하는 컬럼으로 정렬할 수 있으며 페이지 이동이 가능합니다.</p>
+      <p class="mb-1">헤더를 클릭하면 오름차순/내림차순 정렬이 가능하며 50개씩 페이지 이동이 가능합니다.</p>
       <p class="mb-0">검색 후에는 옵션명과 30일 판매량을 그래프로 확인할 수 있습니다.</p>
     </div>
 
-    <!-- 업로드 후 메시지 -->
-    <% if (성공메시지) { %>
+    <% if (typeof 성공메시지 !== 'undefined' && 성공메시지) { %>
       <div class="alert alert-success alert-dismissible fade show" role="alert">
         <%= 성공메시지 %>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -29,12 +28,11 @@
     <% } %>
 
     <!-- 파일 업로드 + 초기화 -->
-    <div class="action-form mb-4">
+    <div class="action-form mb-4 d-flex gap-2 flex-wrap">
       <form action="/coupang/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
         <input type="file" name="excelFile" accept=".xlsx, .xls" class="form-control" required>
         <button type="submit" class="btn btn-success btn-upload">엑셀 업로드</button>
       </form>
-
       <form action="/coupang/delete-all" method="POST" onsubmit="return confirm('정말 모든 데이터를 삭제하시겠습니까?')">
         <button type="submit" class="btn btn-danger btn-reset">데이터 초기화</button>
       </form>
@@ -51,7 +49,7 @@
         </select>
       </div>
       <div class="col flex-grow-1">
-        <input type="text" name="keyword" value="<%= keyword %>" class="form-control" placeholder="상품명, 옵션명 또는 옵션ID 입력">
+        <input type="text" name="keyword" value="<%= keyword || '' %>" class="form-control" placeholder="상품명, 옵션명 또는 옵션ID 입력">
       </div>
       <div class="col">
         <button class="btn btn-outline-primary" type="submit">검색</button>
@@ -64,7 +62,7 @@
           <% 전체필드.forEach(key => { %>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="fields" value="<%= key %>" id="fld-<%= key.replace(/\s+/g,'-') %>" <%= 필드.includes(key) ? 'checked' : '' %>>
-              <label class="form-check-label" for="fld-<%= key.replace(/\s+/g,'-') %>"><%= 한글[key] || key %></label>
+              <label class="form-check-label" for="fld-<%= key.replace(/\s+/g,'-') %>"><%= 한글?.[key] || key %></label>
             </div>
           <% }) %>
           <button type="submit" class="btn btn-outline-primary">선택 적용</button>
@@ -83,7 +81,7 @@
             <tr>
               <th>번호</th>
               <% 필드.forEach((key) => { %>
-                <th><%= 한글[key] || key %></th>
+                <th><%= 한글?.[key] || key %></th>
               <% }) %>
             </tr>
           <% } else { %>
@@ -116,9 +114,9 @@
             </tr>
           <% } %>
         </tbody>
-        
       </table>
     </div>
+
     <% if (keyword) { %>
       <h4 class="mt-5">검색 결과 그래프</h4>
       <canvas id="salesChart" height="200"></canvas>
@@ -128,28 +126,44 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+  <% if (결과 && 결과.length > 0) { %>
   <script>
     $(function () {
       $('#coupangTable').DataTable({
+        ordering: true,
+        order: [[0, 'asc']],
         lengthChange: false,
         paging: true,
         pageLength: 50,
         searching: false,
-        info: false,
-        order: [],
+        info: false
       });
     });
   </script>
+  <% } %>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <% if (keyword && 결과 && 결과.length > 0) { %>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const labels = <%- JSON.stringify(결과.map(r => r['Option name'])) %>;
-    const salesData = <%- JSON.stringify(결과.map(r => r['Sales in the last 30 days'])) %>;
+    const salesData = <%- JSON.stringify(결과.map(r => Number(r['Sales in the last 30 days']) || 0)) %>;
     new Chart(document.getElementById('salesChart'), {
       type: 'bar',
-      data: { labels, datasets: [{ label: '30일 판매량', data: salesData, backgroundColor: 'rgba(75,192,192,0.5)' }] },
-      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      data: {
+        labels,
+        datasets: [{
+          label: '30일 판매량',
+          data: salesData,
+          backgroundColor: 'rgba(75,192,192,0.5)'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
     });
   </script>
   <% } %>
