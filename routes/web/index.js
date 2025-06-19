@@ -4,6 +4,7 @@ const path = require('path');
 const { checkAuth } = require('../../middlewares/auth');
 
 const router = express.Router();
+const postController = require('../../controllers/postController');
 const routesDir = __dirname;
 
 const protectedRoutes = new Set([
@@ -27,16 +28,19 @@ fs.readdirSync(routesDir)
     } else if (name === 'coupangAdd') {
       mountPaths = ['/coupang/add'];
     } else if (name === 'post') {
-      mountPaths = ['/' + name, '/list', '/write'];
+      mountPaths = ['/' + name, '/list'];
     }
 
-    mountPaths.forEach((mountPath) => {
-      if (protectedRoutes.has(name)) {
-        router.use(mountPath, checkAuth, routeModule);
-      } else {
-        router.use(mountPath, routeModule);
-      }
-    });
+  mountPaths.forEach((mountPath) => {
+    if (protectedRoutes.has(name)) {
+      router.use(mountPath, checkAuth, routeModule);
+    } else {
+      router.use(mountPath, routeModule);
+    }
   });
+});
+
+// 글쓰기 페이지 직접 연결
+router.get('/write', checkAuth, postController.renderWritePage);
 
 module.exports = router;
