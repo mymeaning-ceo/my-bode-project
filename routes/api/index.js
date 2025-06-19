@@ -10,6 +10,8 @@ const router = express.Router();
 
 // 재고(Stock) API
 router.use("/stock", require("./stockApi"));
+// 쿠팡 재고 API
+router.use("/coupang", require("./coupangApi"));
 
 // TODO: 다른 API 라우터 추가 시 아래와 같이 등록
 // router.use("/user", require("./userApi"));
