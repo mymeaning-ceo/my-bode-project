@@ -16,9 +16,7 @@ function getViewNames() {
     .filter((name) => !['nav', 'error', 'layouts'].includes(name));
 }
 
-// ─────────────────────────────────────────
 // 관리자 메인 페이지
-// ─────────────────────────────────────────
 router.get('/', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -40,9 +38,7 @@ router.get('/', checkAdmin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
 // 배너 업로드 및 삭제
-// ─────────────────────────────────────────
 router.post('/banner/:idx', checkAdmin, upload.single('banner'), async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -53,7 +49,8 @@ router.post('/banner/:idx', checkAdmin, upload.single('banner'), async (req, res
       { $set: { img: imgLocation, updatedAt: new Date() } },
       { upsert: true }
     );
-    res.redirect('/admin?tab=bannerSection');
+    const tab = req.query.tab || req.body.tab || 'bannerSection';
+    res.redirect(`/admin?tab=${tab}`);
   } catch (err) {
     console.error('❌ 배너 업로드 실패:', err);
     res.status(500).send('서버 오류');
@@ -64,16 +61,15 @@ router.post('/banner/:idx/delete', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
     await db.collection('homepage').deleteOne({ key: 'banner' + req.params.idx });
-    res.redirect('/admin?tab=bannerSection');
+    const tabDel = req.query.tab || req.body.tab || 'bannerSection';
+    res.redirect(`/admin?tab=${tabDel}`);
   } catch (err) {
     console.error('❌ 배너 삭제 실패:', err);
     res.status(500).send('서버 오류');
   }
 });
 
-// ─────────────────────────────────────────
 // 로고 업로드 및 삭제
-// ─────────────────────────────────────────
 router.post('/logo', checkAdmin, upload.single('logo'), async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -83,7 +79,8 @@ router.post('/logo', checkAdmin, upload.single('logo'), async (req, res) => {
       { $set: { img: imgLocation, updatedAt: new Date() } },
       { upsert: true }
     );
-    res.redirect('/admin?tab=logoSection');
+    const tabLogo = req.query.tab || req.body.tab || 'logoSection';
+    res.redirect(`/admin?tab=${tabLogo}`);
   } catch (err) {
     console.error('❌ 로고 업로드 실패:', err);
     res.status(500).send('서버 오류');
@@ -94,16 +91,15 @@ router.post('/logo/delete', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
     await db.collection('homepage').deleteOne({ key: 'logo' });
-    res.redirect('/admin?tab=logoSection');
+    const tabLogoDel = req.query.tab || req.body.tab || 'logoSection';
+    res.redirect(`/admin?tab=${tabLogoDel}`);
   } catch (err) {
     console.error('❌ 로고 삭제 실패:', err);
     res.status(500).send('서버 오류');
   }
 });
 
-// ─────────────────────────────────────────
 // 사용자 목록 및 삭제
-// ─────────────────────────────────────────
 router.get('/users', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -132,9 +128,7 @@ router.post('/users/delete', checkAdmin, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────
 // 페이지 권한 설정
-// ─────────────────────────────────────────
 router.get('/permissions', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
