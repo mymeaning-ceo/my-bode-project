@@ -87,6 +87,7 @@ exports.getData = asyncHandler(async (req, res) => {
   const start = parseInt(req.query.start, 10) || 0;
   const length = parseInt(req.query.length, 10) || 50;
   const draw = parseInt(req.query.draw, 10) || 1;
+  const keyword = req.query.search || '';
 
   // 기본 정렬 기준
   let sort = { _id: -1 };
@@ -104,22 +105,26 @@ exports.getData = asyncHandler(async (req, res) => {
     }
   }
 
-  const [rows, total] = await Promise.all([
-    db
-      .collection('coupangAdd')
-      .find()
-      .sort(sort)
-      .skip(start)
-      .limit(length)
-      .toArray(),
-    db.collection('coupangAdd').countDocuments()
-  ]);
+  let rows = await db.collection('coupangAdd').find().sort(sort).toArray();
+  const total = rows.length;
+
+  if (keyword) {
+    const regex = new RegExp(keyword, 'i');
+    rows = rows.filter(
+      (item) =>
+        regex.test(item['광고집행 상품명'] || '') ||
+        regex.test(String(item['광고집행 옵션ID'] || ''))
+    );
+  }
+
+  const recordsFiltered = rows.length;
+  rows = rows.slice(start, start + length);
 
   res.json({
     draw,
     recordsTotal: total,
-    recordsFiltered: total,
-    data: rows
+    recordsFiltered,
+    data: rows,
   });
 });
 
