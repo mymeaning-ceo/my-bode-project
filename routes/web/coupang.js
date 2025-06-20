@@ -101,7 +101,7 @@ router.get("/", async (req, res) => {
   const brand = req.query.brand || "";
   try {
     const query = brand ? { "Product name": new RegExp(brand, "i") } : {};
-    const [result, total] = await Promise.all([
+    const [rows, total] = await Promise.all([
       db
         .collection("coupang")
         .find(query)
@@ -112,7 +112,7 @@ router.get("/", async (req, res) => {
       db.collection("coupang").countDocuments(query),
     ]);
 
-    result = result.map((row) => {
+    const result = rows.map((row) => {
       const newRow = { ...row };
       if (typeof newRow["Option ID"] === "number") {
         newRow["Option ID"] = String(newRow["Option ID"]);
@@ -234,7 +234,7 @@ router.get("/search", async (req, res) => {
     }
 
     const query = conditions.length > 0 ? { $and: conditions } : {};
-    const [result, total] = await Promise.all([
+    const [rows, total] = await Promise.all([
       db
         .collection("coupang")
         .find(query)
@@ -245,7 +245,7 @@ router.get("/search", async (req, res) => {
       db.collection("coupang").countDocuments(query),
     ]);
 
-    result = result.map((row) => {
+    const result = rows.map((row) => {
       const newRow = { ...row };
       if (typeof newRow["Option ID"] === "number")
         newRow["Option ID"] = String(newRow["Option ID"]);
