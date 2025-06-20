@@ -71,7 +71,7 @@
     <% } %>
 
     <% if (결과 && 결과.length > 0) { %>
-      <p class="text-muted">🔎 총 <strong><%= 결과.length %></strong>건의 결과가 있습니다.</p>
+      <p class="text-muted">🔎 전체 <strong><%= 전체건수 %></strong>건 중 <strong><%= 현재페이지 %>/<%= 전체페이지 %></strong>페이지를 보고 있습니다.</p>
       <% let reorderCount = 0; 결과.forEach(item => { const s = Number(item['Shortage quantity']||0); const sales=Number(item['Sales in the last 30 days']||0); const stock=Number(item['Orderable quantity (real-time)']||0); if (s>0 || (sales>0 && stock===0)) reorderCount++; }); %>
       <div class="alert alert-warning d-flex justify-content-between align-items-center mb-3">
         <span>입고 필요 항목: <strong><%= reorderCount %></strong>건</span>
@@ -108,7 +108,7 @@
                  else if (sales30 === 0 && shortage === 0) rowCls = 'row-muted';
               %>
               <tr class="<%= rowCls %>" data-shortage="<%= shortage %>" data-sales="<%= sales30 %>" data-stock="<%= stock %>">
-                <td class="text-center"><%= index + 1 %></td>
+                <td class="text-center"><%= index + 1 + 페이지크기 * (현재페이지 - 1) %></td>
                 <% 필드.forEach(key => { %>
                   <% if (key === 'Option ID') { %>
                     <td><%= 행[key] %></td>
@@ -132,6 +132,28 @@
         </tbody>
       </table>
     </div>
+
+    <% if (전체페이지 > 1) { %>
+      <nav class="my-4">
+        <ul class="pagination justify-content-center">
+          <% if (현재페이지 > 1) { %>
+            <li class="page-item">
+              <a class="page-link" href="?page=<%= 현재페이지 - 1 %><%= 추가쿼리 %>">이전</a>
+            </li>
+          <% } %>
+          <% for (let i = 1; i <= 전체페이지; i++) { %>
+            <li class="page-item <%= i === 현재페이지 ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %><%= 추가쿼리 %>"><%= i %></a>
+            </li>
+          <% } %>
+          <% if (현재페이지 < 전체페이지) { %>
+            <li class="page-item">
+              <a class="page-link" href="?page=<%= 현재페이지 + 1 %><%= 추가쿼리 %>">다음</a>
+            </li>
+          <% } %>
+        </ul>
+      </nav>
+    <% } %>
 
     <% if (keyword) { %>
       <h4 class="mt-5">검색 결과 그래프</h4>

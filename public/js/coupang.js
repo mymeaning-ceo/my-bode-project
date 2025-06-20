@@ -6,11 +6,9 @@ $(function () {
     order: [[1, 'asc']],
     columnDefs: [{ targets: 0, orderable: false }],
     lengthChange: false,
-    paging: true,
-    pageLength: 50,
-    pagingType: 'numbers',
+    paging: false,
     searching: false,
-    info: true,
+    info: false,
     language: {
       paginate: { previous: '이전', next: '다음' },
       info: '총 _TOTAL_건 중 _START_ ~ _END_',

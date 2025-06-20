@@ -94,15 +94,23 @@ async function attachAdData(items, db) {
 // ✅ 목록 조회
 router.get("/", async (req, res) => {
   const db = req.app.locals.db; // DB 인스턴스 재사용
+  const page = parseInt(req.query.page) || 1;
+  const limit = 50;
+  const skip = (page - 1) * limit;
   const keyword = "";
   const brand = req.query.brand || "";
   try {
     const query = brand ? { "Product name": new RegExp(brand, "i") } : {};
-    let result = await db
-      .collection("coupang")
-      .find(query)
-      .sort({ "Product name": 1 })
-      .toArray();
+    const [result, total] = await Promise.all([
+      db
+        .collection("coupang")
+        .find(query)
+        .sort({ "Product name": 1 })
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      db.collection("coupang").countDocuments(query),
+    ]);
 
     result = result.map((row) => {
       const newRow = { ...row };
@@ -125,6 +133,14 @@ router.get("/", async (req, res) => {
         ? DEFAULT_COLUMNS.filter((col) => selected.includes(col))
         : DEFAULT_COLUMNS;
 
+    const totalPage = Math.ceil(total / limit);
+    const totalCount = total;
+    const params = new URLSearchParams();
+    if (brand) params.append("brand", brand);
+    if (selected && selected.length > 0)
+      selected.forEach((f) => params.append("fields", f));
+    const queryString = params.toString();
+
     res.render("coupang.ejs", {
       결과: resultWithAds,
       필드: fields,
@@ -134,6 +150,11 @@ router.get("/", async (req, res) => {
       keyword,
       brand,
       brandOptions: BRANDS,
+      현재페이지: page,
+      전체페이지: totalPage,
+      전체건수: totalCount,
+      추가쿼리: queryString ? `&${queryString}` : "",
+      페이지크기: limit,
     });
   } catch (err) {
     console.error("GET /coupang 오류:", err);
@@ -176,6 +197,11 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
       keyword: "",
       brand: "",
       brandOptions: BRANDS,
+      현재페이지: 1,
+      전체페이지: 1,
+      전체건수: resultWithAds.length,
+      추가쿼리: "",
+      페이지크기: limit,
     });
   } catch (err) {
     console.error("POST /coupang/upload 오류:", err);
@@ -189,6 +215,9 @@ router.get("/search", async (req, res) => {
   try {
     const keyword = req.query.keyword || "";
     const brand = req.query.brand || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = 50;
+    const skip = (page - 1) * limit;
     const regex = keyword ? new RegExp(keyword, "i") : null;
     const brandRegex = brand ? new RegExp(brand, "i") : null;
 
@@ -207,11 +236,16 @@ router.get("/search", async (req, res) => {
     }
 
     const query = conditions.length > 0 ? { $and: conditions } : {};
-    let result = await db
-      .collection("coupang")
-      .find(query)
-      .sort({ "Product name": 1 })
-      .toArray();
+    const [result, total] = await Promise.all([
+      db
+        .collection("coupang")
+        .find(query)
+        .sort({ "Product name": 1 })
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      db.collection("coupang").countDocuments(query),
+    ]);
 
     result = result.map((row) => {
       const newRow = { ...row };
@@ -233,6 +267,15 @@ router.get("/search", async (req, res) => {
         ? DEFAULT_COLUMNS.filter((col) => selected.includes(col))
         : DEFAULT_COLUMNS;
 
+    const totalPage = Math.ceil(total / limit);
+    const totalCount = total;
+    const params = new URLSearchParams();
+    if (keyword) params.append("keyword", keyword);
+    if (brand) params.append("brand", brand);
+    if (selected && selected.length > 0)
+      selected.forEach((f) => params.append("fields", f));
+    const queryString = params.toString();
+
     res.render("coupang.ejs", {
       결과: resultWithAds,
       필드: fields,
@@ -242,6 +285,11 @@ router.get("/search", async (req, res) => {
       keyword,
       brand,
       brandOptions: BRANDS,
+      현재페이지: page,
+      전체페이지: totalPage,
+      전체건수: totalCount,
+      추가쿼리: queryString ? `&${queryString}` : "",
+      페이지크기: limit,
     });
   } catch (err) {
     console.error("GET /coupang/search 오류:", err);
