@@ -70,8 +70,21 @@ function addShortage(items) {
   });
 }
 
+const AD_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+let cachedAds = null;
+let cachedAdsFetched = 0;
+
+async function getAds(db) {
+  const now = Date.now();
+  if (!cachedAds || now - cachedAdsFetched > AD_CACHE_DURATION) {
+    cachedAds = await db.collection("coupangAdd").find().toArray();
+    cachedAdsFetched = now;
+  }
+  return cachedAds;
+}
+
 async function attachAdData(items, db) {
-  const ads = await db.collection("coupangAdd").find().toArray();
+  const ads = await getAds(db);
   const adMap = {};
   ads.forEach((ad) => {
     const key = String(ad["광고집행 옵션ID"]);
