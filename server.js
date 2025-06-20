@@ -22,6 +22,13 @@ async function initApp() {
   const db = await connectDB();
   app.locals.db = db;
 
+  // 필요한 인덱스 생성 (날짜 정렬을 위한 인덱스)
+  try {
+    await db.collection('coupangAdd').createIndex({ 날짜: 1 });
+  } catch (err) {
+    console.error('❌ 인덱스 생성 실패:', err);
+  }
+
   // 2. Passport 설정
   require("./config/passport")(passport, db);
 
