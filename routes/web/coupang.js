@@ -71,27 +71,22 @@ function addShortage(items) {
 }
 
 async function attachAdData(items, db) {
-  const optionIds = items.map((item) => String(item["Option ID"]));
-  const ads = await db
-    .collection("coupangAdd")
-    .aggregate([
-      { $match: { "광고집행 옵션ID": { $in: optionIds } } },
-      { $sort: { 날짜: -1 } },
-      { $group: { _id: "$광고집행 옵션ID", doc: { $first: "$$ROOT" } } },
-    ])
-    .toArray();
+  const ads = await db.collection("coupangAdd").find().toArray();
   const adMap = {};
-  ads.forEach((a) => {
-    adMap[String(a._id)] = a.doc;
+  ads.forEach((ad) => {
+    const key = String(ad["광고집행 옵션ID"]);
+    if (!key) return;
+    const current = adMap[key];
+    if (!current || (ad.날짜 && (!current.날짜 || ad.날짜 > current.날짜))) {
+      adMap[key] = ad;
+    }
   });
   return items.map((item) => {
     const ad = adMap[String(item["Option ID"])] || {};
-    if (Object.keys(ad).length) {
-      item["노출수"] = ad["노출수"] || 0;
-      item["클릭수"] = ad["클릭수"] || 0;
-      item["광고비"] = ad["광고비"] || 0;
-      item["클릭률"] = ad["클릭률"] || 0;
-    }
+    item["노출수"] = ad["노출수"] || 0;
+    item["클릭수"] = ad["클릭수"] || 0;
+    item["광고비"] = ad["광고비"] || 0;
+    item["클릭률"] = ad["클릭률"] || "0.00";
     return item;
   });
 }
