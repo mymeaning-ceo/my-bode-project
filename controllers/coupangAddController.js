@@ -82,6 +82,7 @@ exports.renderPage = asyncHandler(async (req, res) => {
   // detail 모드 화면
   res.render('coupangAdd', {
     mode,
+    search,
   });
 });
 
