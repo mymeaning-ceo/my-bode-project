@@ -32,43 +32,70 @@ exports.renderPage = asyncHandler(async (req, res) => {
   let list = [];
 
   if (mode === 'summary') {
-    const rawData = await db.collection('coupangAdd').find().toArray();
+    const pipeline = [
+      {
+        $addFields: {
+          trimmedName: {
+            $trim: {
+              input: {
+                $arrayElemAt: [{ $split: ['$광고집행 상품명', ','] }, 0],
+              },
+            },
+          },
+        },
+      },
+      brand
+        ? {
+            $match: {
+              trimmedName: { $regex: brand, $options: 'i' },
+            },
+          }
+        : null,
+      search
+        ? {
+            $match: {
+              trimmedName: { $regex: search, $options: 'i' },
+            },
+          }
+        : null,
+      {
+        $group: {
+          _id: '$trimmedName',
+          impressions: { $sum: '$노출수' },
+          clicks: { $sum: '$클릭수' },
+          adCost: { $sum: '$광고비' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: '$_id',
+          impressions: 1,
+          clicks: 1,
+          adCost: 1,
+          ctr: {
+            $cond: [
+              { $gt: ['$impressions', 0] },
+              {
+                $round: [
+                  { $multiply: [{ $divide: ['$clicks', '$impressions'] }, 100] },
+                  2,
+                ],
+              },
+              0,
+            ],
+          },
+        },
+      },
+      { $sort: { [sortField]: sortOrder } },
+    ].filter(Boolean);
 
-    const cleaned = rawData.map((item) => {
-      const full = item['광고집행 상품명'] || '';
-      const trimmed = full.includes(',') ? full.split(',')[0].trim() : full;
-      return { ...item, trimmedName: trimmed };
-    });
+    const data = await db.collection('coupangAdd').aggregate(pipeline).toArray();
 
-    const grouped = {};
-    cleaned.forEach((item) => {
-      const key = item.trimmedName;
-      if (!grouped[key]) {
-        grouped[key] = { name: key, impressions: 0, clicks: 0, adCost: 0 };
-      }
-      grouped[key].impressions += Number(item['노출수'] || 0);
-      grouped[key].clicks += Number(item['클릭수'] || 0);
-      grouped[key].adCost += Number(item['광고비'] || 0);
-    });
-
-    list = Object.values(grouped).map((g, i) => ({
+    list = data.map((item, i) => ({
       no: i + 1,
-      ...g,
-      ctr: g.impressions > 0 ? ((g.clicks / g.impressions) * 100).toFixed(2) : '0.00',
+      ...item,
     }));
-
-    if (brand) {
-      list = list.filter((item) => item.name.includes(brand));
-    }
-
-    if (search) {
-      list = list.filter((item) => item.name.includes(search));
-    }
-
-    // 정렬 방향에 따라 오름차순/내림차순 처리
-    list.sort((a, b) => {
-      return sortOrder * ((+a[sortField] || 0) - (+b[sortField] || 0));
-    });
 
     return res.render('coupang-add-summary', {
       mode,
