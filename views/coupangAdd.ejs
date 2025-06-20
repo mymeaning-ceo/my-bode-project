@@ -15,6 +15,11 @@
   <div class="container my-5">
     <h2 class="mb-4 fw-bold">🛒 쿠팡 매출/광고비</h2>
 
+    <div class="mb-3">
+      <a href="?mode=detail" class="btn btn-outline-primary <%= mode === 'detail' ? 'active' : '' %>">전체 보기</a>
+      <a href="?mode=summary" class="btn btn-outline-success <%= mode === 'summary' ? 'active' : '' %>">상품명 통합 보기</a>
+    </div>
+
     <div class="alert alert-info mb-4">
       <p class="mb-0">헤더를 클릭하면 오름차순/내림차순 정렬이 가능하며 50개씩 페이지 이동이 가능합니다.</p>
     </div>
@@ -39,19 +44,43 @@
 
 
     <div class="table-responsive">
-      <table id="coupangAddTable" class="table table-bordered table-hover bg-white align-middle text-center auto-width">
+      <table id="coupangAddTable" data-mode="<%= mode %>" class="table table-bordered table-hover bg-white align-middle text-center auto-width">
         <thead class="table-light">
-          <tr>
-            <th>날짜</th>
-            <th>광고집행 옵션ID</th>
-            <th>광고집행 상품명</th>
-            <th>노출수</th>
-            <th>클릭수</th>
-            <th>광고비</th>
-            <th>클릭률</th>
-          </tr>
+          <% if (mode === 'summary') { %>
+            <tr>
+              <th>상품명</th>
+              <th>노출수 합</th>
+              <th>클릭수 합</th>
+              <th>광고비 합</th>
+              <th>클릭률</th>
+            </tr>
+          <% } else { %>
+            <tr>
+              <th>날짜</th>
+              <th>광고집행 옵션ID</th>
+              <th>광고집행 상품명</th>
+              <th>노출수</th>
+              <th>클릭수</th>
+              <th>광고비</th>
+              <th>클릭률</th>
+            </tr>
+          <% } %>
         </thead>
-        <tbody></tbody>
+        <% if (mode === 'summary') { %>
+          <tbody>
+            <% list.forEach(item => { %>
+              <tr>
+                <td class="text-start"><%= item.productName %></td>
+                <td><%= item.impressions.toLocaleString() %></td>
+                <td><%= item.clicks.toLocaleString() %></td>
+                <td><%= item.adCost.toLocaleString() %></td>
+                <td><%= item.ctr %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        <% } else { %>
+          <tbody></tbody>
+        <% } %>
       </table>
     </div>
   </div>
@@ -60,6 +89,7 @@
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
+  <script>var pageMode = '<%= mode %>';</script>
   <script src="/js/coupangAdd.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
