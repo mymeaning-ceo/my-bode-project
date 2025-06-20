@@ -24,11 +24,27 @@ exports.getData = asyncHandler(async (req, res) => {
   const length = parseInt(req.query.length, 10) || 50;
   const draw = parseInt(req.query.draw, 10) || 1;
 
+  // 기본 정렬 기준
+  let sort = { _id: -1 };
+
+  // DataTables에서 전달된 정렬 정보 적용
+  if (
+    req.query.order && Array.isArray(req.query.order) &&
+    req.query.columns && Array.isArray(req.query.columns)
+  ) {
+    const { column, dir } = req.query.order[0];
+    const colIdx = parseInt(column, 10);
+    const columnInfo = req.query.columns[colIdx];
+    if (columnInfo && columnInfo.data) {
+      sort = { [columnInfo.data]: dir === 'asc' ? 1 : -1 };
+    }
+  }
+
   const [rows, total] = await Promise.all([
     db
       .collection('coupangAdd')
       .find()
-      .sort({ _id: -1 })
+      .sort(sort)
       .skip(start)
       .limit(length)
       .toArray(),
