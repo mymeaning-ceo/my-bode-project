@@ -12,9 +12,9 @@ const storage = multer.diskStorage({
 });
 exports.upload = multer({ storage }).single('excelFile');
 
-// 상품명 정규화
+// 상품명 정규화 (쉼표 기준 앞부분만)
 function normalizeProductName(fullName = '') {
-  const idx = fullName.indexOf(',{"');
+  const idx = fullName.indexOf(',');
   return idx >= 0 ? fullName.slice(0, idx).trim() : fullName;
 }
 
@@ -23,61 +23,63 @@ exports.renderPage = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
   const mode = req.query.mode === 'summary' ? 'summary' : 'detail';
 
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = 50;
-  const keyword = req.query.search || '';
-  const skip = (page - 1) * limit;
+  const search = req.query.search || '';
+  const brand = req.query.brand || '';
+  const sortField = req.query.sort || 'clicks';
+  const sortOrder = req.query.order === 'asc' ? 1 : -1;
 
   let list = [];
-  let total = 0;
-  let totalPages = 1;
 
   if (mode === 'summary') {
-    const adList = await db.collection('coupangAdd').find().toArray();
+    const rawData = await db.collection('coupangAdd').find().toArray();
+
+    const cleaned = rawData.map((item) => {
+      const full = item['광고집행 상품명'] || '';
+      const trimmed = full.includes(',') ? full.split(',')[0].trim() : full;
+      return { ...item, trimmedName: trimmed };
+    });
+
     const grouped = {};
-
-    adList.forEach((ad) => {
-      const clean = normalizeProductName(ad['광고집행 상품명'] || '');
-      if (!grouped[clean]) {
-        grouped[clean] = {
-          productName: clean,
-          impressions: 0,
-          clicks: 0,
-          adCost: 0,
-          optionIds: [],
-        };
+    cleaned.forEach((item) => {
+      const key = item.trimmedName;
+      if (!grouped[key]) {
+        grouped[key] = { name: key, impressions: 0, clicks: 0, adCost: 0 };
       }
-
-      grouped[clean].impressions += Number(ad['노출수'] || 0);
-      grouped[clean].clicks += Number(ad['클릭수'] || 0);
-      grouped[clean].adCost += Number(ad['광고비'] || 0);
-      if (ad['광고집행 옵션ID']) grouped[clean].optionIds.push(String(ad['광고집행 옵션ID']));
+      grouped[key].impressions += Number(item['노출수'] || 0);
+      grouped[key].clicks += Number(item['클릭수'] || 0);
+      grouped[key].adCost += Number(item['광고비'] || 0);
     });
 
-    list = Object.values(grouped).map((g) => {
-      g.ctr = g.impressions > 0 ? ((g.clicks / g.impressions) * 100).toFixed(2) : '0.00';
-      return g;
-    });
+    list = Object.values(grouped).map((g, i) => ({
+      no: i + 1,
+      ...g,
+      ctr: g.impressions > 0 ? ((g.clicks / g.impressions) * 100).toFixed(2) : '0.00',
+    }));
 
-    if (keyword) {
-      const regex = new RegExp(keyword, 'i');
-      list = list.filter(
-        (item) => regex.test(item.productName) || item.optionIds.some((id) => regex.test(id))
-      );
+    if (brand) {
+      list = list.filter((item) => item.name.includes(brand));
     }
 
-    total = list.length;
-    totalPages = Math.ceil(total / limit) || 1;
-    list = list.slice(skip, skip + limit);
+    if (search) {
+      list = list.filter((item) => item.name.includes(search));
+    }
+
+    list.sort((a, b) => {
+      return sortOrder * ((+b[sortField] || 0) - (+a[sortField] || 0));
+    });
+
+    return res.render('coupang-add-summary', {
+      list,
+      search,
+      brand,
+      sortField,
+      sortOrder,
+    });
   }
 
+  // detail 모드 화면
   res.render('coupangAdd', {
     mode,
-    list,
-    page,
-    totalPages,
-    search: keyword,
-    total,
   });
 });
 
