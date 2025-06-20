@@ -111,25 +111,27 @@ exports.getData = asyncHandler(async (req, res) => {
     }
   }
 
-  let rows = await db
-    .collection('coupangAdd')
-    .find()
-    .sort(sort)
-    .allowDiskUse(true)
-    .toArray();
-  const total = rows.length;
+  const collection = db.collection('coupangAdd');
+  const query = keyword
+    ? {
+        $or: [
+          { '광고집행 상품명': { $regex: keyword, $options: 'i' } },
+          { '광고집행 옵션ID': { $regex: keyword, $options: 'i' } }
+        ]
+      }
+    : {};
 
-  if (keyword) {
-    const regex = new RegExp(keyword, 'i');
-    rows = rows.filter(
-      (item) =>
-        regex.test(item['광고집행 상품명'] || '') ||
-        regex.test(String(item['광고집행 옵션ID'] || ''))
-    );
-  }
-
-  const recordsFiltered = rows.length;
-  rows = rows.slice(start, start + length);
+  const [total, recordsFiltered, rows] = await Promise.all([
+    collection.countDocuments(),
+    collection.countDocuments(query),
+    collection
+      .find(query)
+      .sort(sort)
+      .allowDiskUse()
+      .skip(start)
+      .limit(length)
+      .toArray()
+  ]);
 
   res.json({
     draw,
