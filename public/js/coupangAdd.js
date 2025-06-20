@@ -2,6 +2,7 @@ $(function () {
   const $table = $('#coupangAddTable');
   if (!$table.length || $table.data('mode') !== 'detail') return;
 
+  const urlParams = new URLSearchParams(window.location.search);
   const table = $table.DataTable({
     serverSide: true,
     processing: true,
@@ -20,7 +21,8 @@ $(function () {
     ajax: {
       url: '/api/coupang-add',
       type: 'GET',
-      dataSrc: 'data',
+      data: () => ({ search: urlParams.get('search') || '' }),
+      dataSrc: 'data'
     },
     columns: [
       { data: '날짜' },
@@ -31,6 +33,11 @@ $(function () {
       { data: '광고비' },
       { data: '클릭률' },
     ],
+    createdRow: function (row, data) {
+      if (data['광고비'] > 0 && data['클릭수'] == 0) {
+        $(row).addClass('table-danger');
+      }
+    },
     language: {
       paginate: { previous: '이전', next: '다음' },
       info: '총 _TOTAL_건 중 _START_ ~ _END_',

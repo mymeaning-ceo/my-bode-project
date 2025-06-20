@@ -21,11 +21,12 @@
         <option value="BYC" <%= brand === 'BYC' ? 'selected' : '' %>>BYC</option>
         <option value="비비안" <%= brand === '비비안' ? 'selected' : '' %>>비비안</option>
       </select>
-      <button class="btn btn-outline-primary">검색</button>
+      <button class="btn btn-outline-primary me-2">검색</button>
     </form>
+    <a href="/coupang/add/download?search=<%= search %>" class="btn btn-success mb-3">📥 엑셀 다운로드</a>
 
     <table class="table table-bordered table-hover text-center">
-      <thead>
+      <thead class="bg-primary text-white text-center">
         <tr>
           <th>번호</th>
           <th>상품명</th>

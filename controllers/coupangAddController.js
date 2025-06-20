@@ -80,6 +80,7 @@ exports.renderPage = asyncHandler(async (req, res) => {
   // detail 모드 화면
   res.render('coupangAdd', {
     mode,
+    search,
   });
 });
 
@@ -89,6 +90,7 @@ exports.getData = asyncHandler(async (req, res) => {
   const start = parseInt(req.query.start, 10) || 0;
   const length = parseInt(req.query.length, 10) || 50;
   const draw = parseInt(req.query.draw, 10) || 1;
+  const keyword = req.query.search || '';
 
   // 기본 정렬 기준
   let sort = { _id: -1 };
@@ -106,15 +108,24 @@ exports.getData = asyncHandler(async (req, res) => {
     }
   }
 
+  const query = keyword
+    ? {
+        $or: [
+          { '광고집행 상품명': { $regex: keyword } },
+          { '광고집행 옵션ID': { $regex: keyword } }
+        ]
+      }
+    : {};
+
   const [rows, total] = await Promise.all([
     db
       .collection('coupangAdd')
-      .find()
+      .find(query)
       .sort(sort)
       .skip(start)
       .limit(length)
       .toArray(),
-    db.collection('coupangAdd').countDocuments()
+    db.collection('coupangAdd').countDocuments(query)
   ]);
 
   res.json({
@@ -180,4 +191,27 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
 
   fs.unlink(filePath, () => {});
   res.json({ status: 'success' });
+});
+
+// Excel download
+exports.downloadExcel = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const keyword = req.query.search || '';
+  const query = keyword
+    ? {
+        $or: [
+          { '광고집행 상품명': { $regex: keyword } },
+          { '광고집행 옵션ID': { $regex: keyword } },
+        ],
+      }
+    : {};
+  const rows = await db.collection('coupangAdd').find(query).sort({ _id: -1 }).toArray();
+  const wb = xlsx.utils.book_new();
+  const ws = xlsx.utils.json_to_sheet(rows);
+  xlsx.utils.book_append_sheet(wb, ws, 'data');
+  const buffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  const fileName = '광고데이터.xlsx';
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`);
+  res.send(buffer);
 });

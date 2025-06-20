@@ -8,6 +8,9 @@ router.get('/', ctrl.renderPage);
 // 엑셀 업로드
 router.post('/upload', ctrl.upload, ctrl.uploadExcel);
 
+// 엑셀 다운로드
+router.get('/download', ctrl.downloadExcel);
+
 // 전체 삭제
 router.post('/delete-all', async (req, res) => {
   const db = req.app.locals.db;
