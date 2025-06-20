@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const xlsx = require("xlsx");
-const safeReadXlsx = require("../../lib/safeReadXlsx");
+const parseCoupangExcel = require("../../lib/parseCoupangExcel");
 const fs = require("fs");
 const path = require("path");
 const { checkAuth } = require("../../middlewares/auth");
@@ -112,36 +111,13 @@ router.get("/", async (req, res) => {
 router.post("/upload", upload.single("excelFile"), async (req, res) => {
   const db = req.app.locals.db;
   try {
+    if (!req.file) {
+      req.flash("error", "파일이 없습니다.");
+      return res.redirect("/coupang");
+    }
+
     const filePath = req.file.path;
-    const workbook = safeReadXlsx(filePath);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-    const dataRows = sheetData.slice(2); // 첫 2행 제거
-
-    const data = dataRows
-      .map((row) => {
-        const obj = {};
-        obj["Option ID"] = String(row[2] ?? "").trim();
-        obj["Product name"] = row[4] ?? "";
-        obj["Option name"] = row[5] ?? "";
-
-        const inventory = Number(String(row[7]).replace(/,/g, "")) || 0;
-        obj["Orderable quantity (real-time)"] = inventory;
-
-        const salesAmount = Number(String(row[11]).replace(/,/g, "")) || 0;
-        obj["Sales amount on the last 30 days"] = salesAmount;
-
-        const salesCount = Number(String(row[13]).replace(/,/g, "")) || 0;
-        obj["Sales in the last 30 days"] = salesCount;
-
-        const daily = salesCount / 30;
-        const safety = daily * 7;
-        obj["Shortage quantity"] =
-          inventory < safety ? Math.ceil(safety - inventory) : 0;
-
-        return obj;
-      })
-      .filter((item) => item["Option ID"]);
+    const data = parseCoupangExcel(filePath);
 
     const bulkOps = data.map((item) => ({
       updateOne: {
