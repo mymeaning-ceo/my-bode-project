@@ -5,7 +5,7 @@ $(document).ready(function () {
     serverSide: true,
     processing: true,
     paging: true,
-    pagingType: 'numbers',
+    pagingType: 'simple_numbers',
     searching: false,
     info: true,
     pageLength: 50,
