@@ -203,6 +203,7 @@ table.auto-width {
   margin-top: 1rem;
   display: flex;
   justify-content: center;
+  float: none;
 }
 
 .dataTables_wrapper .dataTables_paginate .page-link {
