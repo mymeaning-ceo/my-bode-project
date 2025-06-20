@@ -71,16 +71,25 @@ function addShortage(items) {
 }
 
 async function attachAdData(items, db) {
-  const ads = await db.collection("coupangAdd").find().toArray();
+  // 필요한 옵션ID만 조회하여 부가 데이터 매칭
+  const optionIds = [...new Set(items.map((it) => String(it["Option ID"])))]
+    .filter(Boolean);
+  if (optionIds.length === 0) return items;
+
+  const ads = await db
+    .collection("coupangAdd")
+    .find({ "광고집행 옵션ID": { $in: optionIds } })
+    .sort({ 날짜: -1 })
+    .toArray();
+
   const adMap = {};
   ads.forEach((ad) => {
     const key = String(ad["광고집행 옵션ID"]);
-    if (!key) return;
-    const current = adMap[key];
-    if (!current || (ad.날짜 && (!current.날짜 || ad.날짜 > current.날짜))) {
-      adMap[key] = ad;
+    if (!adMap[key]) {
+      adMap[key] = ad; // sort 로 최신순이므로 첫 항목 저장
     }
   });
+
   return items.map((item) => {
     const ad = adMap[String(item["Option ID"])] || {};
     item["노출수"] = ad["노출수"] || 0;
