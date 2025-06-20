@@ -51,7 +51,17 @@ exports.uploadExcel = asyncHandler(async (req, res) => {
   const filePath = req.file.path;
   const workbook = xlsx.readFile(filePath, { cellDates: true });
   const sheetName = workbook.SheetNames[0];
-  const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+  const raw = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+  const numericFields = ['노출수', '클릭수', '광고비', '클릭률'];
+  const data = raw.map(row => {
+    numericFields.forEach(f => {
+      if (row[f] !== undefined && row[f] !== null && row[f] !== '') {
+        const num = Number(String(row[f]).replace(/[^0-9.-]/g, ''));
+        row[f] = f === '클릭률' ? Number(num.toFixed(2)) : num;
+      }
+    });
+    return row;
+  });
 
   const db = req.app.locals.db;
   await db.collection('coupangAdd').deleteMany({});
@@ -70,7 +80,17 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
   const filePath = req.file.path;
   const workbook = xlsx.readFile(filePath, { cellDates: true });
   const sheetName = workbook.SheetNames[0];
-  const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+  const raw = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+  const numericFields = ['노출수', '클릭수', '광고비', '클릭률'];
+  const data = raw.map(row => {
+    numericFields.forEach(f => {
+      if (row[f] !== undefined && row[f] !== null && row[f] !== '') {
+        const num = Number(String(row[f]).replace(/[^0-9.-]/g, ''));
+        row[f] = f === '클릭률' ? Number(num.toFixed(2)) : num;
+      }
+    });
+    return row;
+  });
 
   const db = req.app.locals.db;
   await db.collection('coupangAdd').deleteMany({});
