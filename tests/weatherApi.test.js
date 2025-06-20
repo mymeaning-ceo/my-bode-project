@@ -1,11 +1,16 @@
 jest.setTimeout(60000);
 
+// Mock MongoDB config
 jest.mock('../config/db', () => {
   const mockDb = { collection: jest.fn() };
   const mockConnect = jest.fn().mockResolvedValue(mockDb);
   mockConnect.then = (fn) => fn(mockDb);
   return { connectDB: mockConnect, closeDB: jest.fn().mockResolvedValue() };
 });
+
+// Mock node-fetch
+jest.mock('node-fetch');
+const mockFetch = require('node-fetch');
 
 const request = require('supertest');
 const { initApp } = require('../server');
@@ -20,7 +25,8 @@ beforeAll(async () => {
   process.env.SESSION_SECRET = 'testsecret';
   process.env.WEATHER_API_KEY = 'testkey';
 
-  global.fetch = jest.fn().mockResolvedValue({
+  mockFetch.mockResolvedValue({
+    ok: true,
     json: async () => ({
       response: {
         body: {

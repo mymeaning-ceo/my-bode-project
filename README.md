@@ -38,11 +38,18 @@ Routes are organized under the `routes/` directory. `server.js` mounts two route
 This layout keeps API and web routes separate while avoiding an extra routing layer.
 
 
+=======
+
+
 ## Weather integration
 
 The project exposes `/api/weather/daily` which fetches forecast data from the
 Korean Meteorological Administration using `WEATHER_API_KEY`. An accompanying
 `/weather` page displays the information via AJAX.
+
+
+Server-side requests use `node-fetch`, which is listed in `package.json`.
+=======
 
 
 ## Weather API details
@@ -87,6 +94,8 @@ const fetchWeather = async () => {
 
 fetchWeather();
 ```
+
+=======
 
 ## Order quantity calculator
 
