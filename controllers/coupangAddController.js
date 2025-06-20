@@ -25,7 +25,8 @@ exports.renderPage = asyncHandler(async (req, res) => {
 
   const search = req.query.search || '';
   const brand = req.query.brand || '';
-  const sortField = req.query.sort || 'clicks';
+  // 기본 정렬: 노출수 합 내림차순
+  const sortField = req.query.sort || 'impressions';
   const sortOrder = req.query.order === 'asc' ? 1 : -1;
 
   let list = [];
@@ -64,8 +65,9 @@ exports.renderPage = asyncHandler(async (req, res) => {
       list = list.filter((item) => item.name.includes(search));
     }
 
+    // 정렬 방향에 따라 오름차순/내림차순 처리
     list.sort((a, b) => {
-      return sortOrder * ((+b[sortField] || 0) - (+a[sortField] || 0));
+      return sortOrder * ((+a[sortField] || 0) - (+b[sortField] || 0));
     });
 
     return res.render('coupang-add-summary', {
