@@ -35,3 +35,16 @@ Routes are organized under the `routes/` directory. `server.js` mounts two route
 
 This layout keeps API and web routes separate while avoiding an extra routing layer.
 
+
+## Order quantity calculator
+
+The script `scripts/calc_order_qty.js` merges ad and inventory Excel files to
+calculate recommended order quantities. Usage:
+
+```bash
+node scripts/calc_order_qty.js <ad_excel> <inventory_excel> [output.xlsx]
+```
+
+The algorithm derives average daily sales from recent conversions, applies an
+ad spend multiplier, and subtracts current stock to determine how many units
+to reorder.
