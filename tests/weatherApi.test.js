@@ -1,5 +1,6 @@
 jest.setTimeout(60000);
 
+// Mock MongoDB config
 jest.mock('../config/db', () => {
   const mockDb = { collection: jest.fn() };
   const mockConnect = jest.fn().mockResolvedValue(mockDb);
@@ -7,6 +8,7 @@ jest.mock('../config/db', () => {
   return { connectDB: mockConnect, closeDB: jest.fn().mockResolvedValue() };
 });
 
+// Mock node-fetch
 jest.mock('node-fetch');
 const mockFetch = require('node-fetch');
 

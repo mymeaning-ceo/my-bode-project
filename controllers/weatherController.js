@@ -3,8 +3,7 @@ const asyncHandler = require('../middlewares/asyncHandler');
 
 // Fetch daily weather from KMA API
 exports.getDailyWeather = asyncHandler(async (req, res) => {
-  const baseDate =
-    req.query.date || new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const baseDate = req.query.date || new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const baseTime = req.query.time || '1200';
   const nx = req.query.nx || '60';
   const ny = req.query.ny || '127';
@@ -24,9 +23,11 @@ exports.getDailyWeather = asyncHandler(async (req, res) => {
   const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?${params}`;
 
   const response = await fetch(url);
+
   if (!response.ok) {
     throw new Error(`Weather API error: ${response.status}`);
   }
+
   let data;
   try {
     data = await response.json();
@@ -34,6 +35,7 @@ exports.getDailyWeather = asyncHandler(async (req, res) => {
     const text = await response.text();
     throw new Error(`Invalid JSON: ${text.slice(0, 100)}`);
   }
+
   const items = data?.response?.body?.items?.item || [];
   const findVal = (cat) => items.find((i) => i.category === cat)?.fcstValue;
 

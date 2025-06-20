@@ -11,7 +11,11 @@ $(function () {
     pageLength: 50,
     lengthChange: false,
     order: [[0, 'asc']],
-    columnDefs: [{ targets: '_all', className: 'text-center' }],
+    columnDefs: [
+      { targets: '_all', className: 'text-center' },
+      { targets: [3, 4, 5], render: $.fn.dataTable.render.number(',', '.', 0) },
+      { targets: 6, render: (data) => parseFloat(data).toFixed(2) },
+    ],
     ajax: {
       url: '/api/coupang-add',
       type: 'GET',
