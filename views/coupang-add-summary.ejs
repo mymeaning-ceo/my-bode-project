@@ -13,7 +13,13 @@
   <div class="container my-5">
     <h2 class="mb-4 fw-bold">🛒 쿠팡 광고 요약</h2>
 
-    <form method="get" class="d-flex align-items-center mb-3">
+    <div class="mb-3">
+      <a href="/coupang/add?mode=detail" class="btn <%= mode === 'detail' ? 'btn-primary' : 'btn-outline-primary' %>">전체 보기</a>
+      <a href="/coupang/add?mode=summary" class="btn <%= mode === 'summary' ? 'btn-success' : 'btn-outline-success' %>">상품명 통합 보기</a>
+    </div>
+
+    <form method="get" action="/coupang/add" class="d-flex align-items-center mb-3">
+      <input type="hidden" name="mode" value="summary">
       <input name="search" class="form-control me-2" style="max-width: 250px;" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
       <select name="brand" class="form-select me-2" style="max-width: 150px;">
         <option value="">전체 브랜드</option>

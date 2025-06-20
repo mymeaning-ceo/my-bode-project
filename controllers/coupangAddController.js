@@ -71,6 +71,7 @@ exports.renderPage = asyncHandler(async (req, res) => {
     });
 
     return res.render('coupang-add-summary', {
+      mode,
       list,
       search,
       brand,
