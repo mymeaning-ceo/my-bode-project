@@ -16,8 +16,8 @@
     <h2 class="mb-4 fw-bold">🛒 쿠팡 매출/광고비</h2>
 
     <div class="mb-3">
-      <a href="?mode=detail" class="btn btn-outline-primary <%= mode === 'detail' ? 'active' : '' %>">전체 보기</a>
-      <a href="?mode=summary" class="btn btn-outline-success <%= mode === 'summary' ? 'active' : '' %>">상품명 통합 보기</a>
+      <a href="/coupang/add?mode=detail" class="btn <%= mode === 'detail' ? 'btn-primary' : 'btn-outline-primary' %>">전체 보기</a>
+      <a href="/coupang/add?mode=summary" class="btn <%= mode === 'summary' ? 'btn-success' : 'btn-outline-success' %>">상품명 통합 보기</a>
     </div>
 
     <div class="alert alert-info mb-4">
