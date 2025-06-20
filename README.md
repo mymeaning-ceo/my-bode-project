@@ -43,3 +43,46 @@ The project exposes `/api/weather/daily` which fetches forecast data from the
 Korean Meteorological Administration using `WEATHER_API_KEY`. An accompanying
 `/weather` page displays the information via AJAX.
 
+
+## Weather API details
+
+The weather data is sourced from the [Korean Meteorological Administration (기상청) 초단기예보 API](https://data.go.kr/iim/api/selectAPIAcountView.do#).
+
+### API Endpoint
+https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
+
+### Authentication Keys
+
+Two versions of the API key are provided:
+
+- **Encoding key**: Use this version when placing the key directly into the URL.
+- **Decoding key**: Use this when passing via `params` or using a library that handles encoding.
+
+> Your actual key values can be found in the developer portal at https://data.go.kr
+
+### Example usage with axios
+
+```js
+const axios = require("axios");
+const qs = require("qs");
+
+const fetchWeather = async () => {
+  const params = {
+    serviceKey: process.env.WEATHER_API_KEY, // must be URL encoded
+    pageNo: "1",
+    numOfRows: "1000",
+    dataType: "JSON",
+    base_date: "20240620",
+    base_time: "1200",
+    nx: "60",
+    ny: "127"
+  };
+
+  const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?${qs.stringify(params)}`;
+
+  const { data } = await axios.get(url);
+  console.log(data);
+};
+
+fetchWeather();
+```
