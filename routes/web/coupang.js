@@ -24,6 +24,10 @@ const 한글 = {
   "Sales amount on the last 30 days": "30일 판매금액",
   "Sales in the last 30 days": "30일 판매량",
   "Shortage quantity": "부족재고량",
+  노출수: "노출수",
+  클릭수: "클릭수",
+  광고비: "광고비",
+  클릭률: "클릭률",
 };
 
 const DEFAULT_COLUMNS = [
@@ -34,6 +38,10 @@ const DEFAULT_COLUMNS = [
   "Sales amount on the last 30 days",
   "Sales in the last 30 days",
   "Shortage quantity",
+  "노출수",
+  "클릭수",
+  "광고비",
+  "클릭률",
 ];
 
 const IMPORT_COLUMNS = DEFAULT_COLUMNS.filter(
@@ -44,6 +52,10 @@ const NUMERIC_COLUMNS = [
   "Sales amount on the last 30 days",
   "Sales in the last 30 days",
   "Shortage quantity",
+  "노출수",
+  "클릭수",
+  "광고비",
+  "클릭률",
 ];
 
 function addShortage(items) {
@@ -54,6 +66,32 @@ function addShortage(items) {
     const safety = daily * 7;
     const shortage = inventory < safety ? Math.ceil(safety - inventory) : 0;
     item["Shortage quantity"] = shortage;
+    return item;
+  });
+}
+
+async function attachAdData(items, db) {
+  const optionIds = items.map((item) => String(item["Option ID"]));
+  const ads = await db
+    .collection("coupangAdd")
+    .aggregate([
+      { $match: { "광고집행 옵션ID": { $in: optionIds } } },
+      { $sort: { 날짜: -1 } },
+      { $group: { _id: "$광고집행 옵션ID", doc: { $first: "$$ROOT" } } },
+    ])
+    .toArray();
+  const adMap = {};
+  ads.forEach((a) => {
+    adMap[String(a._id)] = a.doc;
+  });
+  return items.map((item) => {
+    const ad = adMap[String(item["Option ID"])] || {};
+    if (Object.keys(ad).length) {
+      item["노출수"] = ad["노출수"] || 0;
+      item["클릭수"] = ad["클릭수"] || 0;
+      item["광고비"] = ad["광고비"] || 0;
+      item["클릭률"] = ad["클릭률"] || 0;
+    }
     return item;
   });
 }
@@ -84,6 +122,7 @@ router.get("/", async (req, res) => {
     });
 
     const resultWithShortage = addShortage(result);
+    const resultWithAds = await attachAdData(resultWithShortage, db);
     let selected = req.query.fields;
     if (selected && !Array.isArray(selected)) selected = selected.split(",");
     const fields =
@@ -92,7 +131,7 @@ router.get("/", async (req, res) => {
         : DEFAULT_COLUMNS;
 
     res.render("coupang.ejs", {
-      결과: resultWithShortage,
+      결과: resultWithAds,
       필드: fields,
       전체필드: DEFAULT_COLUMNS,
       성공메시지: null,
@@ -131,9 +170,10 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
     fs.unlink(filePath, () => {});
 
     const resultWithShortage = addShortage(data);
+    const resultWithAds = await attachAdData(resultWithShortage, db);
 
     res.render("coupang.ejs", {
-      결과: resultWithShortage,
+      결과: resultWithAds,
       필드: DEFAULT_COLUMNS,
       전체필드: DEFAULT_COLUMNS,
       성공메시지: "✅ 엑셀 업로드 완료",
@@ -190,6 +230,7 @@ router.get("/search", async (req, res) => {
     });
 
     const resultWithShortage = addShortage(result);
+    const resultWithAds = await attachAdData(resultWithShortage, db);
     let selected = req.query.fields;
     if (selected && !Array.isArray(selected)) selected = selected.split(",");
     const fields =
@@ -198,7 +239,7 @@ router.get("/search", async (req, res) => {
         : DEFAULT_COLUMNS;
 
     res.render("coupang.ejs", {
-      결과: resultWithShortage,
+      결과: resultWithAds,
       필드: fields,
       전체필드: DEFAULT_COLUMNS,
       성공메시지: null,
