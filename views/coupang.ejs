@@ -110,7 +110,7 @@
             <% }) %>
           <% } else { %>
             <tr>
-              <td colspan="100%" class="text-center text-muted">📭 재고가 없습니다.</td>
+              <td colspan="<%= (필드?.length || 0) + 1 %>" class="text-center text-muted">📭 재고가 없습니다.</td>
             </tr>
           <% } %>
         </tbody>
