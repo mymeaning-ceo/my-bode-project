@@ -25,14 +25,30 @@
     </form>
 
     <table class="table table-bordered table-hover text-center">
-      <thead>
+      <thead class="table-primary text-center">
         <tr>
           <th>번호</th>
           <th>상품명</th>
-          <th><a href="?sort=impressions&order=<%= sortOrder === 1 ? 'desc' : 'asc' %>">노출수 합</a></th>
-          <th><a href="?sort=clicks&order=<%= sortOrder === 1 ? 'desc' : 'asc' %>">클릭수 합</a></th>
-          <th><a href="?sort=adCost&order=<%= sortOrder === 1 ? 'desc' : 'asc' %>">광고비 합</a></th>
-          <th><a href="?sort=ctr&order=<%= sortOrder === 1 ? 'desc' : 'asc' %>">클릭률</a></th>
+          <th>
+            <a href="?sort=impressions&order=<%= sortField === 'impressions' && sortOrder === -1 ? 'asc' : 'desc' %>">
+              노출수 합 <%= sortField === 'impressions' ? (sortOrder === -1 ? '🔽' : '🔼') : '' %>
+            </a>
+          </th>
+          <th>
+            <a href="?sort=clicks&order=<%= sortField === 'clicks' && sortOrder === -1 ? 'asc' : 'desc' %>">
+              클릭수 합 <%= sortField === 'clicks' ? (sortOrder === -1 ? '🔽' : '🔼') : '' %>
+            </a>
+          </th>
+          <th>
+            <a href="?sort=adCost&order=<%= sortField === 'adCost' && sortOrder === -1 ? 'asc' : 'desc' %>">
+              광고비 합 <%= sortField === 'adCost' ? (sortOrder === -1 ? '🔽' : '🔼') : '' %>
+            </a>
+          </th>
+          <th>
+            <a href="?sort=ctr&order=<%= sortField === 'ctr' && sortOrder === -1 ? 'asc' : 'desc' %>">
+              클릭률 <%= sortField === 'ctr' ? (sortOrder === -1 ? '🔽' : '🔼') : '' %>
+            </a>
+          </th>
         </tr>
       </thead>
       <tbody>
