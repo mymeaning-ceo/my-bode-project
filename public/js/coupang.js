@@ -1,6 +1,7 @@
 $(function () {
   if (!$('#coupangTable').length) return;
-  $('#coupangTable').DataTable({
+  var showReorderOnly = false;
+  var table = $('#coupangTable').DataTable({
     ordering: true,
     order: [[1, 'asc']],
     columnDefs: [{ targets: 0, orderable: false }],
@@ -15,5 +16,47 @@ $(function () {
       info: '총 _TOTAL_건 중 _START_ ~ _END_',
       infoEmpty: '데이터가 없습니다'
     }
+  });
+
+  $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+    if (!showReorderOnly) return true;
+    var row = $(table.row(dataIndex).node());
+    var shortage = Number(row.data('shortage')) || 0;
+    var sales = Number(row.data('sales')) || 0;
+    var stock = Number(row.data('stock')) || 0;
+    return shortage > 0 || (sales > 0 && stock === 0);
+  });
+
+  $('#btn-filter-reorder').on('click', function () {
+    showReorderOnly = !showReorderOnly;
+    $(this).text(showReorderOnly ? '전체 보기' : '입고 필요만 보기');
+    table.draw();
+  });
+
+  $('#btn-download-csv').on('click', function () {
+    var rows = [];
+    table.rows().every(function (rowIdx) {
+      var node = $(this.node());
+      var shortage = Number(node.data('shortage')) || 0;
+      var sales = Number(node.data('sales')) || 0;
+      var stock = Number(node.data('stock')) || 0;
+      if (shortage > 0 || (sales > 0 && stock === 0)) {
+        var data = this.data();
+        var text = $(this.node()).find('td').map(function(){return $(this).text().trim().replace(/,/g,'');}).get().slice(1);
+        rows.push(text.join(','));
+      }
+    });
+    if (!rows.length) {
+      alert('입고 필요 항목이 없습니다.');
+      return;
+    }
+    var csv = rows.join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'reorder.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   });
 });
