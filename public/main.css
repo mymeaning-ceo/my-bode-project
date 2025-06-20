@@ -216,6 +216,42 @@ table.auto-width {
   border-color: #0d6efd;
 }
 
+/* 재고 수량 색상 */
+.low-stock {
+  background-color: #ffe5e5;
+  color: #d8000c;
+  font-weight: bold;
+}
+
+.high-stock {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* 브랜드 뱃지 */
+.badge-try {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+}
+
+/* 테이블 고정 컬럼 */
+.table-container {
+  overflow-x: auto;
+}
+
+th:nth-child(2),
+td:nth-child(2),
+th:nth-child(3),
+td:nth-child(3) {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 2;
+}
+
 /* Mobile navigation customizations */
 @media (max-width: 575.98px) {
   .custom-toggler {
