@@ -113,9 +113,7 @@ exports.getData = asyncHandler(async (req, res) => {
 
   let rows = await db
     .collection('coupangAdd')
-    .find()
-    .sort(sort)
-    .allowDiskUse(true)
+    .aggregate([{ $sort: sort }], { allowDiskUse: true })
     .toArray();
   const total = rows.length;
 
