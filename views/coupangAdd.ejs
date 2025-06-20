@@ -31,6 +31,12 @@
         <button class="btn btn-outline-primary">검색</button>
       </form>
       <p class="text-end mb-2">총 <%= total %>건의 결과가 있습니다.</p>
+    <% } else { %>
+      <form method="GET" class="d-flex align-items-center mb-3" action="/coupang/add">
+        <input type="hidden" name="mode" value="detail">
+        <input name="search" class="form-control me-2" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
+        <button class="btn btn-outline-primary">검색</button>
+      </form>
     <% } %>
 
     <% if (typeof 성공메시지 !== 'undefined' && 성공메시지) { %>
@@ -119,7 +125,7 @@
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-  <script>var pageMode = '<%= mode %>';</script>
+  <script>var pageMode = '<%= mode %>'; var pageSearch = '<%= search %>';</script>
   <script src="/js/coupangAdd.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>

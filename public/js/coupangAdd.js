@@ -20,6 +20,11 @@ $(function () {
     ajax: {
       url: '/api/coupang-add',
       type: 'GET',
+      data: function (d) {
+        if (typeof pageSearch !== 'undefined') {
+          d.search = pageSearch;
+        }
+      },
       dataSrc: 'data',
     },
     columns: [
