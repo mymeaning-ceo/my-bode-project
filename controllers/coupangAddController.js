@@ -12,9 +12,46 @@ const storage = multer.diskStorage({
 });
 exports.upload = multer({ storage }).single('excelFile');
 
+// 상품명 정규화
+function normalizeProductName(fullName = '') {
+  const idx = fullName.indexOf(',{"');
+  return idx >= 0 ? fullName.slice(0, idx).trim() : fullName;
+}
+
 // Render page
 exports.renderPage = asyncHandler(async (req, res) => {
-  res.render('coupangAdd');
+  const db = req.app.locals.db;
+  const mode = req.query.mode === 'summary' ? 'summary' : 'detail';
+
+  let list = [];
+
+  if (mode === 'summary') {
+    const adList = await db.collection('coupangAdd').find().toArray();
+    const grouped = {};
+
+    adList.forEach((ad) => {
+      const clean = normalizeProductName(ad['광고집행 상품명'] || '');
+      if (!grouped[clean]) {
+        grouped[clean] = {
+          productName: clean,
+          impressions: 0,
+          clicks: 0,
+          adCost: 0,
+        };
+      }
+
+      grouped[clean].impressions += Number(ad['노출수'] || 0);
+      grouped[clean].clicks += Number(ad['클릭수'] || 0);
+      grouped[clean].adCost += Number(ad['광고비'] || 0);
+    });
+
+    list = Object.values(grouped).map((g) => {
+      g.ctr = g.impressions > 0 ? (g.clicks / g.impressions * 100).toFixed(2) : '0.00';
+      return g;
+    });
+  }
+
+  res.render('coupangAdd', { mode, list });
 });
 
 // DataTables API
