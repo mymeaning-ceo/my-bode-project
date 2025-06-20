@@ -90,7 +90,10 @@ exports.renderPage = asyncHandler(async (req, res) => {
       { $sort: { [sortField]: sortOrder } },
     ].filter(Boolean);
 
-    const data = await db.collection('coupangAdd').aggregate(pipeline).toArray();
+    const data = await db
+      .collection('coupangAdd')
+      .aggregate(pipeline, { allowDiskUse: true })
+      .toArray();
 
     list = data.map((item, i) => ({
       no: i + 1,
