@@ -92,6 +92,8 @@ exports.getData = asyncHandler(async (req, res) => {
   const draw = parseInt(req.query.draw, 10) || 1;
   const keyword = req.query.search || '';
 
+  const regex = keyword ? new RegExp(keyword, 'i') : null;
+  
   // 기본 정렬 기준
   let sort = { _id: -1 };
 
@@ -108,14 +110,12 @@ exports.getData = asyncHandler(async (req, res) => {
     }
   }
 
-  const query = keyword
-    ? {
-        $or: [
-          { '광고집행 상품명': { $regex: keyword } },
-          { '광고집행 옵션ID': { $regex: keyword } }
-        ]
-      }
-    : {};
+  const query = regex ? {
+    $or: [
+      { '광고집행 상품명': regex },
+      { '광고집행 옵션ID': regex }
+    ]
+  } : {};
 
   const [rows, total] = await Promise.all([
     db
@@ -197,11 +197,12 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
 exports.downloadExcel = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
   const keyword = req.query.search || '';
-  const query = keyword
+  const regex = keyword ? new RegExp(keyword, 'i') : null;
+  const query = regex
     ? {
         $or: [
-          { '광고집행 상품명': { $regex: keyword } },
-          { '광고집행 옵션ID': { $regex: keyword } },
+          { '광고집행 상품명': regex },
+          { '광고집행 옵션ID': regex },
         ],
       }
     : {};
