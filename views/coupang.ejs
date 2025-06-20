@@ -108,7 +108,7 @@
                  else if (sales30 === 0 && shortage === 0) rowCls = 'row-muted';
               %>
               <tr class="<%= rowCls %>" data-shortage="<%= shortage %>" data-sales="<%= sales30 %>" data-stock="<%= stock %>">
-                <td class="text-center"><%= index + 1 %></td>
+                <td class="text-center"><%= index + 1 + 페이지크기 * (현재페이지 - 1) %></td>
                 <% 필드.forEach(key => { %>
                   <% if (key === 'Option ID') { %>
                     <td><%= 행[key] %></td>
