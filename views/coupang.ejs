@@ -94,17 +94,17 @@
               <tr>
                 <td class="text-center"><%= index + 1 %></td>
                 <% 필드.forEach(key => { %>
-                  <td>
-                    <% if (key === 'Option ID') { %>
-                      <%= 행[key] %>
-                    <% } else { 
-                         const val = 행[key];
-                         const numVal = Number(val);
-                         const isNum = !isNaN(numVal) && val !== '-' && val !== '';
-                    %>
+                  <% if (key === 'Option ID') { %>
+                    <td><%= 행[key] %></td>
+                  <% } else {
+                       const val = 행[key];
+                       const numVal = Number(val);
+                       const isNum = !isNaN(numVal) && val !== '-' && val !== '';
+                  %>
+                    <td<% if (isNum) { %> data-order="<%= numVal %>"<% } %>>
                       <%= isNum ? (numVal === 0 ? '-' : numVal.toLocaleString('ko-KR')) : val %>
-                    <% } %>
-                  </td>
+                    </td>
+                  <% } %>
                 <% }) %>
               </tr>
             <% }) %>
@@ -176,5 +176,6 @@
   <% } %>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/stock.js"></script>
 </body>
 </html>
