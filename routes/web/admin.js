@@ -17,23 +17,34 @@ function getViewNames() {
 }
 
 // 관리자 메인 페이지
-router.get('/', checkAdmin, async (req, res) => {
+router.get('/', checkAdmin, (req, res) => {
+  res.render('admin/index.ejs');
+});
+
+// 배너 관리 페이지
+router.get('/banner', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
-    const logoDoc = await db.collection('homepage').findOne({ key: 'logo' });
     const banners = [];
     for (let i = 1; i <= 4; i++) {
       const doc = await db.collection('homepage').findOne({ key: 'banner' + i });
       banners.push(doc?.img || '');
     }
-    const activeTab = req.query.tab || 'bannerSection';
-    res.render('admin/index.ejs', {
-      banners,
-      logo: logoDoc?.img || '',
-      activeTab,
-    });
+    res.render('admin/banner.ejs', { banners });
   } catch (err) {
-    console.error('❌ 관리자 페이지 오류:', err);
+    console.error('❌ 배너 페이지 오류:', err);
+    res.status(500).send('서버 오류');
+  }
+});
+
+// 로고 관리 페이지
+router.get('/logo', checkAdmin, async (req, res) => {
+  try {
+    const db = req.app.locals.db;
+    const logoDoc = await db.collection('homepage').findOne({ key: 'logo' });
+    res.render('admin/logo.ejs', { logo: logoDoc?.img || '' });
+  } catch (err) {
+    console.error('❌ 로고 페이지 오류:', err);
     res.status(500).send('서버 오류');
   }
 });
@@ -49,8 +60,12 @@ router.post('/banner/:idx', checkAdmin, upload.single('banner'), async (req, res
       { $set: { img: imgLocation, updatedAt: new Date() } },
       { upsert: true }
     );
-    const tab = req.query.tab || req.body.tab || 'bannerSection';
-    res.redirect(`/admin?tab=${tab}`);
+    if (req.query.redirect || req.body.redirect) {
+      res.redirect(req.query.redirect || req.body.redirect);
+    } else {
+      const tab = req.query.tab || req.body.tab || 'bannerSection';
+      res.redirect(`/admin?tab=${tab}`);
+    }
   } catch (err) {
     console.error('❌ 배너 업로드 실패:', err);
     res.status(500).send('서버 오류');
@@ -61,8 +76,12 @@ router.post('/banner/:idx/delete', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
     await db.collection('homepage').deleteOne({ key: 'banner' + req.params.idx });
-    const tabDel = req.query.tab || req.body.tab || 'bannerSection';
-    res.redirect(`/admin?tab=${tabDel}`);
+    if (req.query.redirect || req.body.redirect) {
+      res.redirect(req.query.redirect || req.body.redirect);
+    } else {
+      const tabDel = req.query.tab || req.body.tab || 'bannerSection';
+      res.redirect(`/admin?tab=${tabDel}`);
+    }
   } catch (err) {
     console.error('❌ 배너 삭제 실패:', err);
     res.status(500).send('서버 오류');
@@ -79,8 +98,12 @@ router.post('/logo', checkAdmin, upload.single('logo'), async (req, res) => {
       { $set: { img: imgLocation, updatedAt: new Date() } },
       { upsert: true }
     );
-    const tabLogo = req.query.tab || req.body.tab || 'logoSection';
-    res.redirect(`/admin?tab=${tabLogo}`);
+    if (req.query.redirect || req.body.redirect) {
+      res.redirect(req.query.redirect || req.body.redirect);
+    } else {
+      const tabLogo = req.query.tab || req.body.tab || 'logoSection';
+      res.redirect(`/admin?tab=${tabLogo}`);
+    }
   } catch (err) {
     console.error('❌ 로고 업로드 실패:', err);
     res.status(500).send('서버 오류');
@@ -91,8 +114,12 @@ router.post('/logo/delete', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
     await db.collection('homepage').deleteOne({ key: 'logo' });
-    const tabLogoDel = req.query.tab || req.body.tab || 'logoSection';
-    res.redirect(`/admin?tab=${tabLogoDel}`);
+    if (req.query.redirect || req.body.redirect) {
+      res.redirect(req.query.redirect || req.body.redirect);
+    } else {
+      const tabLogoDel = req.query.tab || req.body.tab || 'logoSection';
+      res.redirect(`/admin?tab=${tabLogoDel}`);
+    }
   } catch (err) {
     console.error('❌ 로고 삭제 실패:', err);
     res.status(500).send('서버 오류');
