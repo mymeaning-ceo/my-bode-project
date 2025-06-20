@@ -23,7 +23,14 @@ exports.renderPage = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
   const mode = req.query.mode === 'summary' ? 'summary' : 'detail';
 
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = 50;
+  const keyword = req.query.search || '';
+  const skip = (page - 1) * limit;
+
   let list = [];
+  let total = 0;
+  let totalPages = 1;
 
   if (mode === 'summary') {
     const adList = await db.collection('coupangAdd').find().toArray();
@@ -37,21 +44,41 @@ exports.renderPage = asyncHandler(async (req, res) => {
           impressions: 0,
           clicks: 0,
           adCost: 0,
+          optionIds: [],
         };
       }
 
       grouped[clean].impressions += Number(ad['노출수'] || 0);
       grouped[clean].clicks += Number(ad['클릭수'] || 0);
       grouped[clean].adCost += Number(ad['광고비'] || 0);
+      if (ad['광고집행 옵션ID']) grouped[clean].optionIds.push(String(ad['광고집행 옵션ID']));
     });
 
     list = Object.values(grouped).map((g) => {
-      g.ctr = g.impressions > 0 ? (g.clicks / g.impressions * 100).toFixed(2) : '0.00';
+      g.ctr = g.impressions > 0 ? ((g.clicks / g.impressions) * 100).toFixed(2) : '0.00';
       return g;
     });
+
+    if (keyword) {
+      const regex = new RegExp(keyword, 'i');
+      list = list.filter(
+        (item) => regex.test(item.productName) || item.optionIds.some((id) => regex.test(id))
+      );
+    }
+
+    total = list.length;
+    totalPages = Math.ceil(total / limit) || 1;
+    list = list.slice(skip, skip + limit);
   }
 
-  res.render('coupangAdd', { mode, list });
+  res.render('coupangAdd', {
+    mode,
+    list,
+    page,
+    totalPages,
+    search: keyword,
+    total,
+  });
 });
 
 // DataTables API
