@@ -118,6 +118,11 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
 
     const filePath = req.file.path;
     const data = parseCoupangExcel(filePath);
+    if (data.length === 0) {
+      fs.unlink(filePath, () => {});
+      req.flash("error", "엑셀 데이터가 없습니다.");
+      return res.redirect("/coupang");
+    }
 
     const bulkOps = data.map((item) => ({
       updateOne: {

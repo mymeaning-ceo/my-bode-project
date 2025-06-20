@@ -16,6 +16,12 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
       return res.status(400).json({ status: "error", message: "파일이 없습니다." });
     const filePath = req.file.path;
     const data = parseCoupangExcel(filePath);
+    if (data.length === 0) {
+      fs.unlink(filePath, () => {});
+      return res
+        .status(400)
+        .json({ status: "error", message: "엑셀 데이터가 없습니다." });
+    }
     const bulkOps = data.map((item) => ({
       updateOne: {
         filter: { "Option ID": item["Option ID"] },
