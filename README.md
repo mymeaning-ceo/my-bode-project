@@ -11,6 +11,8 @@ This project requires several environment variables to run:
 - `S3_BUCKET_NAME` – Name of the S3 bucket used for uploads. The server will
   automatically create this bucket if it does not exist (your AWS credentials
   must allow bucket creation).
+- `WEATHER_API_KEY` – API key from the Korean Meteorological Administration used
+  to fetch daily weather data.
 
 Copy `.env.example` to `.env` in the project root and define these values before starting the server. Make sure the file is saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
 
@@ -34,4 +36,10 @@ Routes are organized under the `routes/` directory. `server.js` mounts two route
 `routes/web/index.js` automatically reads every `.js` file in the same folder and mounts it. Some routes like `post` or `admin` are guarded with an auth check. `routes/api/index.js` currently exposes `/stock` endpoints through `stockApi.js`.
 
 This layout keeps API and web routes separate while avoiding an extra routing layer.
+
+## Weather integration
+
+The project exposes `/api/weather/daily` which fetches forecast data from the
+Korean Meteorological Administration using `WEATHER_API_KEY`. An accompanying
+`/weather` page displays the information via AJAX.
 
