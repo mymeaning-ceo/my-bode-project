@@ -27,7 +27,7 @@
     <% } %>
 
     <div class="action-form mb-4 d-flex gap-2 flex-wrap">
-      <form action="/coupang/add/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
+      <form id="uploadForm" action="/coupang/add/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
         <input type="file" name="excelFile" accept=".xlsx, .xls" class="form-control" required>
         <button type="submit" class="btn btn-success btn-upload">엑셀 업로드</button>
       </form>
@@ -36,44 +36,22 @@
       </form>
     </div>
 
-    <% if (결과 && 결과.length > 0) { %>
-      <p class="text-muted">🔎 총 <strong><%= 결과.length %></strong>건의 결과가 있습니다.</p>
-    <% } %>
+
 
     <div class="table-responsive">
       <table id="coupangAddTable" class="table table-bordered table-hover bg-white align-middle text-center auto-width">
-        <thead class="table-light text-center">
-          <% if (필드 && 필드.length > 0) { %>
-            <tr>
-              <% 필드.forEach(key => { %>
-                <th><%= key %></th>
-              <% }) %>
-            </tr>
-          <% } else { %>
-            <tr><th>📂 No Data</th></tr>
-          <% } %>
+        <thead class="table-light">
+          <tr>
+            <th>날짜</th>
+            <th>광고집행 옵션ID</th>
+            <th>광고집행 상품명</th>
+            <th>노출수</th>
+            <th>클릭수</th>
+            <th>광고비</th>
+            <th>클릭률</th>
+          </tr>
         </thead>
-        <tbody>
-          <% if (결과 && 결과.length > 0) { %>
-            <% 결과.forEach(row => { %>
-              <tr>
-                <% 필드.forEach(key => { 
-                     const val = row[key];
-                     const numVal = Number(val);
-                     const isNum = !isNaN(numVal) && val !== '' && val !== null;
-                %>
-                  <td>
-                    <%= isNum ? (numVal === 0 ? '-' : numVal.toLocaleString('ko-KR')) : (val || '-') %>
-                  </td>
-                <% }) %>
-              </tr>
-            <% }) %>
-          <% } else { %>
-            <tr>
-              <td colspan="100%" class="text-center text-muted">📭 데이터가 없습니다.</td>
-            </tr>
-          <% } %>
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
@@ -82,21 +60,7 @@
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-  <% if (결과 && 결과.length > 0) { %>
-  <script>
-    $(function () {
-      $('#coupangAddTable').DataTable({
-        ordering: true,
-        order: [[0, 'asc']],
-        lengthChange: false,
-        paging: true,
-        pageLength: 50,
-        searching: false,
-        info: false
-      });
-    });
-  </script>
-  <% } %>
+  <script src="/js/coupangAdd.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
