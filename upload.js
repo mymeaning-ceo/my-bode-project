@@ -1,5 +1,13 @@
 require("dotenv").config();
 const multer = require("multer");
+
+// If we're running tests, fall back to a simple in-memory storage so the
+// AWS SDK isn't required and no S3 configuration is needed.
+if (process.env.NODE_ENV === "test") {
+  module.exports = multer({ storage: multer.memoryStorage() });
+  return;
+}
+
 const multerS3 = require("multer-s3");
 const {
   S3Client,
