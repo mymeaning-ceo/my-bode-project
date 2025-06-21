@@ -1,11 +1,5 @@
 // upload.js
-const envMap = {
-  production: "prod",
-  test: "test",
-  development: "dev",
-};
-const suffix = envMap[process.env.NODE_ENV] || "dev";
-require("dotenv").config({ path: `.env.${suffix}` });
+require("dotenv").config();
 const multer = require("multer");
 
 let upload;   // ← 공통 export용 변수

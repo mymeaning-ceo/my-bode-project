@@ -14,13 +14,9 @@ This project requires several environment variables to run:
 - `WEATHER_API_KEY` – API key from the Korean Meteorological Administration used
   to fetch daily weather data.
 
-Create environment-specific files based on `.env.example`:
-
-- `.env.dev`  – used when `NODE_ENV=development` for local testing
-- `.env.test` – loaded automatically during Jest runs
-- `.env.prod` – used when `NODE_ENV=production` for deployment (e.g. EC2)
-
-Each file should be saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
+Create a single `.env` file based on `.env.example` and use it for all environments.
+The project no longer relies on `.env.dev`, `.env.test`, or `.env.prod` files.
+Ensure the file is saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
 
 ## Python scripts
 
