@@ -107,7 +107,7 @@
                  else if (sales30 > 0 && stock === 0) rowCls = 'row-warning';
                  else if (sales30 === 0 && shortage === 0) rowCls = 'row-muted';
               %>
-              <tr class="<%= rowCls %>" data-shortage="<%= shortage %>" data-sales="<%= sales30 %>" data-stock="<%= stock %>">
+              <tr class="<%= rowCls %> text-center" data-shortage="<%= shortage %>" data-sales="<%= sales30 %>" data-stock="<%= stock %>">
                 <td class="text-center"><%= index + 1 + 페이지크기 * (현재페이지 - 1) %></td>
                 <% 필드.forEach(key => { %>
                   <% if (key === 'Option ID') { %>
@@ -134,6 +134,7 @@
     </div>
 
     <% if (전체페이지 > 1) { %>
+      <% const groupSize = 10; const startPage = Math.floor((현재페이지 - 1) / groupSize) * groupSize + 1; const endPage = Math.min(startPage + groupSize - 1, 전체페이지); %>
       <nav class="my-4">
         <ul class="pagination justify-content-center">
           <% if (현재페이지 > 1) { %>
@@ -141,7 +142,7 @@
               <a class="page-link" href="?page=<%= 현재페이지 - 1 %><%= 추가쿼리 %>">이전</a>
             </li>
           <% } %>
-          <% for (let i = 1; i <= 전체페이지; i++) { %>
+          <% for (let i = startPage; i <= endPage; i++) { %>
             <li class="page-item <%= i === 현재페이지 ? 'active' : '' %>">
               <a class="page-link" href="?page=<%= i %><%= 추가쿼리 %>"><%= i %></a>
             </li>

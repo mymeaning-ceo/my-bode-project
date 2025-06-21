@@ -84,7 +84,7 @@
         <% if (mode === 'summary') { %>
           <tbody>
             <% list.forEach(item => { %>
-              <tr>
+              <tr class="text-center">
                 <td class="text-start"><%= item.productName %></td>
                 <td><%= item.impressions.toLocaleString() %></td>
                 <td><%= item.clicks.toLocaleString() %></td>
@@ -98,6 +98,7 @@
         <% } %>
       </table>
       <% if (mode === 'summary') { %>
+      <% const groupSize = 10; const startPage = Math.floor((page - 1) / groupSize) * groupSize + 1; const endPage = Math.min(startPage + groupSize - 1, totalPages); %>
       <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
           <% if (page > 1) { %>
@@ -105,7 +106,7 @@
               <a class="page-link" href="?mode=summary&page=<%= page - 1 %>&search=<%= search %>">◀ 이전</a>
             </li>
           <% } %>
-          <% for (let i = 1; i <= totalPages; i++) { %>
+          <% for (let i = startPage; i <= endPage; i++) { %>
             <li class="page-item <%= i === page ? 'active' : '' %>">
               <a class="page-link" href="?mode=summary&page=<%= i %>&search=<%= search %>"><%= i %></a>
             </li>

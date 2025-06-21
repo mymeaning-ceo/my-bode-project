@@ -32,7 +32,11 @@ exports.renderPage = asyncHandler(async (req, res) => {
   let list = [];
 
   if (mode === 'summary') {
-    const pipeline = [
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = 50;
+    const skip = (page - 1) * limit;
+
+    const basePipeline = [
       {
         $addFields: {
           trimmedName: {
@@ -87,17 +91,27 @@ exports.renderPage = asyncHandler(async (req, res) => {
           },
         },
       },
-      { $sort: { [sortField]: sortOrder } },
     ].filter(Boolean);
 
-    const data = await db
-      .collection('coupangAdd')
-      .aggregate(pipeline, { allowDiskUse: true })
-      .toArray();
+    const sortStage = { $sort: { [sortField]: sortOrder } };
+    const countPipeline = [...basePipeline, sortStage, { $count: 'total' }];
+    const dataPipeline = [...basePipeline, sortStage, { $skip: skip }, { $limit: limit }];
+
+    const [countResult, data] = await Promise.all([
+      db.collection('coupangAdd').aggregate(countPipeline, { allowDiskUse: true }).toArray(),
+      db.collection('coupangAdd').aggregate(dataPipeline, { allowDiskUse: true }).toArray(),
+    ]);
+
+    const total = countResult[0]?.total || 0;
+    const totalPages = Math.ceil(total / limit);
 
     list = data.map((item, i) => ({
-      no: i + 1,
-      ...item,
+      no: skip + i + 1,
+      productName: item.name,
+      impressions: item.impressions,
+      clicks: item.clicks,
+      adCost: item.adCost,
+      ctr: item.ctr,
     }));
 
     return res.render('coupang-add-summary', {
@@ -107,6 +121,8 @@ exports.renderPage = asyncHandler(async (req, res) => {
       brand,
       sortField,
       sortOrder,
+      page,
+      totalPages,
     });
   }
 
@@ -141,23 +157,31 @@ exports.getData = asyncHandler(async (req, res) => {
     }
   }
 
-  let rows = await db
-    .collection('coupangAdd')
-    .aggregate([{ $sort: sort }], { allowDiskUse: true })
-    .toArray();
-  const total = rows.length;
+  const filter = keyword
+    ? {
+        $or: [
+          { '광고집행 상품명': { $regex: keyword, $options: 'i' } },
+          { '광고집행 옵션ID': { $regex: keyword, $options: 'i' } },
+        ],
+      }
+    : {};
 
-  if (keyword) {
-    const regex = new RegExp(keyword, 'i');
-    rows = rows.filter(
-      (item) =>
-        regex.test(item['광고집행 상품명'] || '') ||
-        regex.test(String(item['광고집행 옵션ID'] || ''))
-    );
-  }
-
-  const recordsFiltered = rows.length;
-  rows = rows.slice(start, start + length);
+  const [total, recordsFiltered, rows] = await Promise.all([
+    db.collection('coupangAdd').countDocuments(),
+    db.collection('coupangAdd').countDocuments(filter),
+    db
+      .collection('coupangAdd')
+      .aggregate(
+        [
+          { $match: filter },
+          { $sort: sort },
+          { $skip: start },
+          { $limit: length },
+        ],
+        { allowDiskUse: true }
+      )
+      .toArray(),
+  ]);
 
   res.json({
     draw,
