@@ -11,7 +11,13 @@ from typing import Union, IO
 # ─────────────────────────────────────────────
 # ① .env 파일에서 환경변수 불러오기 (MONGO_URI 포함)
 # ─────────────────────────────────────────────
-load_dotenv()
+env_map = {
+    "production": "prod",
+    "test": "test",
+    "development": "dev",
+}
+suffix = env_map.get(os.getenv("NODE_ENV"), "dev")
+load_dotenv(f".env.{suffix}")
 
 # ─────────────────────────────────────────────
 # ② 공통 유틸 함수 정의
