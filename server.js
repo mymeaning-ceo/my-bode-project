@@ -1,6 +1,9 @@
-require("dotenv").config();
-const express = require("express");
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
+if (!process.env.SESSION_SECRET) {
+  throw new Error("SESSION_SECRET environment variable is required");
+}
+const express = require("express");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const passport = require("passport");
