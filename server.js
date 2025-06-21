@@ -111,7 +111,9 @@ async function initApp() {
   }
 
   // 8. 기본 경로 처리
-  app.get("/", (req, res) => res.redirect("/dashboard"));
+  app.get("/", (req, res) => {
+    res.send("✅ 서버는 정상적으로 실행 중입니다.");
+  });
   app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
     const menuIcons = {
