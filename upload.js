@@ -1,5 +1,5 @@
 const path = require("path");
-require("dotenv").config({ path: path.join(__dirname, ".env") });
+require("./config/loadEnv")();
 const multer = require("multer");
 const multerS3 = require("multer-s3");
 const {
