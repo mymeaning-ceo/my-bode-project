@@ -2,7 +2,8 @@
 
 This project requires several environment variables to run:
 
-- `DB_URL` – MongoDB connection string
+- `MONGO_URI` – MongoDB connection string
+- `DB_NAME`  – MongoDB database name
 - `S3_KEY` – AWS S3 access key
 - `S3_SECRET` – AWS S3 secret key
 - `S3_REGION` – AWS S3 region where the bucket resides

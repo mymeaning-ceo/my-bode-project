@@ -5,7 +5,7 @@ const { MongoClient } = require("mongodb");
 const csv = require("csvtojson");
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017";
-const DB_NAME = "try_brand";
+const DB_NAME = process.env.DB_NAME || "try_brand";
 const COLLECTION = "inventory";
 
 async function runPython(scriptPath, excelPath) {
