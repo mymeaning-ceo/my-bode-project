@@ -7,7 +7,7 @@ first checks for a `.env` file in the project root and falls back to
 This project requires several environment variables to run:
 
 - `MONGO_URI` – MongoDB connection string
-- `DB_NAME` – MongoDB database name
+- `DB_NAME`  – MongoDB database name
 - `S3_KEY` – AWS S3 access key
 - `S3_SECRET` – AWS S3 secret key
 - `S3_REGION` – AWS S3 region where the bucket resides
