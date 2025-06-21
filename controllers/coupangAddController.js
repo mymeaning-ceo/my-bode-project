@@ -12,9 +12,79 @@ const storage = multer.diskStorage({
 });
 exports.upload = multer({ storage }).single('excelFile');
 
+// 상품명 정규화 (쉼표 기준 앞부분만)
+function normalizeProductName(fullName = '') {
+  const idx = fullName.indexOf(',');
+  return idx >= 0 ? fullName.slice(0, idx).trim() : fullName;
+}
+
 // Render page
 exports.renderPage = asyncHandler(async (req, res) => {
-  res.render('coupangAdd');
+  const db = req.app.locals.db;
+  const mode = req.query.mode === 'summary' ? 'summary' : 'detail';
+
+  const search = req.query.search || '';
+  const brand = req.query.brand || '';
+  // 기본 정렬: 노출수 합 내림차순
+  const sortField = req.query.sort || 'impressions';
+  const sortOrder = req.query.order === 'asc' ? 1 : -1;
+
+  let list = [];
+
+  if (mode === 'summary') {
+    const rawData = await db.collection('coupangAdd').find().toArray();
+
+    const cleaned = rawData.map((item) => {
+      const full = item['광고집행 상품명'] || '';
+      const trimmed = full.includes(',') ? full.split(',')[0].trim() : full;
+      return { ...item, trimmedName: trimmed };
+    });
+
+    const grouped = {};
+    cleaned.forEach((item) => {
+      const key = item.trimmedName;
+      if (!grouped[key]) {
+        grouped[key] = { name: key, impressions: 0, clicks: 0, adCost: 0 };
+      }
+      grouped[key].impressions += Number(item['노출수'] || 0);
+      grouped[key].clicks += Number(item['클릭수'] || 0);
+      grouped[key].adCost += Number(item['광고비'] || 0);
+    });
+
+    list = Object.values(grouped).map((g, i) => ({
+      no: i + 1,
+      ...g,
+      ctr: g.impressions > 0 ? ((g.clicks / g.impressions) * 100).toFixed(2) : '0.00',
+    }));
+
+    if (brand) {
+      list = list.filter((item) => item.name.includes(brand));
+    }
+
+    if (search) {
+      list = list.filter((item) => item.name.includes(search));
+    }
+
+    // 정렬 방향에 따라 오름차순/내림차순 처리
+    list.sort((a, b) => {
+      return sortOrder * ((+a[sortField] || 0) - (+b[sortField] || 0));
+    });
+
+    return res.render('coupang-add-summary', {
+      mode,
+      list,
+      search,
+      brand,
+      sortField,
+      sortOrder,
+    });
+  }
+
+  // detail 모드 화면
+  res.render('coupangAdd', {
+    mode,
+    search,
+  });
 });
 
 // DataTables API
@@ -23,23 +93,51 @@ exports.getData = asyncHandler(async (req, res) => {
   const start = parseInt(req.query.start, 10) || 0;
   const length = parseInt(req.query.length, 10) || 50;
   const draw = parseInt(req.query.draw, 10) || 1;
+  const keyword = req.query.search || '';
 
-  const [rows, total] = await Promise.all([
-    db
-      .collection('coupangAdd')
-      .find()
-      .sort({ _id: -1 })
+  // 기본 정렬 기준
+  let sort = { _id: -1 };
+
+  // DataTables에서 전달된 정렬 정보 적용
+  if (
+    req.query.order && Array.isArray(req.query.order) &&
+    req.query.columns && Array.isArray(req.query.columns)
+  ) {
+    const { column, dir } = req.query.order[0];
+    const colIdx = parseInt(column, 10);
+    const columnInfo = req.query.columns[colIdx];
+    if (columnInfo && columnInfo.data) {
+      sort = { [columnInfo.data]: dir === 'asc' ? 1 : -1 };
+    }
+  }
+
+  const collection = db.collection('coupangAdd');
+  const query = keyword
+    ? {
+        $or: [
+          { '광고집행 상품명': { $regex: keyword, $options: 'i' } },
+          { '광고집행 옵션ID': { $regex: keyword, $options: 'i' } }
+        ]
+      }
+    : {};
+
+  const [total, recordsFiltered, rows] = await Promise.all([
+    collection.countDocuments(),
+    collection.countDocuments(query),
+    collection
+      .find(query)
+      .sort(sort)
+      .allowDiskUse()
       .skip(start)
       .limit(length)
-      .toArray(),
-    db.collection('coupangAdd').countDocuments()
+      .toArray()
   ]);
 
   res.json({
     draw,
     recordsTotal: total,
-    recordsFiltered: total,
-    data: rows
+    recordsFiltered,
+    data: rows,
   });
 });
 

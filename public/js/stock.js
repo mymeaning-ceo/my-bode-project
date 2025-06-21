@@ -1,4 +1,18 @@
 // public/js/stock.js
+
+function getStockIcon(qty) {
+  if (qty < 5) return '🔴';
+  else if (qty < 20) return '🟡';
+  return '🟢';
+}
+
+function getBrandBadge(code) {
+  if (typeof code === 'string' && code.startsWith('TD')) {
+    return '<span class="badge badge-try">TRY</span>';
+  }
+  return '';
+}
+
 $(document).ready(function () {
   // DataTable 초기화
   const table = $("#stockTable").DataTable({
@@ -19,11 +33,33 @@ $(document).ready(function () {
         }
       },
       {
+        targets: 1,
+        render: function (data) {
+          return data + ' ' + getBrandBadge(data);
+        }
+      },
+      {
+        targets: 5,
+        createdCell: function (td, cellData) {
+          $(td).addClass(cellData < 10 ? 'low-stock' : 'high-stock');
+        },
+        render: function (data) {
+          return getStockIcon(data) + ' ' + data;
+        }
+      },
+      {
         targets: 8,
         render: function (data) {
           if (!data) return '';
           const d = new Date(data);
-          return d.toLocaleString('ko-KR');
+          return d.toLocaleString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          });
         }
       }
     ],
@@ -83,5 +119,4 @@ $(document).ready(function () {
       },
     });
   });
-
 });
