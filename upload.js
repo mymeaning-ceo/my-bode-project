@@ -32,6 +32,9 @@ if (process.env.NODE_ENV === "test") {
   if (!S3_KEY || !S3_SECRET || !S3_REGION || !S3_BUCKET_NAME) {
     throw new Error("Missing S3 configuration in .env");
   }
+  if (S3_BUCKET_NAME === "your-bucket" || S3_REGION === "your-s3-region") {
+    throw new Error("Default S3 placeholders detected in environment settings");
+  }
 
   const s3 = new S3Client({
     region: S3_REGION,
