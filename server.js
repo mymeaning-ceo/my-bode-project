@@ -114,13 +114,19 @@ async function initApp() {
   app.get("/", (req, res) => res.redirect("/dashboard"));
   app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
+    const menuIcons = {
+      "/stock": "\ud83d\udce6",
+      "/list": "\ud83d\udccb",
+      "/write": "\u270d\ufe0f",
+    };
     const menuLabels = {
-      "/stock": "\ud83d\udce6 \uc7ac\uace0 \uad00\ub9ac",
-      "/list": "\ud83d\udccb \uac8c\uc2dc\uad8c \ubaa9\ub85d",
-      "/write": "\u270d \uae00 \uc791\uc131",
+      "/stock": "\uc7ac\uace0 \uad00\ub9ac",
+      "/list": "\uac8c\uc2dc\uad8c \ubaa9\ub85d",
+      "/write": "\uae00 \uc791\uc131",
     };
     res.render("dashboard.ejs", {
       menus,
+      menuIcons,
       menuLabels,
       banners: res.locals.banners,
     });

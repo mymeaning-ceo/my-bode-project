@@ -18,7 +18,7 @@ function getViewNames() {
 
 // 관리자 메인 페이지
 router.get('/', checkAdmin, (req, res) => {
-  res.render('admin/index.ejs');
+  res.render('layouts/admin.ejs', { body: 'admin/index.ejs' });
 });
 
 // 배너 관리 페이지
@@ -30,7 +30,7 @@ router.get('/banner', checkAdmin, async (req, res) => {
       const doc = await db.collection('homepage').findOne({ key: 'banner' + i });
       banners.push(doc?.img || '');
     }
-    res.render('admin/banner.ejs', { banners });
+    res.render('layouts/admin.ejs', { body: 'admin/banner.ejs', banners });
   } catch (err) {
     console.error('❌ 배너 페이지 오류:', err);
     res.status(500).send('서버 오류');
@@ -42,7 +42,10 @@ router.get('/logo', checkAdmin, async (req, res) => {
   try {
     const db = req.app.locals.db;
     const logoDoc = await db.collection('homepage').findOne({ key: 'logo' });
-    res.render('admin/logo.ejs', { logo: logoDoc?.img || '' });
+    res.render('layouts/admin.ejs', {
+      body: 'admin/logo.ejs',
+      logo: logoDoc?.img || '',
+    });
   } catch (err) {
     console.error('❌ 로고 페이지 오류:', err);
     res.status(500).send('서버 오류');
@@ -133,7 +136,7 @@ router.get('/users', checkAdmin, async (req, res) => {
     const q = req.query.q || '';
     const query = q ? { username: new RegExp(q, 'i') } : {};
     const users = await db.collection('user').find(query).sort({ username: 1 }).toArray();
-    res.render('admin/users.ejs', { users, q });
+    res.render('layouts/admin.ejs', { body: 'admin/users.ejs', users, q });
   } catch (err) {
     console.error('❌ 사용자 조회 실패:', err);
     res.status(500).send('서버 오류');
@@ -166,7 +169,12 @@ router.get('/permissions', checkAdmin, async (req, res) => {
       permissions[p.view] = { loginRequired: p.loginRequired, allowedUsers: p.allowedUsers || [] };
     });
     const users = await db.collection('user').find().toArray();
-    res.render('admin/permissions.ejs', { views, permissions, users });
+    res.render('layouts/admin.ejs', {
+      body: 'admin/permissions.ejs',
+      views,
+      permissions,
+      users,
+    });
   } catch (err) {
     console.error('❌ 권한 조회 실패:', err);
     res.status(500).send('서버 오류');

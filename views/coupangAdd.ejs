@@ -15,9 +15,29 @@
   <div class="container my-5">
     <h2 class="mb-4 fw-bold">🛒 쿠팡 매출/광고비</h2>
 
+    <div class="mb-3">
+      <a href="/coupang/add?mode=detail" class="btn <%= mode === 'detail' ? 'btn-primary' : 'btn-outline-primary' %>">전체 보기</a>
+      <a href="/coupang/add?mode=summary" class="btn <%= mode === 'summary' ? 'btn-success' : 'btn-outline-success' %>">상품명 통합 보기</a>
+    </div>
+
     <div class="alert alert-info mb-4">
       <p class="mb-0">헤더를 클릭하면 오름차순/내림차순 정렬이 가능하며 50개씩 페이지 이동이 가능합니다.</p>
     </div>
+
+    <% if (mode === 'summary') { %>
+      <form method="GET" class="mb-3 d-flex" action="/coupang/add">
+        <input type="hidden" name="mode" value="summary">
+        <input type="text" name="search" value="<%= search %>" class="form-control me-2" placeholder="상품명 또는 옵션ID 검색">
+        <button class="btn btn-outline-primary">검색</button>
+      </form>
+      <p class="text-end mb-2">총 <%= total %>건의 결과가 있습니다.</p>
+    <% } else { %>
+      <form method="GET" class="d-flex align-items-center mb-3" action="/coupang/add">
+        <input type="hidden" name="mode" value="detail">
+        <input name="search" class="form-control me-2" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
+        <button class="btn btn-outline-primary">검색</button>
+      </form>
+    <% } %>
 
     <% if (typeof 성공메시지 !== 'undefined' && 성공메시지) { %>
       <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -39,20 +59,66 @@
 
 
     <div class="table-responsive">
-      <table id="coupangAddTable" class="table table-bordered table-hover bg-white align-middle text-center auto-width">
+      <table id="coupangAddTable" data-mode="<%= mode %>" class="table table-bordered table-hover bg-white align-middle text-center auto-width">
         <thead class="table-light">
-          <tr>
-            <th>날짜</th>
-            <th>광고집행 옵션ID</th>
-            <th>광고집행 상품명</th>
-            <th>노출수</th>
-            <th>클릭수</th>
-            <th>광고비</th>
-            <th>클릭률</th>
-          </tr>
+          <% if (mode === 'summary') { %>
+            <tr>
+              <th>상품명</th>
+              <th>노출수 합</th>
+              <th>클릭수 합</th>
+              <th>광고비 합</th>
+              <th>클릭률</th>
+            </tr>
+          <% } else { %>
+            <tr>
+              <th>날짜</th>
+              <th>광고집행 옵션ID</th>
+              <th>광고집행 상품명</th>
+              <th>노출수</th>
+              <th>클릭수</th>
+              <th>광고비</th>
+              <th>클릭률</th>
+            </tr>
+          <% } %>
         </thead>
-        <tbody></tbody>
+        <% if (mode === 'summary') { %>
+          <tbody>
+            <% list.forEach(item => { %>
+              <tr class="text-center">
+                <td class="text-start"><%= item.productName %></td>
+                <td><%= item.impressions.toLocaleString() %></td>
+                <td><%= item.clicks.toLocaleString() %></td>
+                <td><%= item.adCost.toLocaleString() %></td>
+                <td><%= item.ctr %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        <% } else { %>
+          <tbody></tbody>
+        <% } %>
       </table>
+      <% if (mode === 'summary') { %>
+      <% const groupSize = 10; const startPage = Math.floor((page - 1) / groupSize) * groupSize + 1; const endPage = Math.min(startPage + groupSize - 1, totalPages); %>
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+          <% if (page > 1) { %>
+            <li class="page-item">
+              <a class="page-link" href="?mode=summary&page=<%= page - 1 %>&search=<%= search %>">◀ 이전</a>
+            </li>
+          <% } %>
+          <% for (let i = startPage; i <= endPage; i++) { %>
+            <li class="page-item <%= i === page ? 'active' : '' %>">
+              <a class="page-link" href="?mode=summary&page=<%= i %>&search=<%= search %>"><%= i %></a>
+            </li>
+          <% } %>
+          <% if (page < totalPages) { %>
+            <li class="page-item">
+              <a class="page-link" href="?mode=summary&page=<%= page + 1 %>&search=<%= search %>">다음 ▶</a>
+            </li>
+          <% } %>
+        </ul>
+      </nav>
+      <% } %>
     </div>
   </div>
 
@@ -60,6 +126,7 @@
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
+  <script>var pageMode = '<%= mode %>'; var pageSearch = '<%= search %>';</script>
   <script src="/js/coupangAdd.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>

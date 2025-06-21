@@ -215,3 +215,87 @@ table.auto-width {
   background-color: #0d6efd;
   border-color: #0d6efd;
 }
+
+/* 재고 수량 색상 */
+.low-stock {
+  background-color: #ffe5e5;
+  color: #d8000c;
+  font-weight: bold;
+}
+
+.high-stock {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* 브랜드 뱃지 */
+.badge-try {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+}
+
+/* 테이블 고정 컬럼 */
+.table-container {
+  overflow-x: auto;
+}
+
+th:nth-child(2),
+td:nth-child(2),
+th:nth-child(3),
+td:nth-child(3) {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 2;
+}
+
+/* Mobile navigation customizations */
+@media (max-width: 575.98px) {
+  .custom-toggler {
+    border: none;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .custom-toggler .navbar-toggler-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .offcanvas.menu-fit-content {
+    --bs-offcanvas-width: max-content;
+  }
+}
+
+/* Row highlight styles for inventory status */
+.row-danger {
+  background-color: #fff3f3;
+  color: #c62828;
+  font-weight: bold;
+}
+
+.row-warning {
+  background-color: #fffde7;
+  color: #f9a825;
+}
+
+.row-muted {
+  background-color: #f4f6f8;
+  color: #9e9e9e;
+  font-style: italic;
+}
+
+/* Dashboard card styles */
+.dashboard-cards .card {
+  transition: transform 0.2s;
+}
+
+.dashboard-cards .card:hover {
+  transform: translateY(-4px);
+}
+
+.dashboard-cards .display-4 {
+  font-size: 2.5rem;
+}

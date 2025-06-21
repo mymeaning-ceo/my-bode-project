@@ -12,9 +12,125 @@ const storage = multer.diskStorage({
 });
 exports.upload = multer({ storage }).single('excelFile');
 
+// 상품명 정규화 (쉼표 기준 앞부분만)
+function normalizeProductName(fullName = '') {
+  const idx = fullName.indexOf(',');
+  return idx >= 0 ? fullName.slice(0, idx).trim() : fullName;
+}
+
 // Render page
 exports.renderPage = asyncHandler(async (req, res) => {
-  res.render('coupangAdd');
+  const db = req.app.locals.db;
+  const mode = req.query.mode === 'summary' ? 'summary' : 'detail';
+
+  const search = req.query.search || '';
+  const brand = req.query.brand || '';
+  // 기본 정렬: 노출수 합 내림차순
+  const sortField = req.query.sort || 'impressions';
+  const sortOrder = req.query.order === 'asc' ? 1 : -1;
+
+  let list = [];
+
+  if (mode === 'summary') {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = 50;
+    const skip = (page - 1) * limit;
+
+    const basePipeline = [
+      {
+        $addFields: {
+          trimmedName: {
+            $trim: {
+              input: {
+                $arrayElemAt: [{ $split: ['$광고집행 상품명', ','] }, 0],
+              },
+            },
+          },
+        },
+      },
+      brand
+        ? {
+            $match: {
+              trimmedName: { $regex: brand, $options: 'i' },
+            },
+          }
+        : null,
+      search
+        ? {
+            $match: {
+              trimmedName: { $regex: search, $options: 'i' },
+            },
+          }
+        : null,
+      {
+        $group: {
+          _id: '$trimmedName',
+          impressions: { $sum: '$노출수' },
+          clicks: { $sum: '$클릭수' },
+          adCost: { $sum: '$광고비' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: '$_id',
+          impressions: 1,
+          clicks: 1,
+          adCost: 1,
+          ctr: {
+            $cond: [
+              { $gt: ['$impressions', 0] },
+              {
+                $round: [
+                  { $multiply: [{ $divide: ['$clicks', '$impressions'] }, 100] },
+                  2,
+                ],
+              },
+              0,
+            ],
+          },
+        },
+      },
+    ].filter(Boolean);
+
+    const sortStage = { $sort: { [sortField]: sortOrder } };
+    const countPipeline = [...basePipeline, sortStage, { $count: 'total' }];
+    const dataPipeline = [...basePipeline, sortStage, { $skip: skip }, { $limit: limit }];
+
+    const [countResult, data] = await Promise.all([
+      db.collection('coupangAdd').aggregate(countPipeline, { allowDiskUse: true }).toArray(),
+      db.collection('coupangAdd').aggregate(dataPipeline, { allowDiskUse: true }).toArray(),
+    ]);
+
+    const total = countResult[0]?.total || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    list = data.map((item, i) => ({
+      no: skip + i + 1,
+      productName: item.name,
+      impressions: item.impressions,
+      clicks: item.clicks,
+      adCost: item.adCost,
+      ctr: item.ctr,
+    }));
+
+    return res.render('coupang-add-summary', {
+      mode,
+      list,
+      search,
+      brand,
+      sortField,
+      sortOrder,
+      page,
+      totalPages,
+    });
+  }
+
+  // detail 모드 화면
+  res.render('coupangAdd', {
+    mode,
+    search,
+  });
 });
 
 // DataTables API
@@ -23,23 +139,55 @@ exports.getData = asyncHandler(async (req, res) => {
   const start = parseInt(req.query.start, 10) || 0;
   const length = parseInt(req.query.length, 10) || 50;
   const draw = parseInt(req.query.draw, 10) || 1;
+  const keyword = req.query.search || '';
 
-  const [rows, total] = await Promise.all([
+  // 기본 정렬 기준
+  let sort = { _id: -1 };
+
+  // DataTables에서 전달된 정렬 정보 적용
+  if (
+    req.query.order && Array.isArray(req.query.order) &&
+    req.query.columns && Array.isArray(req.query.columns)
+  ) {
+    const { column, dir } = req.query.order[0];
+    const colIdx = parseInt(column, 10);
+    const columnInfo = req.query.columns[colIdx];
+    if (columnInfo && columnInfo.data) {
+      sort = { [columnInfo.data]: dir === 'asc' ? 1 : -1 };
+    }
+  }
+
+  const filter = keyword
+    ? {
+        $or: [
+          { '광고집행 상품명': { $regex: keyword, $options: 'i' } },
+          { '광고집행 옵션ID': { $regex: keyword, $options: 'i' } },
+        ],
+      }
+    : {};
+
+  const [total, recordsFiltered, rows] = await Promise.all([
+    db.collection('coupangAdd').countDocuments(),
+    db.collection('coupangAdd').countDocuments(filter),
     db
       .collection('coupangAdd')
-      .find()
-      .sort({ _id: -1 })
-      .skip(start)
-      .limit(length)
+      .aggregate(
+        [
+          { $match: filter },
+          { $sort: sort },
+          { $skip: start },
+          { $limit: length },
+        ],
+        { allowDiskUse: true }
+      )
       .toArray(),
-    db.collection('coupangAdd').countDocuments()
   ]);
 
   res.json({
     draw,
     recordsTotal: total,
-    recordsFiltered: total,
-    data: rows
+    recordsFiltered,
+    data: rows,
   });
 });
 

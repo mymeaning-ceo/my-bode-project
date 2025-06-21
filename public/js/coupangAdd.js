@@ -1,7 +1,8 @@
 $(function () {
-  if (!$('#coupangAddTable').length) return;
+  const $table = $('#coupangAddTable');
+  if (!$table.length || $table.data('mode') !== 'detail') return;
 
-  const table = $('#coupangAddTable').DataTable({
+  const table = $table.DataTable({
     serverSide: true,
     processing: true,
     paging: true,
@@ -19,6 +20,11 @@ $(function () {
     ajax: {
       url: '/api/coupang-add',
       type: 'GET',
+      data: function (d) {
+        if (typeof pageSearch !== 'undefined') {
+          d.search = pageSearch;
+        }
+      },
       dataSrc: 'data',
     },
     columns: [
