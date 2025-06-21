@@ -13,7 +13,14 @@ jest.mock("./config/db", () => {
 });
 
 // ─────────────────────────────────────────────
-// 2) upload.js 모킹 (S3 설정 우회 + single/array/fields 지원)
+// 2) connect-mongo 모킹 (세션 저장소 우회)
+// ─────────────────────────────────────────────
+jest.mock("connect-mongo", () => ({
+  create: jest.fn(() => ({ get: jest.fn(), set: jest.fn(), destroy: jest.fn() })),
+}));
+
+// ─────────────────────────────────────────────
+// 3) upload.js 모킹 (S3 설정 우회 + single/array/fields 지원)
 // ─────────────────────────────────────────────
 jest.mock("./upload", () => ({
   ensureBucket: jest.fn().mockResolvedValue(),
@@ -23,7 +30,7 @@ jest.mock("./upload", () => ({
 }));
 
 // ─────────────────────────────────────────────
-// 3) multer 모킹 (single/array/fields/diskStorage 전부)
+// 4) multer 모킹 (single/array/fields/diskStorage 전부)
 // ─────────────────────────────────────────────
 jest.mock("multer", () => {
   const dummyMiddleware = () => ({
@@ -42,6 +49,6 @@ jest.mock("multer", () => {
 });
 
 // ─────────────────────────────────────────────
-// 4) 글로벌 타임아웃
+// 5) 글로벌 타임아웃
 // ─────────────────────────────────────────────
 jest.setTimeout(30000); // 30초
