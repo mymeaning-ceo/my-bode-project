@@ -23,6 +23,12 @@ if (process.env.NODE_ENV === "test") {
 
   // 필수 환경 변수 체크
   const { S3_KEY, S3_SECRET, S3_REGION, S3_BUCKET_NAME } = process.env;
+  console.log("[DEBUG S3 CONFIG]", {
+    S3_KEY,
+    S3_SECRET,
+    S3_REGION,
+    S3_BUCKET_NAME,
+  });
   if (!S3_KEY || !S3_SECRET || !S3_REGION || !S3_BUCKET_NAME) {
     throw new Error("Missing S3 configuration in .env");
   }
