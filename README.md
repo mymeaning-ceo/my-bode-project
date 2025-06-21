@@ -14,6 +14,13 @@ Create a `.env` file in the project root and define these values before starting
 the server. Make sure the file is saved as **UTF-8 without BOM** so that
 `dotenv` can read it correctly.
 
+An example configuration is provided in `.env.example`:
+
+```bash
+cp .env.example .env
+# then edit .env with your real credentials
+```
+
 ## Python scripts
 
 Some features convert Excel files to CSV using Python. Install the Python dependencies before running the server:
