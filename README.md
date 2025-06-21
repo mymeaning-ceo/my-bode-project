@@ -14,6 +14,9 @@ Create a `.env` file in the project root and define these values before starting
 the server. Make sure the file is saved as **UTF-8 without BOM** so that
 `dotenv` can read it correctly.
 
+> **Note**: The application always loads variables from `.env` in the project
+> root. Additional files such as `.env.dev` or `.env.empal` are ignored.
+
 An example configuration is provided in `.env.example`:
 
 ```bash
