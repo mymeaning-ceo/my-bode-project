@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env            # 로컬 .env 값 주입
+      - .env.dev        # 로컬 개발 환경 변수
     depends_on:
       - mongo
     restart: unless-stopped

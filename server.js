@@ -1,4 +1,10 @@
-require("dotenv").config();
+const envMap = {
+  production: "prod",
+  test: "test",
+  development: "dev",
+};
+const suffix = envMap[process.env.NODE_ENV] || "dev";
+require("dotenv").config({ path: `.env.${suffix}` });
 const express = require("express");
 const path = require("path");
 const session = require("express-session");
