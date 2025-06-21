@@ -1,4 +1,3 @@
-# .github/workflows/ci.yml
 name: CI + Deploy
 
 on:
@@ -23,10 +22,16 @@ jobs:
           node-version: 18
           cache: npm
 
-      # 3) 의존성 설치
+      # 🔹 3) lockfile 정리 (중복 방지)
+      - name: 🧹 Remove unnecessary lockfiles
+        run: |
+          rm -f yarn.lock pnpm-lock.yaml
+          git rm -f yarn.lock pnpm-lock.yaml || true
+
+      # 4) 의존성 설치
       - run: npm ci
 
-      # 4) 테스트
+      # 5) 테스트
       - name: Run Jest tests
         run: npm test
         env:
@@ -35,11 +40,11 @@ jobs:
           DB_NAME:    ${{ secrets.TEST_DB_NAME }}
           SESSION_SECRET: ${{ secrets.TEST_SESSION_SECRET }}
 
-      # 5) Heroku CLI 설치
+      # 6) Heroku CLI 설치
       - name: Install Heroku CLI
         run: curl https://cli-assets.heroku.com/install.sh | sh
 
-      # 6) Heroku 로그인 (.netrc)
+      # 7) Heroku 로그인 (.netrc)
       - name: Login to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
@@ -54,17 +59,17 @@ jobs:
             password $HEROKU_API_KEY
           EOF
           heroku auth:whoami
-      # 7) 빌드팩 설정 (Node.js → Python)
+
+      # 8) 빌드팩 설정 (Node.js → Python)
       - name: Configure Heroku buildpacks
         env:
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
-          # Ensure Node is the primary buildpack and add Python as secondary.
-          # Ignore errors if the buildpacks are already configured.
           heroku buildpacks:set heroku/nodejs -a $HEROKU_APP_NAME || true
           heroku buildpacks:add --index 2 heroku/python -a $HEROKU_APP_NAME || true
           heroku buildpacks -a $HEROKU_APP_NAME
-      # 8) Git push 배포
+
+      # 9) Git push 배포
       - name: Deploy to Heroku
         env:
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
