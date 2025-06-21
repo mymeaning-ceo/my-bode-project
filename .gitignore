@@ -25,3 +25,5 @@ coverage/
 Thumbs.db
 .vscode/
 
+yarn.lock
+pnpm-lock.yaml
