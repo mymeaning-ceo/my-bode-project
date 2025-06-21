@@ -67,5 +67,8 @@
   "directories": {
     "lib": "lib",
     "test": "tests"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
