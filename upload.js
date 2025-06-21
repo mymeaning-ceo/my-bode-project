@@ -23,18 +23,16 @@ if (process.env.NODE_ENV === "test") {
 
   // 필수 환경 변수 체크
   const { S3_KEY, S3_SECRET, S3_REGION, S3_BUCKET_NAME } = process.env;
+  if (!S3_KEY || !S3_SECRET || !S3_REGION || !S3_BUCKET_NAME) {
+    throw new Error("\u274C Missing S3 configuration in .env");
+  }
+
   console.log("[DEBUG S3 CONFIG]", {
     S3_KEY,
     S3_SECRET,
     S3_REGION,
     S3_BUCKET_NAME,
   });
-  if (!S3_KEY || !S3_SECRET || !S3_REGION || !S3_BUCKET_NAME) {
-    throw new Error("Missing S3 configuration in .env");
-  }
-  if (S3_BUCKET_NAME === "your-bucket" || S3_REGION === "your-s3-region") {
-    throw new Error("Default S3 placeholders detected in environment settings");
-  }
 
   const s3 = new S3Client({
     region: S3_REGION,
@@ -61,7 +59,7 @@ if (process.env.NODE_ENV === "test") {
           { Bucket: S3_BUCKET_NAME },
         );
       } else {
-        console.error("S3 bucket check failed:", err);
+        console.error("\u274C S3 bucket check failed:", err);
         throw err;
       }
     }
@@ -69,7 +67,7 @@ if (process.env.NODE_ENV === "test") {
 
   // 비동기 실행 (await 대신 후행 catch)
   ensureBucket().catch((err) =>
-    console.error("Unable to ensure S3 bucket exists:", err),
+    console.error("\u274C Unable to ensure S3 bucket exists:", err),
   );
 
   // multer-S3 스토리지 설정
