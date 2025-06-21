@@ -56,18 +56,23 @@ async function initApp() {
   app.use(methodOverride("_method"));
 
   // 5. 세션, Passport, Flash
+  const sessionStore =
+    process.env.NODE_ENV === "test"
+      ? new session.MemoryStore()
+      : MongoStore.create({
+          mongoUrl:
+            process.env.MONGO_URI || "mongodb://localhost:27017/testdb",
+          dbName: process.env.DB_NAME || "testdb",
+          collectionName: "sessions",
+          ttl: 60 * 60,
+        });
+
   app.use(
     session({
       secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
-      store: MongoStore.create({
-        mongoUrl:
-          process.env.MONGO_URI || "mongodb://localhost:27017/testdb",
-        dbName: process.env.DB_NAME || "testdb",
-        collectionName: "sessions",
-        ttl: 60 * 60,
-      }),
+      store: sessionStore,
       cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
