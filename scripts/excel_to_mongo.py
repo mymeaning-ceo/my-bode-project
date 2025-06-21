@@ -11,7 +11,8 @@ from typing import Union, IO
 # ─────────────────────────────────────────────
 # ① .env 파일에서 환경변수 불러오기 (MONGO_URI 포함)
 # ─────────────────────────────────────────────
-load_dotenv()
+ROOT_ENV = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=ROOT_ENV)
 
 # ─────────────────────────────────────────────
 # ② 공통 유틸 함수 정의
