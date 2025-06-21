@@ -49,6 +49,11 @@ async function initApp() {
   app.use(morgan("dev"));
 
   // 4. 기본 설정
+  // 루트는 대시보드로 이동하도록 먼저 처리
+  app.get("/", (req, res) => {
+    res.redirect(302, "/stock");
+  });
+  // 정적 파일 서빙
   app.use(express.static(path.join(__dirname, "public")));
   app.set("view engine", "ejs");
   app.use(express.urlencoded({ extended: false }));
@@ -122,10 +127,6 @@ async function initApp() {
   }
 
   // 8. 기본 경로 처리
-  // 루트에서는 대시보드로 리다이렉트하여 바로 서비스를 이용할 수 있도록 함
-  app.get("/", (req, res) => {
-    res.redirect(302, "/stock");
-  });
   app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
     const menuIcons = {
