@@ -9,8 +9,10 @@ const {
   waitUntilBucketExists,
 } = require("@aws-sdk/client-s3");
 
+// ✅ S3Client 설정에 endpoint 포함
 const s3 = new S3Client({
   region: process.env.S3_REGION,
+  endpoint: process.env.S3_ENDPOINT, // 🔹 추가된 부분
   credentials: {
     accessKeyId: process.env.S3_KEY,
     secretAccessKey: process.env.S3_SECRET,
