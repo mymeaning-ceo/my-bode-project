@@ -18,11 +18,16 @@ the server. Make sure the file is saved as **UTF-8 without BOM** so that
 > **Note**: The application always loads variables from `.env` in the project
 > root. Additional files such as `.env.dev` or `.env.empal` are ignored.
 
-An example configuration is provided in `.env.example`:
+Create a `.env` file containing values similar to the following:
 
 ```bash
-cp .env.example .env
-# then edit .env with your real credentials
+MONGO_URI=mongodb://localhost:27017/mydb
+DB_NAME=forum
+S3_KEY=YOUR_ACCESS_KEY
+S3_SECRET=YOUR_SECRET_KEY
+S3_REGION=YOUR_REGION
+S3_BUCKET_NAME=your-bucket-name
+SESSION_SECRET=your-session-secret
 ```
 
 ## Python scripts
