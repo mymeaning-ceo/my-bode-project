@@ -1,5 +1,9 @@
 # My Bode Project
 
+`config/loadEnv.js` loads environment settings before the server starts. It
+first checks for a `.env` file in the project root and falls back to
+`.env.example` when that file is missing.
+
 This project requires several environment variables to run:
 
 - `MONGO_URI` – MongoDB connection string
@@ -16,7 +20,8 @@ the server. Make sure the file is saved as **UTF-8 without BOM** so that
 `dotenv` can read it correctly.
 
 > **Note**: The application always loads variables from `.env` in the project
-> root. Additional files such as `.env.dev` or `.env.empal` are ignored.
+> root. Additional files such as `.env.dev` or `.env.empal` are ignored unless
+> you rename one of them to `.env`.
 
 Create a `.env` file containing values similar to the following:
 
