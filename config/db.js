@@ -1,12 +1,20 @@
 // ─────────────────────────────────────────────────────────────
 // config/db.js
 //   - connectDB(): MongoDB 연결
-//   - closeDB():   연결 및 재연결 타이머 종료
+//   - closeDB():   연결 종료
 // ─────────────────────────────────────────────────────────────
 
 const mongoose = require("mongoose");
-console.log("DEBUG MONGO_URI:", process.env.MONGO_URI);
-let reconnectTimer = null;
+
+mongoose.connection.on("connected", () => {
+  console.log("✅ [mongoose] 연결됨");
+});
+mongoose.connection.on("error", (err) => {
+  console.error("❌ [mongoose] 에러 발생:", err.message);
+});
+mongoose.connection.on("disconnected", () => {
+  console.warn("⚠️ [mongoose] 연결 끊김");
+});
 
 /**
  * MongoDB 연결 함수
@@ -14,35 +22,34 @@ let reconnectTimer = null;
  */
 const connectDB = async () => {
   const uri = process.env.MONGO_URI || "mongodb://localhost:27017/testdb";
+  const dbName = process.env.DB_NAME || "testdb";
+
+  console.log("DEBUG MONGO_URI:", uri);
+  console.log("DEBUG DB_NAME:", dbName);
 
   try {
-    await mongoose.connect(uri, {
-      dbName: process.env.DB_NAME || "testdb",
+    const conn = await mongoose.connect(uri, {
+      dbName,
     });
 
-    // 연결이 완전히 열릴 때까지 대기
-    await new Promise((resolve) => mongoose.connection.once("open", resolve));
-
-    console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
-    return mongoose.connection.db; // 이제 db가 정의됨
-  } catch (err) {
-    console.error("❌ MongoDB connection error:", err.message);
-
-    // 테스트 환경이 아닐 때만 재연결 시도
-    if (process.env.NODE_ENV !== "test") {
-      reconnectTimer = setTimeout(connectDB, 5000);
+    if (conn.connection.readyState !== 1) {
+      throw new Error("MongoDB 연결 상태 비정상 (readyState != 1)");
     }
+
+    console.log("✅ MongoDB 연결 성공 (readyState = 1)");
+    return conn.connection.db;
+  } catch (err) {
+    console.error("❌ MongoDB 연결 실패:", err.message);
     throw err;
   }
 };
 
 /**
  * MongoDB 연결 종료 함수
- *  - 테스트에서 afterAll 훅에서 호출
  */
 const closeDB = async () => {
-  if (reconnectTimer) clearTimeout(reconnectTimer);
   await mongoose.connection.close();
+  console.log("🛑 MongoDB 연결 종료됨");
 };
 
 module.exports = { connectDB, closeDB };

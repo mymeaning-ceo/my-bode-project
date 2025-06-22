@@ -25,3 +25,4 @@ echo ".cache/" >> .gitignore
 git add .gitignore
 git commit -m "chore: update .gitignore"
 git push
+.env.dev
