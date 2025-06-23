@@ -271,8 +271,8 @@ td:nth-child(3) {
 
 /* Row highlight styles for inventory status */
 
-.coupang-table td,
-.coupang-table th {
+.data-table td,
+.data-table th {
   font-size: 0.9rem;
 }
 
