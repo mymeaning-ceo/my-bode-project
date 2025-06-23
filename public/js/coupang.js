@@ -5,7 +5,10 @@ $(function () {
   var table = $('#coupangTable').DataTable({
     ordering: true,
     order: [[1, 'asc']],
-    columnDefs: [{ targets: 0, orderable: false }],
+    columnDefs: [
+      { targets: '_all', className: 'text-center' },
+      { targets: 0, orderable: false }
+    ],
     lengthChange: false,
     paging: false,
     searching: false,
