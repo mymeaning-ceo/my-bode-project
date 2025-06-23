@@ -30,7 +30,17 @@ Some features convert Excel files to CSV using Python. Install the Python depend
 pip install -r requirements.txt
 ```
 
-The `requirements.txt` file lists the minimal packages (`pandas` and `openpyxl`) needed to parse Excel files.
+The `requirements.txt` file lists the minimal packages (`pandas`, `openpyxl` and `requests`) needed to parse Excel files and access the Coupang API.
+
+### Coupang API helper
+
+The module `scripts/coupang_api.py` signs and sends requests to the Coupang Open API. Set `CP_ACCESS_KEY`, `CP_SECRET_KEY` and `CP_VENDOR_ID` in your environment.
+
+Example:
+
+```bash
+python scripts/coupang_api.py GET /v2/providers/openapi/apis/api/v1/marketplace/seller-products/12345
+```
 
 ## Router structure
 
