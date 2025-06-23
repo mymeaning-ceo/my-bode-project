@@ -86,11 +86,15 @@
           <% if (필드 && 필드.length > 0) { %>
             <tr>
               <th>번호</th>
-              <% 필드.forEach((key) => {
-                   const isCurrent = sortField === key;
-                   const arrow = isCurrent ? (sortOrder === 1 ? ' ▲' : ' ▼') : '';
-              %>
-                <th class="sortable" data-field="<%= key %>"><%= 한글?.[key] || key %><%= arrow %></th>
+              <% 필드.forEach((key) => { %>
+                <th>
+                  <a href="?<%= 기본쿼리 %><%= 기본쿼리 ? '&' : '' %>sort=<%= key %>&order=<%= sortField === key && sortOrder === 1 ? 'desc' : 'asc' %>" class="text-decoration-none text-dark">
+                    <%= 한글?.[key] || key %>
+                    <% if (sortField === key) { %>
+                      <%= sortOrder === 1 ? '▲' : '▼' %>
+                    <% } %>
+                  </a>
+                </th>
               <% }) %>
             </tr>
           <% } else { %>

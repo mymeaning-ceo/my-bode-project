@@ -116,11 +116,14 @@ router.get("/", async (req, res) => {
 
     const totalPage = Math.ceil(total / limit);
     const totalCount = total;
-    const params = new URLSearchParams();
-    if (brand) params.append("brand", brand);
+    const baseParams = new URLSearchParams();
+    if (brand) baseParams.append("brand", brand);
     if (selected && selected.length > 0)
-      selected.forEach((f) => params.append("fields", f));
-    if (shortageOnly) params.append("shortage", "1");
+      selected.forEach((f) => baseParams.append("fields", f));
+    if (shortageOnly) baseParams.append("shortage", "1");
+    if (page > 1) baseParams.append("page", page);
+    const baseQuery = baseParams.toString();
+    const params = new URLSearchParams(baseQuery);
     if (sortField !== "Product name") params.append("sort", sortField);
     if (req.query.order) params.append("order", req.query.order);
     const queryString = params.toString();
@@ -138,6 +141,7 @@ router.get("/", async (req, res) => {
       전체페이지: totalPage,
       전체건수: totalCount,
       추가쿼리: queryString ? `&${queryString}` : "",
+      기본쿼리: baseQuery,
       페이지크기: limit,
       sortField,
       sortOrder,
@@ -267,12 +271,15 @@ router.get("/search", async (req, res) => {
 
     const totalPage = Math.ceil(total / limit);
     const totalCount = total;
-    const params = new URLSearchParams();
-    if (keyword) params.append("keyword", keyword);
-    if (brand) params.append("brand", brand);
+    const baseParams = new URLSearchParams();
+    if (keyword) baseParams.append("keyword", keyword);
+    if (brand) baseParams.append("brand", brand);
     if (selected && selected.length > 0)
-      selected.forEach((f) => params.append("fields", f));
-    if (shortageOnly) params.append("shortage", "1");
+      selected.forEach((f) => baseParams.append("fields", f));
+    if (shortageOnly) baseParams.append("shortage", "1");
+    if (page > 1) baseParams.append("page", page);
+    const baseQuery = baseParams.toString();
+    const params = new URLSearchParams(baseQuery);
     if (sortField !== "Product name") params.append("sort", sortField);
     if (req.query.order) params.append("order", req.query.order);
     const queryString = params.toString();
@@ -290,6 +297,7 @@ router.get("/search", async (req, res) => {
       전체페이지: totalPage,
       전체건수: totalCount,
       추가쿼리: queryString ? `&${queryString}` : "",
+      기본쿼리: baseQuery,
       페이지크기: limit,
       sortField,
       sortOrder,
