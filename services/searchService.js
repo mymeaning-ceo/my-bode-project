@@ -42,10 +42,23 @@ async function searchPosts(db, term, page = 1, limit = 5) {
     { $count: 'total' },
   ];
 
-  const [docs, countRes] = await Promise.all([
-    db.collection('post').aggregate(pipeline).toArray(),
-    db.collection('post').aggregate(countPipeline).toArray(),
-  ]);
+  let docs, countRes;
+  try {
+    [docs, countRes] = await Promise.all([
+      db.collection('post').aggregate(pipeline).toArray(),
+      db.collection('post').aggregate(countPipeline).toArray(),
+    ]);
+  } catch (err) {
+    // Atlas Search may not be enabled (e.g. local MongoDB). Fallback to regex search.
+    const regex = new RegExp(escapeRegExp(term), 'i');
+    const filter = { $or: [{ title: regex }, { content: regex }] };
+    [docs, countRes] = await Promise.all([
+      db.collection('post').find(filter).skip(skip).limit(limit).toArray(),
+      db.collection('post').countDocuments(filter),
+    ]);
+    countRes = [{ total: countRes }];
+  }
+
   const total = countRes[0]?.total || 0;
   const totalPage = Math.ceil(total / limit);
 
