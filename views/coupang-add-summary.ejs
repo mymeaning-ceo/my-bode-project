@@ -19,10 +19,10 @@
       <a href="/coupang/add?mode=summary" class="btn <%= mode === 'summary' ? 'btn-success' : 'btn-outline-success' %>">상품명 통합 보기</a>
     </div>
 
-    <form method="get" action="/coupang/add" class="d-flex align-items-center mb-3">
-      <input type="hidden" name="mode" value="summary">
-      <input name="search" class="form-control me-2" style="max-width: 250px;" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
-      <select name="brand" class="form-select me-2" style="max-width: 150px;">
+    <div id="search-form" class="d-flex align-items-center mb-3">
+      <input type="hidden" id="search-mode" value="summary">
+      <input id="search-keyword" class="form-control me-2" style="max-width: 250px;" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
+      <select id="search-brand" name="brand" class="form-select me-2" style="max-width: 150px;">
         <option value="">전체 브랜드</option>
         <option value="트라이" <%= brand === '트라이' ? 'selected' : '' %>>트라이</option>
         <option value="좋은사람들" <%= brand === '좋은사람들' ? 'selected' : '' %>>좋은사람들</option>
@@ -31,7 +31,7 @@
         <option value="제임스딘" <%= brand === '제임스딘' ? 'selected' : '' %>>제임스딘</option>
       </select>
       <button class="btn btn-outline-primary search-send">검색</button>
-    </form>
+    </div>
 
     <div class="table-responsive table-container">
       <table id="summaryTable" class="table table-bordered table-hover table-striped bg-white align-middle text-center auto-width">
@@ -87,6 +87,12 @@
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/coupangAddSummary.js"></script>
+<script>
+  var pageMode = '<%= mode %>';
+  var pageSearch = '<%= search %>';
+  var pageBrand = '<%= brand %>';
+</script>
+<script src="/js/coupangAdd.js"></script>
+<script src="/js/coupangAddSummary.js"></script>
 </body>
 </html>

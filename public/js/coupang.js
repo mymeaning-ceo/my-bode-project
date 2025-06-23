@@ -81,4 +81,21 @@ $(function () {
     link.click();
     document.body.removeChild(link);
   });
+
+  // ✅ 검색 처리
+  $('.search-send').on('click', function () {
+    const brand = $('#search-brand').val();
+    const keyword = $('#search-keyword').val().trim();
+    const params = new URLSearchParams();
+    if (keyword) params.append('keyword', keyword);
+    if (brand) params.append('brand', brand);
+    window.location.href = '/coupang/search?' + params.toString();
+  });
+
+  $('#search-keyword').on('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('.search-send').click();
+    }
+  });
 });
