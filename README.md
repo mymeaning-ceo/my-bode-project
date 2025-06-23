@@ -13,6 +13,10 @@ This project requires several environment variables to run:
   must allow bucket creation).
 - `WEATHER_API_KEY` – API key from the Korean Meteorological Administration used
   to fetch daily weather data.
+- `CP_ACCESS_KEY` – Coupang API access key
+- `CP_SECRET_KEY` – Coupang API secret key
+- `CP_VENDOR_ID` – Your Coupang vendor ID
+- `CP_API_HOST` – Coupang API host (optional)
 
 Copy `.env.example` to `.env` in the project root and define these values before starting the server. Make sure the file is saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
 
@@ -36,6 +40,9 @@ Routes are organized under the `routes/` directory. `server.js` mounts two route
 `routes/web/index.js` automatically reads every `.js` file in the same folder and mounts it. Some routes like `post` or `admin` are guarded with an auth check. `routes/api/index.js` currently exposes `/stock` endpoints through `stockApi.js`.
 
 This layout keeps API and web routes separate while avoiding an extra routing layer.
+
+### Coupang Open API
+`/api/coupang-open/product/:id` fetches product info using Coupang credentials. See `.env.example` for required variables.
 
 
 =======
