@@ -23,7 +23,10 @@ exports.renderPage = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
   const mode = req.query.mode === 'summary' ? 'summary' : 'detail';
 
-  const search = req.query.search || '';
+  const search =
+    typeof req.query.search === 'string'
+      ? req.query.search
+      : req.query.search?.value || '';
   const brand = req.query.brand || '';
   // 기본 정렬: 노출수 합 내림차순
   const sortField = req.query.sort || 'impressions';
@@ -139,7 +142,10 @@ exports.getData = asyncHandler(async (req, res) => {
   const start = parseInt(req.query.start, 10) || 0;
   const length = parseInt(req.query.length, 10) || 50;
   const draw = parseInt(req.query.draw, 10) || 1;
-  const keyword = req.query.search || '';
+  const keyword =
+    typeof req.query.search === 'string'
+      ? req.query.search
+      : req.query.search?.value || '';
 
   // 기본 정렬 기준
   let sort = { _id: -1 };
