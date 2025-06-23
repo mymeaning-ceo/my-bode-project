@@ -10,6 +10,7 @@ const helmet = require("helmet");
 const compression = require("compression");
 const flash = require("connect-flash");
 const { connectDB } = require("./config/db");
+const { initIndexes } = require("./config/initIndexes");
 const webRouter = require("./routes/web");
 const apiRouter = require("./routes/api");
 const { checkAuth } = require("./middlewares/auth");
@@ -21,6 +22,7 @@ const app = express();
 async function initApp() {
   // 1. MongoDB 연결
   const db = await connectDB();
+  await initIndexes(db);
   app.locals.db = db;
   startCronJobs(db);
 
