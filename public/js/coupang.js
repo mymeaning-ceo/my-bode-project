@@ -3,8 +3,7 @@ $(function () {
   var url = new URL(window.location.href);
   var showReorderOnly = url.searchParams.get('shortage') === '1';
   var table = $('#coupangTable').DataTable({
-    ordering: true,
-    order: [[1, 'asc']],
+    ordering: false,
     columnDefs: [
       { targets: '_all', className: 'text-center' },
       { targets: 0, orderable: false }
@@ -21,22 +20,18 @@ $(function () {
     }
   });
 
-  $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-    if (!showReorderOnly) return true;
-    var row = $(table.row(dataIndex).node());
-    var shortage = Number(row.data('shortage')) || 0;
-    return shortage > 0;
-  });
-
   if (showReorderOnly) {
     $('#btn-filter-reorder').text('전체 보기');
-    table.draw();
   }
 
   $('#btn-filter-reorder').on('click', function () {
-    showReorderOnly = !showReorderOnly;
-    $(this).text(showReorderOnly ? '전체 보기' : '입고 필요만 보기');
-    table.draw();
+    var url = new URL(window.location.href);
+    if (showReorderOnly) {
+      url.searchParams.delete('shortage');
+    } else {
+      url.searchParams.set('shortage', '1');
+    }
+    window.location.href = url.toString();
   });
 
   $('#btn-download-csv').on('click', function () {

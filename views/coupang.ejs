@@ -87,7 +87,14 @@
             <tr>
               <th>번호</th>
               <% 필드.forEach((key) => { %>
-                <th><%= 한글?.[key] || key %></th>
+                <th>
+                  <a href="?<%= 기본쿼리 %><%= 기본쿼리 ? '&' : '' %>sort=<%= key %>&order=<%= sortField === key && sortOrder === 1 ? 'desc' : 'asc' %>" class="text-decoration-none text-dark">
+                    <%= 한글?.[key] || key %>
+                    <% if (sortField === key) { %>
+                      <%= sortOrder === 1 ? '▲' : '▼' %>
+                    <% } %>
+                  </a>
+                </th>
               <% }) %>
             </tr>
           <% } else { %>
