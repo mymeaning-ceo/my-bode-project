@@ -276,6 +276,13 @@ td:nth-child(3) {
   font-size: 0.9rem;
 }
 
+/* Global DataTables cell size */
+.dataTable td,
+.dataTable th {
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
 /* Dashboard card styles */
 .dashboard-cards .card {
   transition: transform 0.2s;

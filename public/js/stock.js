@@ -24,6 +24,7 @@ $(document).ready(function () {
     info: true,
     pageLength: 50,
     lengthChange: false,
+    responsive: true,
     columnDefs: [
       { targets: '_all', className: 'text-center' },
       {
