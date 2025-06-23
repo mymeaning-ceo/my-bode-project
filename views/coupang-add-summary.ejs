@@ -33,25 +33,31 @@
     <table class="table table-bordered table-hover text-center">
       <thead class="table-primary text-center">
         <tr>
-          <th>번호</th>
-          <th>상품명</th>
+          <th class="text-reset">
+            번호
+          </th>
           <th>
-            <a href="?sort=impressions&order=<%= sortField === 'impressions' && sortOrder === -1 ? 'asc' : 'desc' %>">
+            <a href="?sort=name&order=<%= sortField === 'name' && sortOrder === -1 ? 'asc' : 'desc' %>" class="text-reset text-decoration-none">
+              상품명 <%= sortField === 'name' ? (sortOrder === -1 ? '🔽' : '🔼') : '' %>
+            </a>
+          </th>
+          <th>
+            <a href="?sort=impressions&order=<%= sortField === 'impressions' && sortOrder === -1 ? 'asc' : 'desc' %>" class="text-reset text-decoration-none">
               노출수 합 <%= sortField === 'impressions' ? (sortOrder === -1 ? '🔽' : '🔼') : '' %>
             </a>
           </th>
           <th>
-            <a href="?sort=clicks&order=<%= sortField === 'clicks' && sortOrder === -1 ? 'asc' : 'desc' %>">
+            <a href="?sort=clicks&order=<%= sortField === 'clicks' && sortOrder === -1 ? 'asc' : 'desc' %>" class="text-reset text-decoration-none">
               클릭수 합 <%= sortField === 'clicks' ? (sortOrder === -1 ? '🔽' : '🔼') : '' %>
             </a>
           </th>
           <th>
-            <a href="?sort=adCost&order=<%= sortField === 'adCost' && sortOrder === -1 ? 'asc' : 'desc' %>">
+            <a href="?sort=adCost&order=<%= sortField === 'adCost' && sortOrder === -1 ? 'asc' : 'desc' %>" class="text-reset text-decoration-none">
               광고비 합 <%= sortField === 'adCost' ? (sortOrder === -1 ? '🔽' : '🔼') : '' %>
             </a>
           </th>
           <th>
-            <a href="?sort=ctr&order=<%= sortField === 'ctr' && sortOrder === -1 ? 'asc' : 'desc' %>">
+            <a href="?sort=ctr&order=<%= sortField === 'ctr' && sortOrder === -1 ? 'asc' : 'desc' %>" class="text-reset text-decoration-none">
               클릭률 <%= sortField === 'ctr' ? (sortOrder === -1 ? '🔽' : '🔼') : '' %>
             </a>
           </th>
@@ -61,7 +67,7 @@
         <% list.forEach(item => { %>
           <tr>
             <td><%= item.no %></td>
-            <td><%= item.name %></td>
+            <td><%= item.productName %></td>
             <td><%= item.impressions.toLocaleString() %></td>
             <td><%= item.clicks.toLocaleString() %></td>
             <td><%= item.adCost.toLocaleString() %></td>
