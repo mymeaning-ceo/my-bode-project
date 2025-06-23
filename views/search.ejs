@@ -26,7 +26,12 @@
         alert('검색어를 입력하세요.');
         return;
       }
-      location.href = '/search?val=' + encodeURIComponent(input);
+      const params = new URLSearchParams({
+        val: input,
+        sort: '<%= sortField %>',
+        order: '<%= sortOrder === 1 ? "asc" : "desc" %>'
+      });
+      location.href = '/search?' + params.toString();
     });
 
     document.querySelector('.search').addEventListener('keydown', function(e){
@@ -64,19 +69,19 @@
     <div class="pagination text-center mt-4">
       <% if (전체페이지 > 1) { %>
         <% if (현재페이지 > 1) { %>
-          <a href="/search?val=<%= val %>&page=<%= 현재페이지 - 1 %>">◀ 이전</a>
+          <a href="/search?<%= 기본쿼리 %>&page=<%= 현재페이지 - 1 %>">◀ 이전</a>
         <% } %>
 
         <% for (let i = 1; i <= 전체페이지; i++) { %>
           <% if (i === 현재페이지) { %>
             <strong>[<%= i %>]</strong>
           <% } else { %>
-            <a href="/search?val=<%= val %>&page=<%= i %>">[<%= i %>]</a>
+            <a href="/search?<%= 기본쿼리 %>&page=<%= i %>">[<%= i %>]</a>
           <% } %>
         <% } %>
 
         <% if (현재페이지 < 전체페이지) { %>
-          <a href="/search?val=<%= val %>&page=<%= 현재페이지 + 1 %>">다음 ▶</a>
+          <a href="/search?<%= 기본쿼리 %>&page=<%= 현재페이지 + 1 %>">다음 ▶</a>
         <% } %>
       <% } %>
     </div>

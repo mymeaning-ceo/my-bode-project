@@ -13,7 +13,14 @@ function highlight(text = '', term = '') {
   return escapeHtml(text).replace(regex, (m) => `<mark>${m}</mark>`);
 }
 
-async function searchPosts(db, term, page = 1, limit = 5) {
+async function searchPosts(
+  db,
+  term,
+  page = 1,
+  limit = 5,
+  sortField = 'createdAt',
+  sortOrder = -1
+) {
   const skip = (page - 1) * limit;
   const pipeline = [
     {
@@ -26,6 +33,7 @@ async function searchPosts(db, term, page = 1, limit = 5) {
         },
       },
     },
+    { $sort: { [sortField]: sortOrder } },
     { $skip: skip },
     { $limit: limit },
   ];
@@ -53,7 +61,13 @@ async function searchPosts(db, term, page = 1, limit = 5) {
     const regex = new RegExp(escapeRegExp(term), 'i');
     const filter = { $or: [{ title: regex }, { content: regex }] };
     [docs, countRes] = await Promise.all([
-      db.collection('post').find(filter).skip(skip).limit(limit).toArray(),
+      db
+        .collection('post')
+        .find(filter)
+        .sort({ [sortField]: sortOrder })
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
       db.collection('post').countDocuments(filter),
     ]);
     countRes = [{ total: countRes }];
