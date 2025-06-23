@@ -1,8 +1,10 @@
 $(function () {
+  const mode = typeof pageMode !== 'undefined' ? pageMode : 'detail';
   const $table = $('#coupangAddTable');
-  if (!$table.length || $table.data('mode') !== 'detail') return;
+  let table;
 
-  const table = $table.DataTable({
+  if ($table.length && mode === 'detail') {
+    table = $table.DataTable({
     serverSide: true,
     processing: true,
     paging: true,
@@ -67,10 +69,29 @@ $(function () {
     });
   });
 
-  $('#resetForm').on('submit', function () {
-    if (!confirm('정말 모든 데이터를 삭제하시겠습니까?')) {
-      return false;
+    $('#resetForm').on('submit', function () {
+      if (!confirm('정말 모든 데이터를 삭제하시겠습니까?')) {
+        return false;
+      }
+      alert('데이터 삭제 중입니다. 잠시만 기다려주세요.');
+    });
+  }
+
+  // ✅ 검색 처리 (summary/detail 공통)
+  $('.search-send').on('click', function () {
+    const keyword = $('#search-keyword').val().trim();
+    const brand = $('#search-brand').val();
+    const params = new URLSearchParams();
+    if (mode) params.append('mode', mode);
+    if (keyword) params.append('search', keyword);
+    if (brand) params.append('brand', brand);
+    window.location.href = '/coupang/add?' + params.toString();
+  });
+
+  $('#search-keyword').on('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('.search-send').click();
     }
-    alert('데이터 삭제 중입니다. 잠시만 기다려주세요.');
   });
 });
