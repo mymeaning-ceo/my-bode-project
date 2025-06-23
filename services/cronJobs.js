@@ -1,4 +1,3 @@
-const cron = require('node-cron');
 const { coupangRequest } = require('../lib/coupangApiClient');
 
 async function updateInventory(db) {
@@ -68,8 +67,19 @@ async function calcAdMetrics(db) {
 }
 
 function startCronJobs(db) {
-  cron.schedule('0 * * * *', () => updateInventory(db));
-  cron.schedule('30 0 * * *', () => calcAdMetrics(db));
+  // Update inventory every hour
+  setInterval(() => updateInventory(db), 60 * 60 * 1000);
+
+  // Calculate ad metrics daily at 00:30
+  const now = new Date();
+  const firstRun = new Date(now);
+  firstRun.setHours(0, 30, 0, 0);
+  if (firstRun <= now) firstRun.setDate(firstRun.getDate() + 1);
+
+  setTimeout(() => {
+    calcAdMetrics(db);
+    setInterval(() => calcAdMetrics(db), 24 * 60 * 60 * 1000);
+  }, firstRun - now);
 }
 
 module.exports = { startCronJobs };
