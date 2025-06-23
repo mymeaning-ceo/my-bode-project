@@ -14,6 +14,7 @@ const webRouter = require("./routes/web");
 const apiRouter = require("./routes/api");
 const { checkAuth } = require("./middlewares/auth");
 const errorHandler = require("./middlewares/errorHandler");
+const { startCronJobs } = require("./services/cronJobs");
 
 const app = express();
 
@@ -21,6 +22,7 @@ async function initApp() {
   // 1. MongoDB 연결
   const db = await connectDB();
   app.locals.db = db;
+  startCronJobs(db);
 
   // 2. Passport 설정
   require("./config/passport")(passport, db);
