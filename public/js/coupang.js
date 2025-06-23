@@ -20,9 +20,7 @@ $(function () {
     if (!showReorderOnly) return true;
     var row = $(table.row(dataIndex).node());
     var shortage = Number(row.data('shortage')) || 0;
-    var sales = Number(row.data('sales')) || 0;
-    var stock = Number(row.data('stock')) || 0;
-    return shortage > 0 || (sales > 0 && stock === 0);
+    return shortage > 0;
   });
 
   $('#btn-filter-reorder').on('click', function () {
@@ -36,9 +34,7 @@ $(function () {
     table.rows().every(function (rowIdx) {
       var node = $(this.node());
       var shortage = Number(node.data('shortage')) || 0;
-      var sales = Number(node.data('sales')) || 0;
-      var stock = Number(node.data('stock')) || 0;
-      if (shortage > 0 || (sales > 0 && stock === 0)) {
+      if (shortage > 0) {
         var data = this.data();
         var text = $(this.node()).find('td').map(function(){return $(this).text().trim().replace(/,/g,'');}).get().slice(1);
         rows.push(text.join(','));
@@ -48,7 +44,7 @@ $(function () {
       alert('입고 필요 항목이 없습니다.');
       return;
     }
-    var csv = rows.join('\n');
+    var csv = '\ufeff' + rows.join('\n');
     var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     var link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
