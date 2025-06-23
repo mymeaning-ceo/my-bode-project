@@ -13,10 +13,12 @@ This project requires several environment variables to run:
   must allow bucket creation).
 - `WEATHER_API_KEY` – API key from the Korean Meteorological Administration used
   to fetch daily weather data.
-- `CP_ACCESS_KEY` – Coupang Open API access key.
-- `CP_SECRET_KEY` – Coupang Open API secret key used to sign requests.
-- `CP_VENDOR_ID` – Your Coupang vendor ID.
-- `CP_API_HOST` – Base URL for the Coupang Open API (defaults to `https://api-gateway.coupang.com`).
+  
+- `CP_ACCESS_KEY` – Coupang Open API access key
+- `CP_SECRET_KEY` – Coupang Open API secret key
+- `CP_VENDOR_ID` – Vendor ID issued by Coupang
+- `CP_API_HOST` – Base URL for the Coupang Open API (optional)
+
 
 Copy `.env.example` to `.env` in the project root and define these values before starting the server. Make sure the file is saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
 
