@@ -49,6 +49,7 @@ $(function () {
 
   $('#uploadForm').on('submit', function (e) {
     e.preventDefault();
+    alert('업로드 중입니다. 잠시만 기다려주세요.');
     const formData = new FormData(this);
     $.ajax({
       url: '/coupang/add/upload',
@@ -64,5 +65,12 @@ $(function () {
         alert('업로드 실패: ' + xhr.responseText);
       }
     });
+  });
+
+  $('#resetForm').on('submit', function () {
+    if (!confirm('정말 모든 데이터를 삭제하시겠습니까?')) {
+      return false;
+    }
+    alert('데이터 삭제 중입니다. 잠시만 기다려주세요.');
   });
 });
