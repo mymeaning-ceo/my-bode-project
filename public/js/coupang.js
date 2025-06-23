@@ -25,20 +25,23 @@ $(function () {
   });
 
   $('#btn-filter-reorder').on('click', function () {
-    showReorderOnly = !showReorderOnly;
-    $(this).text(showReorderOnly ? '전체 보기' : '입고 필요만 보기');
-    table.draw();
+    var url = new URL(window.location.href);
+    var show = url.searchParams.get('shortage') === '1';
+    if (show) url.searchParams.delete('shortage');
+    else url.searchParams.set('shortage', '1');
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
   });
 
   $('#btn-download-csv').on('click', function () {
     var rows = [];
-    table.rows().every(function (rowIdx) {
-      var node = $(this.node());
-      var shortage = Number(node.data('shortage')) || 0;
+    $('#coupangTable tbody tr').each(function () {
+      var shortage = Number($(this).data('shortage')) || 0;
       if (shortage > 0) {
-        var data = this.data();
-        var text = $(this.node()).find('td').map(function(){return $(this).text().trim().replace(/,/g,'');}).get().slice(1);
-        rows.push(text.join(','));
+        var cols = $(this).find('td').map(function () {
+          return $(this).text().trim().replace(/,/g, '');
+        }).get().slice(1);
+        rows.push(cols.join(','));
       }
     });
     if (!rows.length) {
