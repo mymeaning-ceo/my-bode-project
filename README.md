@@ -13,10 +13,12 @@ This project requires several environment variables to run:
   must allow bucket creation).
 - `WEATHER_API_KEY` – API key from the Korean Meteorological Administration used
   to fetch daily weather data.
+  
 - `CP_ACCESS_KEY` – Coupang Open API access key
 - `CP_SECRET_KEY` – Coupang Open API secret key
 - `CP_VENDOR_ID` – Vendor ID issued by Coupang
 - `CP_API_HOST` – Base URL for the Coupang Open API (optional)
+
 
 Copy `.env.example` to `.env` in the project root and define these values before starting the server. Make sure the file is saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
 
@@ -41,6 +43,22 @@ Routes are organized under the `routes/` directory. `server.js` mounts two route
 
 This layout keeps API and web routes separate while avoiding an extra routing layer.
 
+## Coupang product endpoint
+
+`/api/coupang-open/product/:id` fetches product details from the Coupang Open API.
+The server must be configured with `CP_ACCESS_KEY`, `CP_SECRET_KEY` and `CP_VENDOR_ID`.
+Optionally, `CP_API_HOST` can override the default host.
+
+```js
+const axios = require('axios');
+
+const getProduct = async (id) => {
+  const { data } = await axios.get(`http://localhost:3000/api/coupang-open/product/${id}`);
+  console.log(data);
+};
+
+getProduct('1234');
+```
 
 =======
 
