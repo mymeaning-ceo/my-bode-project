@@ -11,6 +11,7 @@ $(function () {
     info: true,
     pageLength: 50,
     lengthChange: false,
+    responsive: true,
     order: [[0, 'asc']],
     columnDefs: [
       { targets: '_all', className: 'text-center' },

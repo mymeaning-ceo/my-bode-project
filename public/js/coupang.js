@@ -9,6 +9,7 @@ $(function () {
     paging: false,
     searching: false,
     info: false,
+    responsive: true,
     language: {
       paginate: { previous: '이전', next: '다음' },
       info: '총 _TOTAL_건 중 _START_ ~ _END_',
