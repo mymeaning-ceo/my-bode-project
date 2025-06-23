@@ -25,6 +25,9 @@ $(function () {
         if (typeof pageSearch !== 'undefined') {
           d.search = pageSearch;
         }
+        if (typeof pageBrand !== 'undefined') {
+          d.brand = pageBrand;
+        }
       },
       dataSrc: 'data',
     },

@@ -133,6 +133,7 @@ exports.renderPage = asyncHandler(async (req, res) => {
   res.render('coupangAdd', {
     mode,
     search,
+    brand,
   });
 });
 
@@ -146,6 +147,7 @@ exports.getData = asyncHandler(async (req, res) => {
     typeof req.query.search === 'string'
       ? req.query.search
       : req.query.search?.value || '';
+  const brand = req.query.brand || '';
 
   // 기본 정렬 기준
   let sort = { _id: -1 };
@@ -163,14 +165,19 @@ exports.getData = asyncHandler(async (req, res) => {
     }
   }
 
-  const filter = keyword
-    ? {
-        $or: [
-          { '광고집행 상품명': { $regex: keyword, $options: 'i' } },
-          { '광고집행 옵션ID': { $regex: keyword, $options: 'i' } },
-        ],
-      }
-    : {};
+  const conditions = [];
+  if (keyword) {
+    conditions.push({
+      $or: [
+        { '광고집행 상품명': { $regex: keyword, $options: 'i' } },
+        { '광고집행 옵션ID': { $regex: keyword, $options: 'i' } },
+      ],
+    });
+  }
+  if (brand) {
+    conditions.push({ '광고집행 상품명': { $regex: brand, $options: 'i' } });
+  }
+  const filter = conditions.length ? { $and: conditions } : {};
 
   const [total, recordsFiltered, rows] = await Promise.all([
     db.collection('coupangAdd').countDocuments(),
