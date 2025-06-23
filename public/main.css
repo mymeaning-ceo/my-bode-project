@@ -39,6 +39,11 @@ body {
   border-bottom-left-radius: 0;
 }
 
+mark {
+  background-color: #ffeb3b;
+  padding: 0 2px;
+}
+
 /* 페이지네이션 */
 .pagination {
   text-align: center;
