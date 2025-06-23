@@ -72,9 +72,6 @@ router.get("/", async (req, res) => {
   const skip = (page - 1) * limit;
   const keyword = "";
   const brand = req.query.brand || "";
-  const sortField =
-    DEFAULT_COLUMNS.includes(req.query.sort) ? req.query.sort : "Product name";
-  const sortOrder = req.query.order === "desc" ? -1 : 1;
   const shortageOnly = req.query.shortage === "1";
   try {
     const query = brand ? { "Product name": new RegExp(brand, "i") } : {};
@@ -83,7 +80,7 @@ router.get("/", async (req, res) => {
       db
         .collection("coupang")
         .find(query)
-        .sort({ [sortField]: sortOrder })
+        .sort({ "Product name": 1 })
         .skip(skip)
         .limit(limit)
         .toArray(),
@@ -124,8 +121,6 @@ router.get("/", async (req, res) => {
     if (page > 1) baseParams.append("page", page);
     const baseQuery = baseParams.toString();
     const params = new URLSearchParams(baseQuery);
-    if (sortField !== "Product name") params.append("sort", sortField);
-    if (req.query.order) params.append("order", req.query.order);
     const queryString = params.toString();
 
     res.render("coupang.ejs", {
@@ -143,8 +138,6 @@ router.get("/", async (req, res) => {
       추가쿼리: queryString ? `&${queryString}` : "",
       기본쿼리: baseQuery,
       페이지크기: limit,
-      sortField,
-      sortOrder,
       shortageOnly,
       reorderCount,
     });
@@ -227,9 +220,6 @@ router.get("/search", async (req, res) => {
       conditions.push({ "Product name": brandRegex });
     }
 
-    const sortField =
-      DEFAULT_COLUMNS.includes(req.query.sort) ? req.query.sort : "Product name";
-    const sortOrder = req.query.order === "desc" ? -1 : 1;
     const shortageOnly = req.query.shortage === "1";
 
     const query = conditions.length > 0 ? { $and: conditions } : {};
@@ -242,7 +232,7 @@ router.get("/search", async (req, res) => {
       db
         .collection("coupang")
         .find(query)
-        .sort({ [sortField]: sortOrder })
+        .sort({ "Product name": 1 })
         .skip(skip)
         .limit(limit)
         .toArray(),
@@ -280,8 +270,6 @@ router.get("/search", async (req, res) => {
     if (page > 1) baseParams.append("page", page);
     const baseQuery = baseParams.toString();
     const params = new URLSearchParams(baseQuery);
-    if (sortField !== "Product name") params.append("sort", sortField);
-    if (req.query.order) params.append("order", req.query.order);
     const queryString = params.toString();
 
     res.render("coupang.ejs", {
@@ -299,8 +287,6 @@ router.get("/search", async (req, res) => {
       추가쿼리: queryString ? `&${queryString}` : "",
       기본쿼리: baseQuery,
       페이지크기: limit,
-      sortField,
-      sortOrder,
       shortageOnly,
       reorderCount,
     });
