@@ -18,6 +18,8 @@ router.use("/coupang-add", require("./coupangAddApi"));
 router.use("/coupang-open", require("./coupangOpenApi"));
 // 날씨 API
 router.use("/weather", require("./weatherApi"));
+// 광고 성과 API
+router.use("/analytics", require("./analytics"));
 
 // TODO: 다른 API 라우터 추가 시 아래와 같이 등록
 // router.use("/user", require("./userApi"));

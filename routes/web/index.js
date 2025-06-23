@@ -14,6 +14,7 @@ const protectedRoutes = new Set([
   'coupangAdd',
   'post',
   'profile',
+  'analytics',
 ]);
 
 fs.readdirSync(routesDir)
