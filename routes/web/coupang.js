@@ -72,17 +72,26 @@ router.get("/", async (req, res) => {
   const skip = (page - 1) * limit;
   const keyword = "";
   const brand = req.query.brand || "";
+  const sortField =
+    DEFAULT_COLUMNS.includes(req.query.sort) ? req.query.sort : "Product name";
+  const sortOrder = req.query.order === "desc" ? -1 : 1;
+  const shortageOnly = req.query.shortage === "1";
   try {
     const query = brand ? { "Product name": new RegExp(brand, "i") } : {};
-    const [rows, total] = await Promise.all([
+    if (shortageOnly) query["Shortage quantity"] = { $gt: 0 };
+    const [rows, total, reorderCount] = await Promise.all([
       db
         .collection("coupang")
         .find(query)
-        .sort({ "Product name": 1 })
+        .sort({ [sortField]: sortOrder })
         .skip(skip)
         .limit(limit)
         .toArray(),
       db.collection("coupang").countDocuments(query),
+      db.collection("coupang").countDocuments({
+        ...(brand ? { "Product name": new RegExp(brand, "i") } : {}),
+        "Shortage quantity": { $gt: 0 },
+      }),
     ]);
     let result = rows.map((row) => {
       const newRow = { ...row };
@@ -111,6 +120,9 @@ router.get("/", async (req, res) => {
     if (brand) params.append("brand", brand);
     if (selected && selected.length > 0)
       selected.forEach((f) => params.append("fields", f));
+    if (shortageOnly) params.append("shortage", "1");
+    if (sortField !== "Product name") params.append("sort", sortField);
+    if (req.query.order) params.append("order", req.query.order);
     const queryString = params.toString();
 
     res.render("coupang.ejs", {
@@ -127,6 +139,10 @@ router.get("/", async (req, res) => {
       전체건수: totalCount,
       추가쿼리: queryString ? `&${queryString}` : "",
       페이지크기: limit,
+      sortField,
+      sortOrder,
+      shortageOnly,
+      reorderCount,
     });
   } catch (err) {
     console.error("GET /coupang 오류:", err);
@@ -207,16 +223,27 @@ router.get("/search", async (req, res) => {
       conditions.push({ "Product name": brandRegex });
     }
 
+    const sortField =
+      DEFAULT_COLUMNS.includes(req.query.sort) ? req.query.sort : "Product name";
+    const sortOrder = req.query.order === "desc" ? -1 : 1;
+    const shortageOnly = req.query.shortage === "1";
+
     const query = conditions.length > 0 ? { $and: conditions } : {};
-    const [rows, total] = await Promise.all([
+    if (shortageOnly) query["Shortage quantity"] = { $gt: 0 };
+
+    const reorderQuery = conditions.length > 0 ? { $and: conditions } : {};
+    reorderQuery["Shortage quantity"] = { $gt: 0 };
+
+    const [rows, total, reorderCount] = await Promise.all([
       db
         .collection("coupang")
         .find(query)
-        .sort({ "Product name": 1 })
+        .sort({ [sortField]: sortOrder })
         .skip(skip)
         .limit(limit)
         .toArray(),
       db.collection("coupang").countDocuments(query),
+      db.collection("coupang").countDocuments(reorderQuery),
     ]);
     let result = rows.map((row) => {
       const newRow = { ...row };
@@ -245,6 +272,9 @@ router.get("/search", async (req, res) => {
     if (brand) params.append("brand", brand);
     if (selected && selected.length > 0)
       selected.forEach((f) => params.append("fields", f));
+    if (shortageOnly) params.append("shortage", "1");
+    if (sortField !== "Product name") params.append("sort", sortField);
+    if (req.query.order) params.append("order", req.query.order);
     const queryString = params.toString();
 
     res.render("coupang.ejs", {
@@ -261,6 +291,10 @@ router.get("/search", async (req, res) => {
       전체건수: totalCount,
       추가쿼리: queryString ? `&${queryString}` : "",
       페이지크기: limit,
+      sortField,
+      sortOrder,
+      shortageOnly,
+      reorderCount,
     });
   } catch (err) {
     console.error("GET /coupang/search 오류:", err);
