@@ -18,6 +18,7 @@ This project requires several environment variables to run:
 - `CP_SECRET_KEY` – Coupang Open API secret key
 - `CP_VENDOR_ID` – Vendor ID issued by Coupang
 - `CP_API_HOST` – Base URL for the Coupang Open API (optional)
+- `CP_RG_AUTH_TOKEN` – Token for RocketGross API calls (enable the feature in WING first)
 
 
 Copy `.env.example` to `.env` in the project root and define these values before starting the server. Make sure the file is saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
@@ -68,6 +69,23 @@ const getProduct = async (id) => {
 };
 
 getProduct('1234');
+```
+
+## RocketGross product creation
+
+Enable the **RocketGross** API in WING and copy the issued token to
+`CP_RG_AUTH_TOKEN`.
+Then you can register a product through `/api/coupang-open/product/create`:
+
+```js
+const axios = require('axios');
+
+const createProduct = async (body) => {
+  const { data } = await axios.post('http://localhost:3000/api/coupang-open/product/create', body);
+  console.log(data);
+};
+
+createProduct({ name: 'Sample' });
 ```
 
 =======
