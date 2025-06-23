@@ -24,10 +24,11 @@
       <select name="brand" class="form-select me-2" style="max-width: 150px;">
         <option value="">전체 브랜드</option>
         <option value="트라이" <%= brand === '트라이' ? 'selected' : '' %>>트라이</option>
+        <option value="좋은사람들" <%= brand === '좋은사람들' ? 'selected' : '' %>>좋은사람들</option>
         <option value="BYC" <%= brand === 'BYC' ? 'selected' : '' %>>BYC</option>
         <option value="비비안" <%= brand === '비비안' ? 'selected' : '' %>>비비안</option>
       </select>
-      <button class="btn btn-outline-primary">검색</button>
+      <button class="btn btn-outline-primary search-send">검색</button>
     </form>
 
     <table class="table table-bordered table-hover text-center">
