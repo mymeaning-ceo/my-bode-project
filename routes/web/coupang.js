@@ -24,10 +24,7 @@ const 한글 = {
   "Sales amount on the last 30 days": "30일 판매금액",
   "Sales in the last 30 days": "30일 판매량",
   "Shortage quantity": "부족재고량",
-  노출수: "노출수",
-  클릭수: "클릭수",
-  광고비: "광고비",
-  클릭률: "클릭률",
+  // 광고 지표 컬럼 제거
 };
 
 const DEFAULT_COLUMNS = [
@@ -38,10 +35,6 @@ const DEFAULT_COLUMNS = [
   "Sales amount on the last 30 days",
   "Sales in the last 30 days",
   "Shortage quantity",
-  "노출수",
-  "클릭수",
-  "광고비",
-  "클릭률",
 ];
 
 const IMPORT_COLUMNS = DEFAULT_COLUMNS.filter(
@@ -52,10 +45,6 @@ const NUMERIC_COLUMNS = [
   "Sales amount on the last 30 days",
   "Sales in the last 30 days",
   "Shortage quantity",
-  "노출수",
-  "클릭수",
-  "광고비",
-  "클릭률",
 ];
 
 function addShortage(items) {
@@ -70,38 +59,9 @@ function addShortage(items) {
   });
 }
 
-const AD_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-let cachedAds = null;
-let cachedAdsFetched = 0;
-
-async function getAds(db) {
-  const now = Date.now();
-  if (!cachedAds || now - cachedAdsFetched > AD_CACHE_DURATION) {
-    cachedAds = await db.collection("coupangAdd").find().toArray();
-    cachedAdsFetched = now;
-  }
-  return cachedAds;
-}
-
+// 광고 지표는 더 이상 사용하지 않으므로 빈 함수로 남겨둔다
 async function attachAdData(items, db) {
-  const ads = await getAds(db);
-  const adMap = {};
-  ads.forEach((ad) => {
-    const key = String(ad["광고집행 옵션ID"]);
-    if (!key) return;
-    const current = adMap[key];
-    if (!current || (ad.날짜 && (!current.날짜 || ad.날짜 > current.날짜))) {
-      adMap[key] = ad;
-    }
-  });
-  return items.map((item) => {
-    const ad = adMap[String(item["Option ID"])] || {};
-    item["노출수"] = ad["노출수"] || 0;
-    item["클릭수"] = ad["클릭수"] || 0;
-    item["광고비"] = ad["광고비"] || 0;
-    item["클릭률"] = ad["클릭률"] || "0.00";
-    return item;
-  });
+  return items;
 }
 
 // ✅ 목록 조회
