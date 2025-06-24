@@ -117,7 +117,7 @@ async function initApp() {
   // 8. 기본 경로 처리
   // 루트에서는 대시보드로 리다이렉트하여 바로 서비스를 이용할 수 있도록 함
   app.get("/", (req, res) => {
-    res.redirect(302, "/stock");
+    res.render("index.ejs");
   });
   app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
