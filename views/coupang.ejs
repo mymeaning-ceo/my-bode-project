@@ -93,9 +93,6 @@
                     class="text-decoration-none text-dark"
                   >
                     <%= 한글?.[key] || key %>
-                    <% if (sortField === key) { %>
-                      <%= sortOrder === 1 ? '▲' : '▼' %>
-                    <% } %>
                   </a>
                 </th>
               <% }) %>
