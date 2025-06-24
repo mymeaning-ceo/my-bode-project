@@ -1,7 +1,18 @@
 $(function () {
   if (!$('#coupangTable').length) return;
 
+  // ─────────────────────────────────────────
+  // 헤더 선택 저장/복원
+  // ─────────────────────────────────────────
+  const storedFields = JSON.parse(localStorage.getItem('coupangFields') || '[]');
   const url = new URL(window.location.href);
+  const currentFields = url.searchParams.getAll('fields');
+  if (storedFields.length > 0 && currentFields.length === 0) {
+    storedFields.forEach((f) => url.searchParams.append('fields', f));
+    window.location.replace(url.toString());
+    return;
+  }
+
   const showReorderOnly = url.searchParams.get('shortage') === '1';
 
   // ✅ DataTable 초기화
@@ -100,18 +111,34 @@ $(function () {
   $('#uploadForm').on('submit', function (e) {
     e.preventDefault();
     const formData = new FormData(this);
+    $('#uploadProgress').removeClass('d-none');
+    $('#uploadProgress .progress-bar').css('width', '0%').text('0%');
     $.ajax({
       url: '/coupang/upload',
       type: 'POST',
       data: formData,
       processData: false,
       contentType: false,
+      xhr: function () {
+        const xhr = new window.XMLHttpRequest();
+        xhr.upload.addEventListener('progress', function (evt) {
+          if (evt.lengthComputable) {
+            const percent = Math.round((evt.loaded / evt.total) * 100);
+            $('#uploadProgress .progress-bar')
+              .css('width', percent + '%')
+              .text(percent + '%');
+          }
+        });
+        return xhr;
+      },
       success: function () {
+        $('#uploadProgress .progress-bar').text('100%');
         alert('업로드 성공!');
         window.location.reload();
       },
       error: function (xhr) {
         alert('업로드 실패: ' + xhr.responseText);
+        $('#uploadProgress').addClass('d-none');
       }
     });
   });
@@ -132,4 +159,32 @@ $(function () {
       }
     });
   });
+
+  // ─────────────────────────────────────────
+  // 헤더 선택 이벤트
+  // ─────────────────────────────────────────
+  if ($('#headerSelectForm').length) {
+    if (storedFields.length > 0) {
+      $('#headerSelectForm input[name="fields"]').each(function () {
+        $(this).prop('checked', storedFields.includes($(this).val()));
+      });
+    }
+
+    $('#btn-select-all').on('click', function () {
+      $('#headerSelectForm input[name="fields"]').prop('checked', true);
+    });
+
+    $('#btn-deselect-all').on('click', function () {
+      $('#headerSelectForm input[name="fields"]').prop('checked', false);
+    });
+
+    $('#headerSelectForm').on('submit', function () {
+      const selected = $('#headerSelectForm input[name="fields"]:checked')
+        .map(function () {
+          return $(this).val();
+        })
+        .get();
+      localStorage.setItem('coupangFields', JSON.stringify(selected));
+    });
+  }
 });

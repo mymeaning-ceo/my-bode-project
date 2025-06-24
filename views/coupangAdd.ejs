@@ -75,14 +75,19 @@
       </div>
     <% } %>
 
-    <div class="action-form mb-4 d-flex gap-2 flex-wrap">
-      <form id="uploadForm" action="/coupang/add/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
-        <input type="file" name="excelFile" accept=".xlsx, .xls" class="form-control" required>
-        <button type="submit" class="btn btn-success btn-upload">엑셀 업로드</button>
-      </form>
-      <form id="resetForm" action="/coupang/add/delete-all" method="POST">
-        <button type="submit" class="btn btn-danger btn-reset">데이터 초기화</button>
-      </form>
+    <div class="action-form mb-4 d-flex flex-column gap-2 flex-wrap">
+      <div class="d-flex gap-2 flex-nowrap">
+        <form id="uploadForm" action="/coupang/add/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
+          <input type="file" name="excelFile" accept=".xlsx, .xls" class="form-control" required>
+          <button type="submit" class="btn btn-success btn-upload">엑셀 업로드</button>
+        </form>
+        <form id="resetForm" action="/coupang/add/delete-all" method="POST">
+          <button type="submit" class="btn btn-danger btn-reset">데이터 초기화</button>
+        </form>
+      </div>
+      <div id="uploadProgress" class="progress d-none" style="height: 20px;">
+        <div class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+      </div>
     </div>
 
 

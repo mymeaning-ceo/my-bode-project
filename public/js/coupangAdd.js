@@ -46,20 +46,35 @@ $(function () {
 
   $('#uploadForm').on('submit', function (e) {
     e.preventDefault();
-    alert('업로드 중입니다. 잠시만 기다려주세요.');
     const formData = new FormData(this);
+    $('#uploadProgress').removeClass('d-none');
+    $('#uploadProgress .progress-bar').css('width', '0%').text('0%');
     $.ajax({
       url: '/coupang/add/upload',
       type: 'POST',
       data: formData,
       processData: false,
       contentType: false,
+      xhr: function () {
+        const xhr = new window.XMLHttpRequest();
+        xhr.upload.addEventListener('progress', function (evt) {
+          if (evt.lengthComputable) {
+            const percent = Math.round((evt.loaded / evt.total) * 100);
+            $('#uploadProgress .progress-bar')
+              .css('width', percent + '%')
+              .text(percent + '%');
+          }
+        });
+        return xhr;
+      },
       success: () => {
+        $('#uploadProgress .progress-bar').text('100%');
         alert('업로드 성공!');
         table.ajax.reload(null, false);
       },
       error: (xhr) => {
         alert('업로드 실패: ' + xhr.responseText);
+        $('#uploadProgress').addClass('d-none');
       }
     });
   });
