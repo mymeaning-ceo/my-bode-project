@@ -112,13 +112,13 @@
                 <td class="text-center"><%= index + 1 + 페이지크기 * (현재페이지 - 1) %></td>
                 <% 필드.forEach(key => { %>
                   <% if (key === 'Option ID') { %>
-                    <td class="text-center"><%= 행[key] %></td>
+                    <td class="text-center text-primary"><%= 행[key] %></td>
                   <% } else {
                        const val = 행[key];
                        const numVal = Number(val);
                        const isNum = !isNaN(numVal) && val !== '-' && val !== '';
                   %>
-                    <td class="text-center<%= key === 'Shortage quantity' && shortage > 0 ? ' low-stock' : '' %>"<% if (isNum) { %> data-order="<%= numVal %>"<% } %>>
+                    <td class="text-center<%= key === 'Shortage quantity' && shortage > 0 ? ' low-stock' : '' %><%= key === 'Product name' ? ' text-success text-start' : '' %>"<% if (isNum) { %> data-order="<%= numVal %>"<% } %>>
                       <%= isNum ? (numVal === 0 ? '-' : numVal.toLocaleString('ko-KR')) : val %>
                     </td>
                   <% } %>
