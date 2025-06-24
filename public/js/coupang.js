@@ -99,4 +99,41 @@ $(function () {
       $('.search-send').click();
     }
   });
+
+  // ✅ 엑셀 업로드 (AJAX)
+  $('#uploadForm').on('submit', function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    $.ajax({
+      url: '/coupang/upload',
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function () {
+        alert('업로드 성공!');
+        window.location.reload();
+      },
+      error: function (xhr) {
+        alert('업로드 실패: ' + xhr.responseText);
+      }
+    });
+  });
+
+  // ✅ 데이터 초기화
+  $('#resetForm').on('submit', function (e) {
+    e.preventDefault();
+    if (!confirm('정말 모든 데이터를 삭제하시겠습니까?')) return;
+    $.ajax({
+      url: '/coupang/delete-all',
+      type: 'POST',
+      success: function () {
+        alert('데이터가 초기화되었습니다.');
+        window.location.reload();
+      },
+      error: function (xhr) {
+        alert('삭제 실패: ' + xhr.responseText);
+      }
+    });
+  });
 });

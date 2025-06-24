@@ -28,11 +28,11 @@
 
     <!-- 파일 업로드 + 초기화 -->
     <div class="action-form mb-4 d-flex gap-2 flex-wrap">
-      <form action="/coupang/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
+      <form id="uploadForm" action="/coupang/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
         <input type="file" name="excelFile" accept=".xlsx, .xls" class="form-control" required>
         <button type="submit" class="btn btn-success btn-upload">엑셀 업로드</button>
       </form>
-      <form action="/coupang/delete-all" method="POST" onsubmit="return confirm('정말 모든 데이터를 삭제하시겠습니까?')">
+      <form id="resetForm" action="/coupang/delete-all" method="POST">
         <button type="submit" class="btn btn-danger btn-reset">데이터 초기화</button>
       </form>
     </div>
