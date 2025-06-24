@@ -279,29 +279,6 @@ td:nth-child(3) {
   font-size: 2.5rem;
 }
 
-/* Simple table style for summary page */
-.simple-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.simple-table th,
-.simple-table td {
-  border: 1px solid #dee2e6;
-  padding: 0.5rem;
-}
-
-.simple-table th {
-  background-color: #f8f9fa;
-}
-
-.simple-table tbody tr:nth-child(even) {
-  background-color: #fafafa;
-}
-
-.simple-table tbody tr:hover {
-  background-color: #f1f1f1;
-}
 
 /* Remove stripe color from first row */
 .table-striped > tbody > tr:first-child {

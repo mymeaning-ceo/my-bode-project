@@ -5,7 +5,7 @@ $(function () {
   const showReorderOnly = url.searchParams.get('shortage') === '1';
 
   // ✅ DataTable 초기화
-  const table = $('#coupangTable').DataTable({
+  const table = createDataTable('#coupangTable', {
     ordering: true,
     columnDefs: [
       { targets: '_all', className: 'text-center' },
@@ -13,17 +13,10 @@ $(function () {
       { targets: 1, className: 'text-start' },
       { targets: 2, className: 'text-start' }
     ],
-    lengthChange: false,
     paging: false,
     searching: false,
     info: false,
-    responsive: true,
-    language: {
-      paginate: { previous: '이전', next: '다음' },
-      info: '총 _TOTAL_건 중 _START_ ~ _END_',
-      infoEmpty: '데이터가 없습니다',
-      emptyTable: '📭 재고가 없습니다.'
-    }
+    language: { emptyTable: '📭 재고가 없습니다.' }
   });
 
   // ✅ 입고필요 필터 버튼
