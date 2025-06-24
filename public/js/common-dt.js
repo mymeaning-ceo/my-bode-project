@@ -5,6 +5,7 @@ function createDataTable(selector, opts = {}) {
         lengthChange: false,
         pagingType: 'simple_numbers',
         responsive: true,
+        fixedHeader: true,
         language: {
           paginate: { previous: '이전', next: '다음' },
           info: '총 _TOTAL_건 중 _START_ ~ _END_',
