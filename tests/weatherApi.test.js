@@ -12,6 +12,25 @@ jest.mock('../config/db', () => {
 jest.mock('node-fetch');
 const mockFetch = require('node-fetch');
 
+// Mock child_process.spawn to emulate Python script
+jest.mock('child_process', () => {
+  const EventEmitter = require('events');
+  return {
+    spawn: jest.fn(() => {
+      const proc = new EventEmitter();
+      proc.stdout = new EventEmitter();
+      proc.stderr = new EventEmitter();
+      proc.kill = jest.fn();
+      proc.killed = false;
+      process.nextTick(() => {
+        proc.stdout.emit('data', Buffer.from('[{"time":"2024-01-01","tavg":1}]'));
+        proc.emit('close', 0);
+      });
+      return proc;
+    }),
+  };
+});
+
 const request = require('supertest');
 const { initApp } = require('../server');
 const { closeDB } = require('../config/db');
@@ -57,4 +76,12 @@ test('GET /api/weather/daily returns parsed weather data', async () => {
     sky: '1',
     precipitationType: '0',
   });
+});
+
+test('GET /api/weather/meteostat returns python weather data', async () => {
+  const res = await request(app).get('/api/weather/meteostat');
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual([
+    { time: '2024-01-01', tavg: 1 }
+  ]);
 });
