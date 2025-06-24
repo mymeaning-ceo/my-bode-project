@@ -17,6 +17,8 @@ $(function () {
     order: [[0, 'asc']],
     columnDefs: [
       { targets: '_all', className: 'text-center' },
+      { targets: 1, className: 'text-primary' },
+      { targets: 2, className: 'text-success text-start' },
       { targets: [3, 4, 5], render: $.fn.dataTable.render.number(',', '.', 0) },
       { targets: 6, render: (data) => parseFloat(data).toFixed(2) },
     ],

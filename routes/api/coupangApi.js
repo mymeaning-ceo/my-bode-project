@@ -9,13 +9,29 @@ const uploadsDir = path.join(__dirname, "../../uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 const upload = multer({ dest: uploadsDir });
 
+const DEFAULT_COLUMNS = [
+  "Option ID",
+  "Product name",
+  "Option name",
+  "Offer condition",
+  "Orderable quantity (real-time)",
+  "Sales amount on the last 30 days",
+  "Sales in the last 30 days",
+  "Shortage quantity",
+];
+
 router.post("/upload", upload.single("excelFile"), async (req, res) => {
   const db = req.app.locals.db;
   try {
     if (!req.file)
       return res.status(400).json({ status: "error", message: "파일이 없습니다." });
     const filePath = req.file.path;
-    const data = parseCoupangExcel(filePath);
+    const data = parseCoupangExcel(filePath).map((item) =>
+      DEFAULT_COLUMNS.reduce((acc, col) => {
+        acc[col] = item[col] ?? "";
+        return acc;
+      }, {})
+    );
     const bulkOps = data.map((item) => ({
       updateOne: {
         filter: { "Option ID": item["Option ID"] },

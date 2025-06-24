@@ -49,6 +49,14 @@ const NUMERIC_COLUMNS = [
   "Shortage quantity",
 ];
 
+function normalizeItemFields(item) {
+  const normalized = { ...item };
+  DEFAULT_COLUMNS.forEach((col) => {
+    if (!(col in normalized)) normalized[col] = "";
+  });
+  return normalized;
+}
+
 function addShortage(items) {
   return items.map((item) => {
     const condition = String(item["Offer condition"] || "").trim().toUpperCase();
@@ -101,7 +109,7 @@ router.get("/", async (req, res) => {
       }),
     ]);
     let result = rows.map((row) => {
-      const newRow = { ...row };
+      const newRow = normalizeItemFields({ ...row });
       if (typeof newRow["Option ID"] === "number") {
         newRow["Option ID"] = String(newRow["Option ID"]);
       }
@@ -171,7 +179,9 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
     }
 
     const filePath = req.file.path;
-    const data = parseCoupangExcel(filePath);
+    const data = parseCoupangExcel(filePath).map((item) =>
+      normalizeItemFields(item)
+    );
 
     const bulkOps = data.map((item) => ({
       updateOne: {
@@ -257,7 +267,7 @@ router.get("/search", async (req, res) => {
       db.collection("coupang").countDocuments(reorderQuery),
     ]);
     let result = rows.map((row) => {
-      const newRow = { ...row };
+      const newRow = normalizeItemFields({ ...row });
       if (typeof newRow["Option ID"] === "number")
         newRow["Option ID"] = String(newRow["Option ID"]);
       NUMERIC_COLUMNS.forEach((col) => {

@@ -8,7 +8,9 @@ $(function () {
   const table = $('#coupangTable').DataTable({
     ordering: true,
     columnDefs: [
-      { targets: '_all', className: 'text-center' }
+      { targets: '_all', className: 'text-center' },
+      { targets: 1, className: 'text-primary' },
+      { targets: 2, className: 'text-success text-start' }
     ],
     lengthChange: false,
     paging: false,
