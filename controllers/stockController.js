@@ -24,7 +24,10 @@ exports.getStockData = asyncHandler(async (req, res) => {
   const start  = parseInt(req.query.start, 10) || 0;
   const length = parseInt(req.query.length, 10) || 50;
   const draw   = parseInt(req.query.draw, 10) || 1;
-  const searchVal = req.query.search ? req.query.search.value : '';
+  // DataTables 기본 파서(querystring)는 search[value] 형태로 전달됨
+  const searchVal = req.query['search[value]'] ||
+                    (req.query.search && req.query.search.value) ||
+                    '';
 
   const query = searchVal
     ? {
