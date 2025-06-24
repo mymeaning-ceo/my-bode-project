@@ -12,6 +12,24 @@ const storage = multer.diskStorage({
 });
 exports.upload = multer({ storage }).single('excelFile');
 
+const DEFAULT_COLUMNS = [
+  '날짜',
+  '광고집행 옵션ID',
+  '광고집행 상품명',
+  '노출수',
+  '클릭수',
+  '광고비',
+  '클릭률',
+];
+
+function normalizeItemFields(item) {
+  const normalized = { ...item };
+  DEFAULT_COLUMNS.forEach((col) => {
+    if (!(col in normalized)) normalized[col] = '';
+  });
+  return normalized;
+}
+
 // 상품명 정규화 (쉼표 기준 앞부분만)
 function normalizeProductName(fullName = '') {
   const idx = fullName.indexOf(',');
@@ -196,11 +214,13 @@ exports.getData = asyncHandler(async (req, res) => {
       .toArray(),
   ]);
 
+  const normalizedRows = rows.map((r) => normalizeItemFields(r));
+
   res.json({
     draw,
     recordsTotal: total,
     recordsFiltered,
-    data: rows,
+    data: normalizedRows,
   });
 });
 
@@ -221,7 +241,7 @@ exports.uploadExcel = asyncHandler(async (req, res) => {
         row[f] = f === '클릭률' ? Number(num.toFixed(2)) : num;
       }
     });
-    return row;
+    return normalizeItemFields(row);
   });
 
   const db = req.app.locals.db;
@@ -250,7 +270,7 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
         row[f] = f === '클릭률' ? Number(num.toFixed(2)) : num;
       }
     });
-    return row;
+    return normalizeItemFields(row);
   });
 
   const db = req.app.locals.db;

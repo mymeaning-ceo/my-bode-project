@@ -112,7 +112,7 @@
                 <td class="text-center"><%= index + 1 + 페이지크기 * (현재페이지 - 1) %></td>
                 <% 필드.forEach(key => { %>
                   <% if (key === 'Option ID') { %>
-                    <td class="text-center"><%= 행[key] %></td>
+                    <td class="text-center text-primary"><%= 행[key] %></td>
                   <% } else {
                        const val = 행[key];
                        const numVal = Number(val);
