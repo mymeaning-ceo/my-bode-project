@@ -207,8 +207,9 @@ table.auto-width {
 
 
 /* 재고 수량 색상 */
+
 .low-stock {
-  color: #d8000c;
+  color: #842029;
   font-weight: bold;
 }
 
@@ -305,4 +306,19 @@ td:nth-child(3) {
 /* Remove stripe color from first row */
 .table-striped > tbody > tr:first-child {
   background-color: transparent;
+}
+
+/* Stock search form styling */
+.stock-search .form-control,
+.stock-search .btn {
+  height: calc(1.5em + 0.75rem + 2px);
+}
+
+.stock-search .btn {
+  white-space: nowrap;
+}
+
+/* Low stock row highlight */
+.table-danger .low-stock {
+  color: #842029;
 }

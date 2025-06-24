@@ -83,6 +83,11 @@ $(document).ready(function () {
       { data: "uploadedBy" },
       { data: "createdAt" },
     ],
+    createdRow: function (row, data) {
+      if (data.qty < 10) {
+        $(row).addClass("table-danger");
+      }
+    },
   });
 
   // 검색 버튼
