@@ -115,13 +115,11 @@
             <tr>
               <th>번호</th>
               <% 필드.forEach((key) => { %>
-                <th>
-                  <a
-                    href="?<%= 기본쿼리 %><%= 기본쿼리 ? '&' : '' %>sort=<%= key %>&order=<%= sortField === key && sortOrder === 1 ? 'desc' : 'asc' %>"
-                    class="text-decoration-none text-dark"
-                  >
-                    <%= 한글?.[key] || key %>
-                  </a>
+                <th class="sortable" data-field="<%= key %>">
+                  <span><%= 한글?.[key] || key %></span>
+                  <% if (sortField === key) { %>
+                    <span class="sort-indicator"><%= sortOrder === 1 ? '▲' : '▼' %></span>
+                  <% } %>
                 </th>
               <% }) %>
             </tr>
