@@ -239,6 +239,7 @@ td:nth-child(3) {
   left: 0;
   background: var(--bs-table-bg, #fff);
   z-index: 2;
+  color: #000;
 }
 
 /* Mobile navigation customizations */
