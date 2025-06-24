@@ -4,16 +4,13 @@ $(function () {
   let table;
 
   if ($table.length && mode === 'detail') {
-    table = $table.DataTable({
+    table = createDataTable('#coupangAddTable', {
     serverSide: true,
     processing: true,
     paging: true,
-    pagingType: 'simple_numbers',
     searching: false,
     info: true,
     pageLength: 50,
-    lengthChange: false,
-    responsive: true,
     order: [[0, 'asc']],
     columnDefs: [
       { targets: '_all', className: 'text-center' },
@@ -44,12 +41,7 @@ $(function () {
       { data: '클릭수' },
       { data: '광고비' },
       { data: '클릭률' },
-    ],
-    language: {
-      paginate: { previous: '이전', next: '다음' },
-      info: '총 _TOTAL_건 중 _START_ ~ _END_',
-      infoEmpty: '데이터가 없습니다'
-    }
+    ]
   });
 
   $('#uploadForm').on('submit', function (e) {
