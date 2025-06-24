@@ -306,15 +306,16 @@ td:nth-child(3) {
   color: #b94a48;
 }
 
-/* Stock table subtle shadow and rounded corners */
-#stockTable {
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
-  border-collapse: separate;
-}
-
-#stockTable th,
-#stockTable td {
-  padding: 0.75rem 1rem;
-}
+/* Stock table  */
+<table id="stockTable">
+  <colgroup>
+    <col style="width: 5%">   <!-- # -->
+    <col style="width: 10%">  <!-- 품번 -->
+    <col style="width: 20%">  <!-- 품명 -->
+    <col style="width: 8%">   <!-- 색상 -->
+    <col style="width: 8%">   <!-- 사이즈 -->
+    <col style="width: 8%">   <!-- 수량 -->
+    <col style="width: 10%">  <!-- 할당 -->
+    <col style="width: 12%">  <!-- 업로드 사용자 -->
+    <col style="width: 19%">  <!-- 업로드 시각 -->
+  </colgroup>
