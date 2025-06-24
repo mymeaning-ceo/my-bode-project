@@ -118,7 +118,7 @@
                        const numVal = Number(val);
                        const isNum = !isNaN(numVal) && val !== '-' && val !== '';
                   %>
-                    <td class="text-center<%= key === 'Shortage quantity' && shortage > 0 ? ' low-stock' : '' %><%= key === 'Product name' ? ' text-success text-start' : '' %>"<% if (isNum) { %> data-order="<%= numVal %>"<% } %>>
+                    <td class="text-center<%= key === 'Shortage quantity' && shortage > 0 ? ' low-stock' : '' %><%= key === 'Product name' ? ' text-primary' : '' %><%= key === 'Option name' ? ' text-success' : '' %>"<% if (isNum) { %> data-order="<%= numVal %>"<% } %>>
                       <%= isNum ? (numVal === 0 ? '-' : numVal.toLocaleString('ko-KR')) : val %>
                     </td>
                   <% } %>
