@@ -3,113 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>내의미 - 게시글 목록</title>
+  <title>게시글 목록</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/main.css">
-  <style>
-    .card-title a {
-      display: inline-block;
-      max-width: 80%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .card-text-ellipsis {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  </style>
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.bootstrap5.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="bg-light">
-
   <%- include('../nav.ejs') %>
 
-  <!-- 검색창 -->
-<div class="container my-4">
-  <div class="input-group">
-    <input type="text" class="form-control search" placeholder="제목 또는 내용 검색" value="<%= 검색어 || '' %>">
-    <button class="btn btn-outline-secondary search-send" type="button">검색</button>
-  </div>
-</div>
-
-<!-- 글쓰기 버튼 -->
-<div class="container mb-3 text-end">
-  <a href="/write" class="btn btn-primary">글 작성</a>
-</div>
-
-<!-- 게시글 목록 -->
-<div class="container">
-  <% if (글목록.length === 0) { %>
-    <p class="text-center text-muted">등록된 게시글이 없습니다.</p>
-  <% } %>
-
-  <% 글목록.forEach(function(item) { %>
-    <div class="card mb-3 shadow-sm">
-      <% if (item.img) { %>
-        <img src="<%= item.img %>" class="card-img-top" alt="썸네일" style="width: 100%; height: 200px; object-fit: cover;">
-      <% } %>
-      <div class="card-body">
-        <h5 class="card-title mb-2">
-          <a href="/post/detail/<%= item._id %>" class="text-decoration-none"><%= item.title %></a>
-          <% if (유저 && String(유저._id) === String(item.user)) { %>
-            <a href="/post/edit/<%= item._id %>" class="action-icon text-secondary" title="수정">✏️</a>
-            <a href="#" class="action-icon text-danger delete" data-id="<%= item._id %>" title="삭제">🗑️</a>
-          <% } %>
-        </h5>
-        <p class="card-text text-muted mb-0" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= item.content %></p>
-        <small class="text-muted">작성자: <%= item.username %> | 작성일: <%= item.createdAtFormatted %></small>
-      </div>
+  <div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold">게시글 목록</h2>
+      <a href="/write" class="btn btn-primary">글 작성</a>
     </div>
-  <% }); %>
-</div>
-
-
-  <!-- 페이지네이션 -->
-  <div class="container text-center my-4">
-    <nav>
-      <ul class="pagination justify-content-center">
-        <% if (현재페이지 > 1) { %>
-          <li class="page-item"><a class="page-link" href="/list/<%= 현재페이지 - 1 %>">이전</a></li>
-        <% } %>
-        <% for (let i = 1; i <= 전체페이지; i++) { %>
-          <li class="page-item <%= i === 현재페이지 ? 'active' : '' %>">
-            <a class="page-link" href="/list/<%= i %>"><%= i %></a>
-          </li>
-        <% } %>
-        <% if (현재페이지 < 전체페이지) { %>
-          <li class="page-item"><a class="page-link" href="/list/<%= 현재페이지 + 1 %>">다음</a></li>
-        <% } %>
-      </ul>
-    </nav>
+    <table id="postTable" class="table table-striped table-bordered align-middle">
+      <thead>
+        <tr>
+          <th style="width:1%">#</th>
+          <th>제목</th>
+          <th>작성자</th>
+          <th>작성일</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% 글목록.forEach(function(item, idx){ %>
+          <tr>
+            <td class="text-center"><%= idx + 1 %></td>
+            <td class="text-start">
+              <a href="/post/detail/<%= item._id %>" class="text-decoration-none"><%= item.title %></a>
+              <% if (유저 && String(유저._id) === String(item.user)) { %>
+                <a href="/post/edit/<%= item._id %>" class="ms-1 text-secondary" title="수정">✏️</a>
+                <a href="#" class="ms-1 text-danger delete" data-id="<%= item._id %>" title="삭제">🗑️</a>
+              <% } %>
+            </td>
+            <td><%= item.username %></td>
+            <td><%= item.createdAtFormatted %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
   </div>
 
-  <!-- JS 스크립트 -->
-  <script>
-    document.querySelector('.search-send').addEventListener('click', function () {
-      const val = document.querySelector('.search').value.trim();
-      if (val === '') return alert('검색어를 입력해주세요');
-      location.href = '/search?val=' + encodeURIComponent(val);
-    });
-
-    document.querySelector('.search').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        document.querySelector('.search-send').click();
-      }
-    });
-
-    document.querySelectorAll('.delete').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const id = this.dataset.id;
-        if (confirm('정말 삭제하시겠습니까?')) {
-          fetch('/post/delete?docid=' + encodeURIComponent(id), { method: 'DELETE' })
-            .then(res => res.ok ? location.reload() : alert('삭제 실패'));
-        }
-      });
-    });
-  </script>
-
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+  <script src="/js/common-dt.js"></script>
+  <script src="/js/postList.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

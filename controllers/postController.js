@@ -5,10 +5,6 @@ const moment = require('moment');
 exports.listPosts = async (req, res) => {
   const db = req.app.locals.db;
   try {
-    const page = parseInt(req.params.page || '1');
-    const limit = 10;
-    const skip = (page - 1) * limit;
-
     const search = req.query.val;
     const query = search
       ? {
@@ -19,15 +15,10 @@ exports.listPosts = async (req, res) => {
         }
       : {};
 
-    const total = await db.collection('post').countDocuments(query);
-    const totalPage = Math.ceil(total / limit);
-
     const result = await db
       .collection('post')
       .find(query)
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
       .toArray();
 
     result.forEach((item) => {
@@ -37,8 +28,6 @@ exports.listPosts = async (req, res) => {
     res.render('post/list.ejs', {
       글목록: result,
       유저: req.user,
-      현재페이지: page,
-      전체페이지: totalPage,
       검색어: search || '',
     });
   } catch (e) {
