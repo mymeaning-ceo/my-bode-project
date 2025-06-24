@@ -105,6 +105,14 @@ The project exposes `/api/weather/daily` which fetches forecast data from the
 Korean Meteorological Administration using `WEATHER_API_KEY`. An accompanying
 `/weather` page displays the information via AJAX.
 
+Additionally `/api/weather/meteostat` runs a Python helper script using the
+[`meteostat`](https://github.com/meteostat/meteostat-python) library to return
+historical climate data. Example usage:
+
+```bash
+curl "http://localhost:3000/api/weather/meteostat?start=2024-01-01&end=2024-03-31"
+```
+
 
 Server-side requests use `node-fetch`, which is listed in `package.json`.
 =======

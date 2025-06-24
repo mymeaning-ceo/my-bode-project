@@ -1,5 +1,7 @@
 const fetch = require('node-fetch');
 const asyncHandler = require('../middlewares/asyncHandler');
+const { spawn } = require('child_process');
+const path = require('path');
 
 // Fetch daily weather from KMA API
 exports.getDailyWeather = asyncHandler(async (req, res) => {
@@ -43,5 +45,51 @@ exports.getDailyWeather = asyncHandler(async (req, res) => {
     temperature: findVal('T1H'),
     sky: findVal('SKY'),
     precipitationType: findVal('PTY'),
+  });
+});
+
+// Fetch historical weather using Meteostat via Python
+exports.getMeteostatWeather = asyncHandler(async (req, res) => {
+  const lat = req.query.lat || '37.5665';
+  const lon = req.query.lon || '126.9780';
+  const start = req.query.start || '2024-01-01';
+  const end = req.query.end || '2024-03-31';
+  const scriptPath = path.join(__dirname, '../scripts/meteostat_weather.py');
+
+  const py = spawn('python', ['-u', scriptPath, lat, lon, start, end], {
+    shell: true,
+    env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+  });
+
+  let output = '';
+  py.stdout.on('data', (d) => {
+    output += d.toString();
+  });
+  py.stderr.on('data', (d) => {
+    console.error(`\u26A0\uFE0F Python STDERR: ${d.toString()}`);
+  });
+
+  const timeout = setTimeout(() => {
+    if (!py.killed) {
+      py.kill('SIGTERM');
+      console.error('\u23F1\uFE0F Python execution timeout');
+      if (!res.headersSent) res.status(500).json({ error: 'Python timeout' });
+    }
+  }, 30000);
+
+  py.on('close', (code) => {
+    clearTimeout(timeout);
+    if (res.headersSent) return;
+    if (code === 0) {
+      try {
+        const data = JSON.parse(output || '[]');
+        res.json(data);
+      } catch (err) {
+        console.error('Invalid JSON from Python');
+        res.status(500).json({ error: 'Invalid JSON from Python' });
+      }
+    } else {
+      res.status(500).json({ error: 'Python process failed' });
+    }
   });
 });
