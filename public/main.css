@@ -237,7 +237,7 @@ th:nth-child(3),
 td:nth-child(3) {
   position: sticky;
   left: 0;
-  background: #fff;
+  background: var(--bs-table-bg, #fff);
   z-index: 2;
 }
 
