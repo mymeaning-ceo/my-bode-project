@@ -27,38 +27,56 @@
     <% } %>
 
     <!-- 파일 업로드 + 초기화 -->
-    <div class="action-form mb-4 d-flex flex-column gap-2 flex-wrap">
-      <div class="d-flex gap-2 flex-nowrap">
-        <form id="uploadForm" action="/coupang/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
+    <div class="action-form mb-4 d-flex flex-column align-items-start gap-2">
+      <div class="d-flex gap-2 flex-nowrap justify-content-start">
+        <form id="uploadForm" action="/coupang/add/upload" method="POST" enctype="multipart/form-data" class="d-flex gap-2 flex-nowrap">
           <input type="file" name="excelFile" accept=".xlsx, .xls" class="form-control" required>
           <button type="submit" class="btn btn-success btn-upload">엑셀 업로드</button>
         </form>
-        <form id="resetForm" action="/coupang/delete-all" method="POST">
+        <form id="resetForm" action="/coupang/add/delete-all" method="POST">
           <button type="submit" class="btn btn-danger btn-reset">데이터 초기화</button>
         </form>
       </div>
-      <div id="uploadProgress" class="progress d-none" style="height: 20px;">
+      <div id="uploadProgress" class="progress d-none" style="height: 20px; width: 100%;">
         <div class="progress-bar" role="progressbar" style="width: 0%">0%</div>
       </div>
     </div>
+    
+<!-- 검색 -->
+<div id="search-form" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <!-- 브랜드 선택 -->
+  <div style="flex: 0 0 160px;">
+    <select id="search-brand" name="brand" class="form-select w-100">
+      <option value="">전체 브랜드</option>
+      <% if (brandOptions) { brandOptions.forEach(b => { %>
+        <option value="<%= b %>" <%= b === brand ? 'selected' : '' %>><%= b %></option>
+      <% }) } %>
+    </select>
+  </div>
 
-    <!-- 검색 -->
-    <div id="search-form" class="row row-cols-auto g-2 mb-4">
-      <div class="col">
-        <select id="search-brand" class="form-select">
-          <option value="">전체 브랜드</option>
-          <% if (brandOptions) { brandOptions.forEach(b => { %>
-            <option value="<%= b %>" <%= b === brand ? 'selected' : '' %>><%= b %></option>
-          <% }) } %>
-        </select>
-      </div>
-      <div class="col flex-grow-1">
-        <input type="text" id="search-keyword" class="form-control" value="<%= keyword || '' %>" placeholder="상품명, 옵션명 또는 옵션ID 입력">
-      </div>
-      <div class="col">
-        <button class="btn btn-outline-primary search-send" type="button">검색</button>
-      </div>
-    </div>
+  <!-- 검색창 + 버튼 그룹 -->
+  <div class="d-flex align-items-center gap-2" style="flex: 0 0 320px;">
+    <input
+      type="text"
+      id="search-keyword"
+      class="form-control"
+      value="<%= keyword || '' %>"
+      placeholder="상품명 또는 옵션ID 검색"
+      style="flex: 1 1 auto;"
+    />
+    <button
+      type="button"
+      class="btn btn-outline-primary search-send"
+      style="white-space: nowrap; height: 38px;"
+    >
+      검색
+    </button>
+  </div>
+</div>
+
+
+
+
 
     <% if (전체필드 && 전체필드.length > 0) { %>
       <form id="headerSelectForm" action="/coupang" method="GET" class="mb-4">
