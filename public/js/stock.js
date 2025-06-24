@@ -1,17 +1,6 @@
 // public/js/stock.js
 
-function getStockIcon(qty) {
-  if (qty < 5) return "🔴";
-  else if (qty < 20) return "🟡";
-  return "🟢";
-}
-
-function getBrandBadge(code) {
-  if (typeof code === "string" && code.startsWith("TD")) {
-    return '<span class="badge badge-try">TRY</span>';
-  }
-  return "";
-}
+// 심플한 테이블 디자인을 위해 불필요한 장식 요소 제거
 
 $(document).ready(function () {
   // DataTable 초기화
@@ -38,7 +27,8 @@ $(document).ready(function () {
       {
         targets: 1,
         render: function (data) {
-          return data + " " + getBrandBadge(data);
+          // 품번 옆 배지를 제거하여 보다 깔끔한 출력
+          return data;
         },
       },
       {
@@ -47,7 +37,8 @@ $(document).ready(function () {
           $(td).addClass(cellData < 10 ? "low-stock" : "high-stock");
         },
         render: function (data) {
-          return getStockIcon(data) + " " + data;
+          // 이모지 대신 수량만 표시
+          return data;
         },
       },
       {

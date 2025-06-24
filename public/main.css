@@ -208,13 +208,11 @@ table.auto-width {
 
 /* 재고 수량 색상 */
 .low-stock {
-  background-color: #ffe5e5;
   color: #d8000c;
   font-weight: bold;
 }
 
 .high-stock {
-  background-color: #e8f5e9;
   color: #2e7d32;
 }
 
