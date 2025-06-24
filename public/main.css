@@ -322,3 +322,10 @@ td:nth-child(3) {
 .table-danger .low-stock {
   color: #842029;
 }
+
+/* Stock table subtle shadow and rounded corners */
+#stockTable {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+}
