@@ -1,12 +1,11 @@
 <h1 class="mb-3">사용자 관리</h1>
-<form class="mb-3" method="get" action="/admin/users">
+<form class="mb-3" onsubmit="return false;">
   <div class="input-group">
-    <input type="text" name="q" class="form-control" placeholder="아이디 검색" value="<%= q %>">
-    <button class="btn btn-outline-secondary" type="submit">검색</button>
+    <input type="text" id="searchUser" class="form-control" placeholder="아이디 검색" value="<%= q %>">
   </div>
 </form>
 <form method="post" action="/admin/users/delete" onsubmit="return confirm('선택한 사용자를 삭제하시겠습니까?');">
-  <table class="table table-striped align-middle">
+  <table id="usersTable" class="table table-striped table-bordered align-middle">
     <thead>
       <tr>
         <th style="width: 1%;"></th>
@@ -25,6 +24,10 @@
   <button type="submit" id="deleteBtn" class="btn btn-danger" disabled>삭제</button>
 </form>
 <script>
+  const table = createDataTable('#usersTable');
+  document.getElementById('searchUser').addEventListener('input', function(){
+    table.search(this.value).draw();
+  });
   document.querySelectorAll('input[name="userId"]').forEach(function(radio){
     radio.addEventListener('change', function(){
       document.getElementById('deleteBtn').disabled = false;

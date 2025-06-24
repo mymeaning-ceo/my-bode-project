@@ -3,3 +3,12 @@ td.low-stock {
   font-weight: bold;
   color: #d8000c;
 }
+
+.dataTables_wrapper .dataTables_paginate .page-link {
+  color: #333;
+}
+
+.dataTables_wrapper .dataTables_paginate .page-item.active .page-link {
+  background-color: #0d6efd;
+  color: #fff;
+}
