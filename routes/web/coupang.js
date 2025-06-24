@@ -20,6 +20,7 @@ const 한글 = {
   "Option ID": "옵션ID",
   "Product name": "상품명",
   "Option name": "옵션명",
+  "Offer condition": "상품상태",
   "Orderable quantity (real-time)": "재고량",
   "Sales amount on the last 30 days": "30일 판매금액",
   "Sales in the last 30 days": "30일 판매량",
@@ -31,6 +32,7 @@ const DEFAULT_COLUMNS = [
   "Option ID",
   "Product name",
   "Option name",
+  "Offer condition",
   "Orderable quantity (real-time)",
   "Sales amount on the last 30 days",
   "Sales in the last 30 days",
@@ -49,6 +51,11 @@ const NUMERIC_COLUMNS = [
 
 function addShortage(items) {
   return items.map((item) => {
+    const condition = String(item["Offer condition"] || "").trim().toUpperCase();
+    if (condition && condition !== "NEW") {
+      item["Shortage quantity"] = 0;
+      return item;
+    }
     const sales30 = Number(item["Sales in the last 30 days"] || 0);
     const inventory = Number(item["Orderable quantity (real-time)"] || 0);
     const daily = sales30 / 30;
