@@ -16,6 +16,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Ensure repository is not shallow (Heroku rejects shallow pushes)
+      - name: Unshallow repository
+        run: |
+          git fetch --all --unshallow
+
       # 2) Node + 캐시
       - uses: actions/setup-node@v3
         with:
