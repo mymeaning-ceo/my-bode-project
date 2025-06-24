@@ -306,16 +306,14 @@ td:nth-child(3) {
   color: #b94a48;
 }
 
-/* Stock table  */
-<table id="stockTable">
-  <colgroup>
-    <col style="width: 5%">   <!-- # -->
-    <col style="width: 10%">  <!-- 품번 -->
-    <col style="width: 20%">  <!-- 품명 -->
-    <col style="width: 8%">   <!-- 색상 -->
-    <col style="width: 8%">   <!-- 사이즈 -->
-    <col style="width: 8%">   <!-- 수량 -->
-    <col style="width: 10%">  <!-- 할당 -->
-    <col style="width: 12%">  <!-- 업로드 사용자 -->
-    <col style="width: 19%">  <!-- 업로드 시각 -->
-  </colgroup>
+/* Row details */
+.data-table tbody tr {
+  cursor: pointer;
+}
+.data-table tbody tr.shown {
+  background-color: #f8f9fa;
+}
+.data-table tbody tr .child-table th {
+  width: 25%;
+  white-space: nowrap;
+}
