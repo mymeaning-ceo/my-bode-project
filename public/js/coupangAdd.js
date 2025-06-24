@@ -44,6 +44,23 @@ $(function () {
     ]
   });
 
+  function pollProgress(id) {
+    const timer = setInterval(function () {
+      $.getJSON('/api/jobs/' + id, function (data) {
+        if (data.progress == null) return;
+        $('#uploadProgress .progress-bar')
+          .css('width', data.progress + '%')
+          .text(data.progress + '%');
+        if (data.progress >= 100) {
+          clearInterval(timer);
+          $('#uploadProgress').addClass('d-none');
+          alert('업로드 성공!');
+          if (table) table.ajax.reload(null, false);
+        }
+      });
+    }, 1000);
+  }
+
   $('#uploadForm').on('submit', function (e) {
     e.preventDefault();
     const formData = new FormData(this);
@@ -55,25 +72,10 @@ $(function () {
       data: formData,
       processData: false,
       contentType: false,
-      xhr: function () {
-        const xhr = new window.XMLHttpRequest();
-        xhr.upload.addEventListener('progress', function (evt) {
-          if (evt.lengthComputable) {
-            const percent = Math.round((evt.loaded / evt.total) * 100);
-            $('#uploadProgress .progress-bar')
-              .css('width', percent + '%')
-              .text(percent + '%');
-          }
-        });
-        return xhr;
+      success: (res) => {
+        if (res.jobId) pollProgress(res.jobId);
       },
-      success: () => {
-        $('#uploadProgress .progress-bar').text('100%');
-        alert('업로드 성공!');
-        table.ajax.reload(null, false);
-      },
-      error: (xhr) => {
-        alert('업로드 실패: ' + xhr.responseText);
+      error: () => {
         $('#uploadProgress').addClass('d-none');
       }
     });

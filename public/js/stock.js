@@ -102,22 +102,40 @@ $(document).ready(function () {
   });
 
   // 엑셀 업로드
+  function pollProgress(id) {
+    const timer = setInterval(() => {
+      $.getJSON(`/api/jobs/${id}`, (data) => {
+        if (data.progress == null) return;
+        $("#uploadProgress .progress-bar")
+          .css("width", data.progress + "%")
+          .text(data.progress + "%");
+        if (data.progress >= 100) {
+          clearInterval(timer);
+          $("#uploadProgress").addClass("d-none");
+          alert("업로드 완료!");
+          table.ajax.reload(null, false);
+        }
+      });
+    }, 1000);
+  }
+
   $("#uploadForm").on("submit", function (e) {
     e.preventDefault();
     const formData = new FormData(this);
+    $("#uploadProgress").removeClass("d-none");
+    $("#uploadProgress .progress-bar").css("width", "0%").text("0%");
 
     $.ajax({
-      url: "/stock/upload", // 서버 라우터와 일치
+      url: "/stock/upload",
       type: "POST",
       data: formData,
       processData: false,
       contentType: false,
-      success: () => {
-        alert("업로드 성공!");
-        table.ajax.reload(null, false); // 페이지 유지한 채 데이터만 갱신
+      success: (res) => {
+        if (res.jobId) pollProgress(res.jobId);
       },
-      error: (xhr) => {
-        alert("업로드 실패: " + xhr.responseText);
+      error: () => {
+        $("#uploadProgress").addClass("d-none");
       },
     });
   });
