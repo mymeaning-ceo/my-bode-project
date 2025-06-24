@@ -49,7 +49,7 @@ describe("GET /stock", () => {
   it(
     "should return 302 redirect (CI 환경)",
     async () => {
-      const res = await request(app).get("/");
+      const res = await request(app).get("/").redirects(0);
       expect(res.statusCode).toBe(302);
     },
     60000 // 개별 테스트 타임아웃 (60초)
