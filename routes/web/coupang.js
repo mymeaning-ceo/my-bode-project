@@ -5,7 +5,6 @@ const parseCoupangExcel = require("../../lib/parseCoupangExcel");
 const fs = require("fs");
 const path = require("path");
 const { checkAuth } = require("../../middlewares/auth");
-const { addJob } = require("../../lib/jobQueue");
 
 // ─────────────────────────────────────────
 // 1) Multer 설정
