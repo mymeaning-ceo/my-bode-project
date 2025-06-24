@@ -5,6 +5,7 @@ This project requires several environment variables to run:
 - `MONGO_URI` – MongoDB connection string
 - `DB_NAME` – MongoDB database name used by the application
 - `SESSION_SECRET` – Secret string used to sign session cookies
+- `JWT_SECRET` – Secret key used to sign JWTs for the API
 - `S3_KEY` – AWS S3 access key
 - `S3_SECRET` – AWS S3 secret key
 - `S3_REGION` – AWS S3 region where the bucket resides
@@ -53,6 +54,13 @@ Routes are organized under the `routes/` directory. `server.js` mounts two route
 `routes/web/index.js` automatically reads every `.js` file in the same folder and mounts it. Some routes like `post` or `admin` are guarded with an auth check. `routes/api/index.js` currently exposes `/stock` endpoints through `stockApi.js`.
 
 This layout keeps API and web routes separate while avoiding an extra routing layer.
+
+## JWT authentication
+
+`/api/auth/login` issues a JSON Web Token for API clients. Send `username` and
+`password` in the request body and the server returns `{ "token": "..." }` if the
+credentials are valid. Include this token in the `Authorization` header as
+`Bearer <token>` when accessing protected endpoints.
 
 ## Coupang product endpoint
 

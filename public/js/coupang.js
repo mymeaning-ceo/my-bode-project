@@ -46,20 +46,74 @@ $(function () {
     window.location.href = url.toString();
   });
 
-  // ✅ 정렬 버튼 클릭 → URL 쿼리 갱신
+  const fields = $('#coupangTable thead th.sortable')
+    .map(function () {
+      return $(this).data('field');
+    })
+    .get();
+
+  function buildRow(row, idx) {
+    const shortage = Number(row['Shortage quantity'] || 0);
+    const sales30 = Number(row['Sales in the last 30 days'] || 0);
+    const stock = Number(row['Orderable quantity (real-time)'] || 0);
+    let html =
+      `<tr class="text-center" data-shortage="${shortage}" data-sales="${sales30}" data-stock="${stock}">` +
+      `<td class="text-center">${idx + 1}</td>`;
+    fields.forEach((key) => {
+      if (key === 'Option ID') {
+        html += `<td class="text-center">${row[key]}</td>`;
+      } else {
+        const val = row[key];
+        const numVal = Number(val);
+        const isNum = !isNaN(numVal) && val !== '-' && val !== '';
+        html += `<td class="text-center${key === 'Shortage quantity' && shortage > 0 ? ' low-stock' : ''}"`;
+        if (isNum) html += ` data-order="${numVal}"`;
+        html += '>' + (isNum ? (numVal === 0 ? '-' : numVal.toLocaleString('ko-KR')) : val) + '</td>';
+      }
+    });
+    html += '</tr>';
+    return html;
+  }
+
+  function updateTable(rows, order) {
+    const html = rows.map((r, i) => buildRow(r, i)).join('');
+    const $tbody = $('#coupangTable tbody');
+    table.clear().draw();
+    $tbody.html(html);
+    table.rows.add($tbody.find('tr')).draw(false);
+    $('#coupangTable thead th.sortable .sort-indicator').text('');
+    if (order.field) {
+      const indicator = order.dir === 'asc' ? '▲' : '▼';
+      $(`#coupangTable thead th.sortable[data-field="${order.field}"] .sort-indicator`).text(indicator);
+    }
+  }
+
+  // ✅ 정렬 버튼 클릭 → AJAX 로드
   $('#coupangTable thead').on('click', 'th.sortable', function () {
-    const field = $(this).data('field');
+    const $th = $(this);
+    const field = $th.data('field');
     if (!field) return;
 
     const url = new URL(window.location.href);
     const currentSort = url.searchParams.get('sort') || 'Product name';
     const currentOrder = url.searchParams.get('order') || 'asc';
-    const nextOrder = (currentSort === field && currentOrder === 'asc') ? 'desc' : 'asc';
+    const nextOrder = currentSort === field && currentOrder === 'asc' ? 'desc' : 'asc';
 
     url.searchParams.set('sort', field);
     url.searchParams.set('order', nextOrder);
     url.searchParams.set('page', '1');
-    window.location.href = url.toString();
+
+    $.ajax({
+      url: url.pathname + url.search,
+      dataType: 'json',
+      success: function (res) {
+        updateTable(res.rows || [], { field, dir: nextOrder });
+        history.replaceState({}, '', url.toString());
+      },
+      error: function () {
+        window.location.href = url.toString();
+      },
+    });
   });
 
   // ✅ CSV 다운로드 (입고필요 항목만, 전체 컬럼 포함)

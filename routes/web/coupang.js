@@ -143,6 +143,20 @@ router.get("/", async (req, res) => {
     if (req.query.order) params.append("order", req.query.order);
     const queryString = params.toString();
 
+    if (req.xhr || req.headers.accept?.includes("application/json")) {
+      return res.json({
+        rows: resultWithAds,
+        fields,
+        page,
+        totalPage,
+        totalCount,
+        sortField,
+        sortOrder,
+        shortageOnly,
+        reorderCount,
+      });
+    }
+
     res.render("coupang.ejs", {
       결과: resultWithAds,
       필드: fields,
@@ -300,6 +314,20 @@ router.get("/search", async (req, res) => {
     if (sortField !== "Product name") params.append("sort", sortField);
     if (req.query.order) params.append("order", req.query.order);
     const queryString = params.toString();
+
+    if (req.xhr || req.headers.accept?.includes("application/json")) {
+      return res.json({
+        rows: resultWithAds,
+        fields,
+        page,
+        totalPage,
+        totalCount,
+        shortageOnly,
+        reorderCount,
+        sortField,
+        sortOrder,
+      });
+    }
 
     res.render("coupang.ejs", {
       결과: resultWithAds,

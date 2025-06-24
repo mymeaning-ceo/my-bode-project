@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const jwt = require('jsonwebtoken');
 
 exports.renderLoginPage = (req, res) => {
   res.render('login');
@@ -30,6 +31,33 @@ exports.login = async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+};
+
+// JWT 로그인 - 성공 시 토큰 반환
+exports.loginJwt = async (req, res) => {
+  const db = req.app.locals.db;
+  const { username, password } = req.body;
+  try {
+    const user = await db
+      .collection('user')
+      .findOne({ username: new RegExp(`^${username}$`, 'i') });
+
+    if (!user) return res.status(401).json({ message: '아이디 없음' });
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ message: '비밀번호 불일치' });
+
+    const token = jwt.sign(
+      { id: user._id.toString(), username: user.username },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '1h' }
+    );
+
+    res.json({ token });
+  } catch (err) {
+    console.error('❌ JWT 로그인 오류:', err);
+    res.status(500).json({ message: '서버 오류' });
   }
 };
 
