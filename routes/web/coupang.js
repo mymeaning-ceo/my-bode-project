@@ -315,10 +315,18 @@ router.post("/delete-all", checkAuth, async (req, res) => {
   const db = req.app.locals.db;
   try {
     await db.collection("coupang").deleteMany({});
-    res.redirect("/coupang");
+    if (req.xhr || req.headers.accept?.includes("application/json")) {
+      res.json({ status: "success" });
+    } else {
+      res.redirect("/coupang");
+    }
   } catch (err) {
     console.error("POST /coupang/delete-all 오류:", err);
-    res.status(500).send("❌ 삭제 실패");
+    if (req.xhr || req.headers.accept?.includes("application/json")) {
+      res.status(500).json({ status: "error" });
+    } else {
+      res.status(500).send("❌ 삭제 실패");
+    }
   }
 });
 
