@@ -25,18 +25,33 @@
     </div>
 
     <% if (mode === 'summary') { %>
-      <div id="search-form" class="mb-3 d-flex">
-        <input type="hidden" id="search-mode" value="summary">
-        <select id="search-brand" name="brand" class="form-select me-2" style="max-width: 150px;">
-          <option value="">전체 브랜드</option>
-          <option value="트라이" <%= brand === '트라이' ? 'selected' : '' %>>트라이</option>
-          <option value="좋은사람들" <%= brand === '좋은사람들' ? 'selected' : '' %>>좋은사람들</option>
-          <option value="BYC" <%= brand === 'BYC' ? 'selected' : '' %>>BYC</option>
-          <option value="비비안" <%= brand === '비비안' ? 'selected' : '' %>>비비안</option>
-        </select>
-        <input type="text" id="search-keyword" class="form-control me-2" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
-        <button class="btn btn-outline-primary search-send">검색</button>
+      <div id="search-form" class="row row-cols-auto g-2 align-items-center mb-4">
+        <input type="hidden" id="search-mode" value="summary" />
+      
+        <!-- 브랜드 선택 -->
+        <div class="col">
+          <select id="search-brand" name="brand" class="form-select">
+            <option value="">전체 브랜드</option>
+            <option value="트라이" <%= brand === '트라이' ? 'selected' : '' %>>트라이</option>
+            <option value="제임스딘" <%= brand === '제임스딘' ? 'selected' : '' %>>제임스딘</option>
+            <option value="BYC" <%= brand === 'BYC' ? 'selected' : '' %>>BYC</option>
+            <option value="비비안" <%= brand === '비비안' ? 'selected' : '' %>>비비안</option>
+          </select>
+        </div>
+      
+        <!-- 검색창 -->
+        <div class="col flex-grow-1">
+          <input type="text" id="search-keyword" class="form-control" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색" />
+        </div>
+      
+        <!-- 검색 버튼 -->
+        <div class="col">
+          <button type="button" class="btn btn-outline-primary px-4 search-send" style="white-space: nowrap;">
+            검색
+          </button>
+        </div>
       </div>
+           
       <p class="text-end mb-2">총 <%= total %>건의 결과가 있습니다.</p>
     <% } else { %>
       <div id="search-form" class="d-flex align-items-center mb-3">
@@ -44,12 +59,12 @@
         <select id="search-brand" name="brand" class="form-select me-2" style="max-width: 150px;">
           <option value="">전체 브랜드</option>
           <option value="트라이" <%= brand === '트라이' ? 'selected' : '' %>>트라이</option>
-          <option value="좋은사람들" <%= brand === '좋은사람들' ? 'selected' : '' %>>좋은사람들</option>
+          <option value="제임스딘" <%= brand === '제임스딘' ? 'selected' : '' %>>제임스딘</option>
           <option value="BYC" <%= brand === 'BYC' ? 'selected' : '' %>>BYC</option>
           <option value="비비안" <%= brand === '비비안' ? 'selected' : '' %>>비비안</option>
         </select>
         <input id="search-keyword" class="form-control me-2" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
-        <button class="btn btn-outline-primary search-send">검색</button>
+        <button class="btn btn-outline-primary search-send">클릭</button>
       </div>
     <% } %>
 
@@ -75,7 +90,7 @@
     <div class="table-responsive table-container">
 
       <table id="coupangAddTable" data-mode="<%= mode %>" class="table table-bordered table-hover table-striped bg-white align-middle text-center auto-width">
-        <thead class="table-primary">
+        <thead class="table-light">
 
           <% if (mode === 'summary') { %>
             <tr>
