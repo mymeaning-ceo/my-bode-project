@@ -81,6 +81,14 @@ $(function () {
   $('.search-send').on('click', function () {
     const keyword = $('#search-keyword').val().trim();
     const brand = $('#search-brand').val();
+
+    if (table && mode === 'detail') {
+      pageSearch = keyword;
+      pageBrand = brand;
+      table.ajax.reload();
+      return;
+    }
+
     const params = new URLSearchParams();
     if (mode) params.append('mode', mode);
     if (keyword) params.append('search', keyword);
