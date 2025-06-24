@@ -8,6 +8,8 @@
 const express = require("express");
 const router = express.Router();
 
+// 인증 API
+router.use("/auth", require("./authApi"));
 // 재고(Stock) API
 router.use("/stock", require("./stockApi"));
 // 쿠팡 재고 API
