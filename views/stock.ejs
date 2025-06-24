@@ -26,14 +26,23 @@
     </div>
 
     <!-- 검색 -->
-    <div class="row row-cols-1 row-cols-sm-auto g-2 mb-4">
-      <div class="col flex-grow-1">
-        <input id="keyword" class="form-control" placeholder="상품명 또는 상품코드" />
+    <div class="row g-2 mb-4 align-items-end">
+      <div class="col">
+        <label for="itemCode" class="form-label">품번</label>
+        <input id="itemCode" class="form-control" placeholder="품번" />
       </div>
       <div class="col">
+        <label for="color" class="form-label">색상</label>
+        <input id="color" class="form-control" placeholder="색상" />
+      </div>
+      <div class="col">
+        <label for="size" class="form-label">사이즈</label>
+        <input id="size" class="form-control" placeholder="사이즈" />
+      </div>
+      <div class="col-auto">
         <button id="btnSearch" class="btn btn-outline-primary">검색</button>
       </div>
-      <div class="col">
+      <div class="col-auto">
         <button id="btnRefresh" class="btn btn-secondary">새로고침</button>
       </div>
     </div>
