@@ -2,6 +2,7 @@ const path = require('path');
 const multer = require('multer');
 const xlsx = require('xlsx');
 const fs = require('fs');
+const { addJob } = require('../lib/jobQueue');
 const asyncHandler = require('../middlewares/asyncHandler');
 
 // Multer storage
@@ -252,56 +253,19 @@ exports.getData = asyncHandler(async (req, res) => {
 // Excel upload for web route
 exports.uploadExcel = asyncHandler(async (req, res) => {
   if (!req.file) {
-    return res.status(400).send('❌ 파일이 업로드되지 않았습니다.');
+    return res.status(400).json({ message: '파일이 없습니다.' });
   }
-  const filePath = req.file.path;
-  const workbook = xlsx.readFile(filePath, { cellDates: true });
-  const sheetName = workbook.SheetNames[0];
-  const raw = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-  const numericFields = ['노출수', '클릭수', '광고비', '클릭률'];
-  const data = raw.map(row => {
-    numericFields.forEach(f => {
-      if (row[f] !== undefined && row[f] !== null && row[f] !== '') {
-        const num = Number(String(row[f]).replace(/[^0-9.-]/g, ''));
-        row[f] = f === '클릭률' ? Number(num.toFixed(2)) : num;
-      }
-    });
-    return normalizeItemFields(row);
-  });
 
-  const db = req.app.locals.db;
-  await db.collection('coupangAdd').deleteMany({});
-  if (data.length > 0) await db.collection('coupangAdd').insertMany(data);
-
-  fs.unlink(filePath, () => {});
-  if (req.flash) req.flash('성공메시지', '✅ 업로드 완료');
-  res.redirect('/coupang/add');
+  const jobId = addJob('coupangAdd', req.file.path, req.app.locals.db);
+  res.json({ jobId });
 });
 
 // Excel upload API
 exports.uploadExcelApi = asyncHandler(async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ status: 'error', message: '파일이 없습니다.' });
+    return res.status(400).json({ message: '파일이 없습니다.' });
   }
-  const filePath = req.file.path;
-  const workbook = xlsx.readFile(filePath, { cellDates: true });
-  const sheetName = workbook.SheetNames[0];
-  const raw = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-  const numericFields = ['노출수', '클릭수', '광고비', '클릭률'];
-  const data = raw.map(row => {
-    numericFields.forEach(f => {
-      if (row[f] !== undefined && row[f] !== null && row[f] !== '') {
-        const num = Number(String(row[f]).replace(/[^0-9.-]/g, ''));
-        row[f] = f === '클릭률' ? Number(num.toFixed(2)) : num;
-      }
-    });
-    return normalizeItemFields(row);
-  });
 
-  const db = req.app.locals.db;
-  await db.collection('coupangAdd').deleteMany({});
-  if (data.length > 0) await db.collection('coupangAdd').insertMany(data);
-
-  fs.unlink(filePath, () => {});
-  res.json({ status: 'success' });
+  const jobId = addJob('coupangAdd', req.file.path, req.app.locals.db);
+  res.json({ jobId });
 });

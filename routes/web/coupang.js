@@ -5,6 +5,7 @@ const parseCoupangExcel = require("../../lib/parseCoupangExcel");
 const fs = require("fs");
 const path = require("path");
 const { checkAuth } = require("../../middlewares/auth");
+const { addJob } = require("../../lib/jobQueue");
 
 // ─────────────────────────────────────────
 // 1) Multer 설정
@@ -170,52 +171,14 @@ router.get("/", async (req, res) => {
 });
 
 // ✅ 엑셀 업로드
+const { addJob } = require("../../lib/jobQueue");
 router.post("/upload", upload.single("excelFile"), async (req, res) => {
-  const db = req.app.locals.db;
-  try {
-    if (!req.file) {
-      req.flash("error", "파일이 없습니다.");
-      return res.redirect("/coupang");
-    }
-
-    const filePath = req.file.path;
-    const data = parseCoupangExcel(filePath).map((item) =>
-      normalizeItemFields(item)
-    );
-
-    const bulkOps = data.map((item) => ({
-      updateOne: {
-        filter: { "Option ID": item["Option ID"] },
-        update: { $set: item },
-        upsert: true,
-      },
-    }));
-
-    if (bulkOps.length > 0) await db.collection("coupang").bulkWrite(bulkOps);
-    fs.unlink(filePath, () => {});
-
-    const resultWithShortage = addShortage(data);
-    const resultWithAds = await attachAdData(resultWithShortage, db);
-
-    res.render("coupang.ejs", {
-      결과: resultWithAds,
-      필드: DEFAULT_COLUMNS,
-      전체필드: DEFAULT_COLUMNS,
-      성공메시지: "✅ 엑셀 업로드 완료",
-      한글,
-      keyword: "",
-      brand: "",
-      brandOptions: BRANDS,
-      현재페이지: 1,
-      전체페이지: 1,
-      전체건수: resultWithAds.length,
-      추가쿼리: "",
-      페이지크기: limit,
-    });
-  } catch (err) {
-    console.error("POST /coupang/upload 오류:", err);
-    res.status(500).send("❌ 업로드 실패");
+  if (!req.file) {
+    return res.status(400).json({ message: "파일이 없습니다." });
   }
+
+  const jobId = addJob("coupang", req.file.path, req.app.locals.db);
+  res.json({ jobId });
 });
 
 // ✅ 검색
