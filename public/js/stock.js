@@ -4,17 +4,14 @@
 
 $(document).ready(function () {
   // DataTable 초기화
-  const table = $("#stockTable").DataTable({
+  const table = createDataTable('#stockTable', {
     serverSide: true,
     processing: true,
     paging: true,
-    pagingType: "simple_numbers",
     searching: false,
-    dom: "lrtip",
+    dom: 'lrtip',
     info: true,
     pageLength: 50,
-    lengthChange: false,
-    responsive: true,
     order: [[1, "asc"]],
     columnDefs: [
       { targets: "_all", className: "text-center" },

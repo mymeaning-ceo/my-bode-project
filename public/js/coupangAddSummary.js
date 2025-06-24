@@ -1,7 +1,7 @@
 $(function () {
-  const table = $('#summaryTable');
-  if (!table.length) return;
-  table.DataTable({
+  const table = '#summaryTable';
+  if (!$(table).length) return;
+  createDataTable(table, {
     ordering: true,
     order: [[1, 'asc']],
     paging: false,
@@ -10,11 +10,6 @@ $(function () {
     lengthChange: false,
     responsive: true,
     columnDefs: [{ targets: '_all', className: 'text-center' }],
-    language: {
-      paginate: { previous: '이전', next: '다음' },
-      info: '총 _TOTAL_건 중 _START_ ~ _END_',
-      infoEmpty: '데이터가 없습니다'
-    }
   });
 
   // 검색 핸들러 (요약 화면)
