@@ -9,8 +9,9 @@ $(function () {
     ordering: true,
     columnDefs: [
       { targets: '_all', className: 'text-center' },
-      { targets: 1, className: 'text-primary' },
-      { targets: 2, className: 'text-success text-start' }
+      // 텍스트 색상을 기본값으로 돌려 가독성을 높인다
+      { targets: 1, className: 'text-start' },
+      { targets: 2, className: 'text-start' }
     ],
     lengthChange: false,
     paging: false,

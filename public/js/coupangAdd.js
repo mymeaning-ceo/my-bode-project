@@ -17,8 +17,9 @@ $(function () {
     order: [[0, 'asc']],
     columnDefs: [
       { targets: '_all', className: 'text-center' },
-      { targets: 1, className: 'text-primary' },
-      { targets: 2, className: 'text-success text-start' },
+      // 텍스트 컬러는 기본 색상 사용
+      { targets: 1, className: 'text-start' },
+      { targets: 2, className: 'text-start' },
       { targets: [3, 4, 5], render: $.fn.dataTable.render.number(',', '.', 0) },
       { targets: 6, render: (data) => parseFloat(data).toFixed(2) },
     ],
