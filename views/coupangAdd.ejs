@@ -27,7 +27,6 @@
     <% if (mode === 'summary') { %>
       <div id="search-form" class="mb-3 d-flex">
         <input type="hidden" id="search-mode" value="summary">
-        <input type="text" id="search-keyword" class="form-control me-2" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
         <select id="search-brand" name="brand" class="form-select me-2" style="max-width: 150px;">
           <option value="">전체 브랜드</option>
           <option value="트라이" <%= brand === '트라이' ? 'selected' : '' %>>트라이</option>
@@ -35,13 +34,13 @@
           <option value="BYC" <%= brand === 'BYC' ? 'selected' : '' %>>BYC</option>
           <option value="비비안" <%= brand === '비비안' ? 'selected' : '' %>>비비안</option>
         </select>
+        <input type="text" id="search-keyword" class="form-control me-2" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
         <button class="btn btn-outline-primary search-send">검색</button>
       </div>
       <p class="text-end mb-2">총 <%= total %>건의 결과가 있습니다.</p>
     <% } else { %>
       <div id="search-form" class="d-flex align-items-center mb-3">
         <input type="hidden" id="search-mode" value="detail">
-        <input id="search-keyword" class="form-control me-2" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
         <select id="search-brand" name="brand" class="form-select me-2" style="max-width: 150px;">
           <option value="">전체 브랜드</option>
           <option value="트라이" <%= brand === '트라이' ? 'selected' : '' %>>트라이</option>
@@ -49,6 +48,7 @@
           <option value="BYC" <%= brand === 'BYC' ? 'selected' : '' %>>BYC</option>
           <option value="비비안" <%= brand === '비비안' ? 'selected' : '' %>>비비안</option>
         </select>
+        <input id="search-keyword" class="form-control me-2" value="<%= search %>" placeholder="상품명 또는 옵션ID 검색">
         <button class="btn btn-outline-primary search-send">검색</button>
       </div>
     <% } %>

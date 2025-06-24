@@ -34,9 +34,10 @@ body {
 }
 
 .search-send {
-  height: 100%; /* 입력창 높이에 맞춤 */
+  /* 높이를 고정하지 않고 텍스트 크기에 맞게 자동 조절 */
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  white-space: nowrap;
 }
 
 mark {
