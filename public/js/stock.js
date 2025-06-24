@@ -7,6 +7,7 @@ $(document).ready(function () {
   const table = createDataTable('#stockTable', {
     serverSide: true,
     processing: true,
+    ordering: true,
     paging: true,
     searching: false,
     dom: 'lrtip',

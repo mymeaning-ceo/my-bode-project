@@ -297,8 +297,13 @@ td:nth-child(3) {
 }
 
 /* Low stock row highlight */
+/* Low stock row highlight */
+.table-danger {
+  background-color: #fff1f1;
+}
+
 .table-danger .low-stock {
-  color: #842029;
+  color: #b94a48;
 }
 
 /* Stock table subtle shadow and rounded corners */
@@ -306,4 +311,10 @@ td:nth-child(3) {
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+  border-collapse: separate;
+}
+
+#stockTable th,
+#stockTable td {
+  padding: 0.75rem 1rem;
 }
