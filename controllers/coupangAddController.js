@@ -39,7 +39,8 @@ function normalizeProductName(fullName = '') {
 // Render page
 exports.renderPage = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
-  const mode = req.query.mode === 'summary' ? 'summary' : 'detail';
+  const allowedModes = ['summary', 'daily'];
+  const mode = allowedModes.includes(req.query.mode) ? req.query.mode : 'detail';
 
   const search =
     typeof req.query.search === 'string'
@@ -145,6 +146,30 @@ exports.renderPage = asyncHandler(async (req, res) => {
       page,
       totalPages,
     });
+  } else if (mode === 'daily') {
+    const data = await db
+      .collection('coupangAdd')
+      .aggregate([
+        brand
+          ? { $match: { '광고집행 상품명': { $regex: brand, $options: 'i' } } }
+          : null,
+        {
+          $group: {
+            _id: '$날짜',
+            adCost: { $sum: '$광고비' },
+          },
+        },
+        { $project: { _id: 0, date: '$_id', adCost: 1 } },
+        { $sort: { date: 1 } },
+      ].filter(Boolean))
+      .toArray();
+
+    list = data.map((d) => ({
+      date: d.date instanceof Date ? d.date.toISOString().slice(0, 10) : d.date,
+      adCost: d.adCost,
+    }));
+
+    return res.render('coupang-add-daily', { mode, list, brand });
   }
 
   // detail 모드 화면
