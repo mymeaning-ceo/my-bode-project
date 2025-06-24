@@ -101,7 +101,7 @@
             <tr><th>📂 No Data</th></tr>
           <% } %>
         </thead>
-        <tbody>
+          <tbody>
           <% if (결과 && 결과.length > 0) { %>
             <% 결과.forEach((행, index) => { %>
               <% const shortage = Number(행['Shortage quantity'] || 0);
@@ -125,14 +125,13 @@
                 <% }) %>
               </tr>
             <% }) %>
-          <% } else { %>
-            <tr>
-              <td colspan="<%= (필드?.length || 0) + 1 %>" class="text-center text-muted">📭 재고가 없습니다.</td>
-            </tr>
           <% } %>
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
+      <% if (!(결과 && 결과.length > 0)) { %>
+        <p class="text-muted">📭 재고가 없습니다.</p>
+      <% } %>
 
     <% if (전체페이지 > 1) { %>
       <% const groupSize = 10; const startPage = Math.floor((현재페이지 - 1) / groupSize) * groupSize + 1; const endPage = Math.min(startPage + groupSize - 1, 전체페이지); %>

@@ -18,7 +18,8 @@ $(function () {
     language: {
       paginate: { previous: '이전', next: '다음' },
       info: '총 _TOTAL_건 중 _START_ ~ _END_',
-      infoEmpty: '데이터가 없습니다'
+      infoEmpty: '데이터가 없습니다',
+      emptyTable: '📭 재고가 없습니다.'
     }
   });
 
