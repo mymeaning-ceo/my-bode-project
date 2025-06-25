@@ -13,7 +13,6 @@ $(document).ready(function () {
     dom: 'lrtip',
     info: true,
     pageLength: 50,
-    order: [[1, "asc"]],
     columnDefs: [
       { targets: "_all", className: "text-center" },
       {
