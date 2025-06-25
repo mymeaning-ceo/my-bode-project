@@ -6,7 +6,7 @@
   </div>
 </form>
 <form method="post" action="/admin/users/delete" onsubmit="return confirm('선택한 사용자를 삭제하시겠습니까?');">
-  <table class="table table-striped align-middle">
+  <table id="usersTable" class="table table-striped align-middle">
     <thead>
       <tr>
         <th style="width: 1%;"></th>
@@ -24,10 +24,3 @@
   </table>
   <button type="submit" id="deleteBtn" class="btn btn-danger" disabled>삭제</button>
 </form>
-<script>
-  document.querySelectorAll('input[name="userId"]').forEach(function(radio){
-    radio.addEventListener('change', function(){
-      document.getElementById('deleteBtn').disabled = false;
-    });
-  });
-</script>
