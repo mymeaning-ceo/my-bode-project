@@ -144,7 +144,7 @@ if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   initApp().then(() => {
     if (process.env.NODE_ENV !== 'test') {
-      app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+      app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
     }
   });
 }
