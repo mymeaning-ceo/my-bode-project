@@ -23,7 +23,9 @@ async function initApp() {
   const db = await connectDB();
   await initIndexes(db);
   app.locals.db = db;
-  startCronJobs(db);
+  if (process.env.NODE_ENV !== 'test') {
+    startCronJobs(db);
+  }
 
   require("./config/passport")(passport, db);
 
