@@ -1,7 +1,11 @@
 async function initIndexes(db) {
   try {
-    const coupangCollection = db.collection('coupang');
-    if (typeof coupangCollection.createIndex === 'function') {
+    const coupangCollection =
+      typeof db.collection === 'function' ? db.collection('coupang') : null;
+    if (
+      coupangCollection &&
+      typeof coupangCollection.createIndex === 'function'
+    ) {
       await coupangCollection.createIndex({ 'Product name': 1 });
     }
   } catch (err) {

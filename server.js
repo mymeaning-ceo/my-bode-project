@@ -75,14 +75,36 @@ async function initApp() {
   app.use(async (req, res, next) => {
     try {
       const db = req.app.locals.db;
-      const logoDoc = await db.collection("homepage").findOne({ key: "logo" });
-      const bannerDocs = await db
-        .collection("homepage")
-        .find({ key: /^banner/ })
-        .sort({ key: 1 })
-        .toArray();
+      const homepageColl =
+        db && typeof db.collection === "function"
+          ? db.collection("homepage")
+          : null;
+
+      let logoDoc = null;
+      let bannerDocs = [];
+
+      if (homepageColl) {
+        if (typeof homepageColl.findOne === "function") {
+          logoDoc = await homepageColl.findOne({ key: "logo" });
+        }
+
+        if (typeof homepageColl.find === "function") {
+          const cursor = homepageColl.find({ key: /^banner/ });
+          if (cursor) {
+            if (typeof cursor.sort === "function") {
+              cursor.sort({ key: 1 });
+            }
+            if (typeof cursor.toArray === "function") {
+              bannerDocs = await cursor.toArray();
+            }
+          }
+        }
+      }
+
       res.locals.logo = logoDoc?.img || "";
-      res.locals.banners = bannerDocs.map((b) => b.img);
+      res.locals.banners = Array.isArray(bannerDocs)
+        ? bannerDocs.map((b) => b.img)
+        : [];
     } catch (err) {
       console.error("❌ 로고/배너 조회 실패:", err);
       res.locals.logo = "";
