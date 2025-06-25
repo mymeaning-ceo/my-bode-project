@@ -79,3 +79,22 @@ describe("DELETE /api/stock", () => {
     expect(mockColl.deleteMany).toHaveBeenCalledWith({});
   });
 });
+
+describe("GET /api/stock/detail", () => {
+  it("should return detail rows", async () => {
+    mockCollection.toArray.mockResolvedValueOnce([{ size: "S", qty: 3 }]);
+
+    const res = await request(app)
+      .get("/api/stock/detail")
+      .query({ item_code: "ABC", color: "RED" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ data: [{ size: "S", qty: 3 }] });
+
+    expect(mockCollection.find).toHaveBeenCalledWith({
+      item_code: "ABC",
+      color: "RED",
+    });
+    expect(mockCollection.sort).toHaveBeenCalledWith({ size: 1 });
+  });
+});

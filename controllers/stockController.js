@@ -69,6 +69,26 @@ exports.getStockData = asyncHandler(async (req, res) => {
   });
 });
 
+// 상세 데이터 조회 API
+exports.getStockDetail = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const { item_code: itemCode, color } = req.query;
+
+  if (!itemCode || !color) {
+    return res
+      .status(400)
+      .json({ error: "item_code and color are required" });
+  }
+
+  const rows = await db
+    .collection("stock")
+    .find({ item_code: itemCode, color })
+    .sort({ size: 1 })
+    .toArray();
+
+  res.json({ data: rows });
+});
+
 // Excel upload API
 exports.uploadExcel = asyncHandler(async (req, res) => {
   console.log("✅ POST /stock/upload controller");

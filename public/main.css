@@ -317,5 +317,9 @@ td:nth-child(3) {
     <col style="width: 8%">   <!-- 수량 -->
     <col style="width: 10%">  <!-- 할당 -->
     <col style="width: 12%">  <!-- 업로드 사용자 -->
-    <col style="width: 19%">  <!-- 업로드 시각 -->
+  <col style="width: 19%">  <!-- 업로드 시각 -->
   </colgroup>
+
+.dt-toggle {
+  cursor: pointer;
+}

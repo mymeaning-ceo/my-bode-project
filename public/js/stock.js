@@ -22,9 +22,11 @@ $(document).ready(function () {
         },
       },
       {
-        targets: 1,
+        targets: [1, 3],
+        createdCell: function (td) {
+          $(td).addClass("dt-toggle").css("cursor", "pointer");
+        },
         render: function (data) {
-          // 품번 옆 배지를 제거하여 보다 깔끔한 출력
           return data;
         },
       },
@@ -85,6 +87,33 @@ $(document).ready(function () {
         $(row).addClass("table-danger");
       }
     },
+  });
+
+  // 품번 또는 색상 클릭 시 상세 정보 로딩
+  $('#stockTable tbody').on('click', 'td.dt-toggle', function () {
+    const tr = $(this).closest('tr');
+    const row = table.row(tr);
+
+    if (row.child.isShown()) {
+      row.child.hide();
+      tr.removeClass('shown');
+      return;
+    }
+
+    const data = row.data();
+
+    $.get('/api/stock/detail', { item_code: data.item_code, color: data.color })
+      .done(function (res) {
+        let html =
+          '<table class="table table-sm mb-0"><thead><tr><th>사이즈</th><th>수량</th><th>할당</th></tr></thead><tbody>';
+        res.data.forEach(function (d) {
+          html += `<tr><td>${d.size}</td><td>${d.qty}</td><td>${d.allocation || ''}</td></tr>`;
+        });
+        html += '</tbody></table>';
+
+        row.child(html).show();
+        tr.addClass('shown');
+      });
   });
 
   // 검색 버튼
