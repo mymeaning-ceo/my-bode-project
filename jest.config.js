@@ -1,6 +1,9 @@
 module.exports = {
     // Node.js 백엔드라면:
-    testEnvironment: "node",
+
+      setupFilesAfterEnv: ['<rootDirir>/tests/setup.js'],
+  detectOpenHandles:  true,
+      testEnvironment: "node",
   
     // 프론트엔드(React 등)라면:
     // testEnvironment: "jsdom",
