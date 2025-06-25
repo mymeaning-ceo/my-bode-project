@@ -1,7 +1,7 @@
 module.exports = {
     // Node.js 백엔드라면:
 
-      setupFilesAfterEnv: ['<rootDirir>/tests/setup.js'],
+      setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   detectOpenHandles:  true,
       testEnvironment: "node",
   
