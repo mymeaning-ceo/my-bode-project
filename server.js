@@ -59,7 +59,9 @@ async function initApp() {
       secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
-      store: MongoStore.create({
+      store: process.env.NODE_ENV === 'test'
+      ? undefined
+      : MongoStore.create({
         mongoUrl:
           process.env.MONGO_URI || "mongodb://localhost:27017/testdb",
         dbName: process.env.DB_NAME || "testdb",
