@@ -160,3 +160,17 @@ The algorithm derives average daily sales from recent conversions, applies an
 ad spend multiplier, and subtracts current stock to determine how many units
 to reorder.
 
+## DataTable helper
+
+Client pages use a helper `createDataTable()` located in `public/js/common-dt.js`.
+Tables can specify the default sort column via `data-order-col` and
+`data-order-dir` attributes:
+
+```html
+<table id="stockTable" data-order-col="1" data-order-dir="asc"></table>
+```
+
+These values are passed to DataTables when initializing so you can control the
+initial ordering without writing extra JavaScript.
+
+

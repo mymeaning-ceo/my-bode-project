@@ -3,7 +3,6 @@ $(function () {
   if (!$(table).length) return;
   createDataTable(table, {
     ordering: true,
-    order: [[1, 'asc']],
     paging: false,
     searching: false,
     info: false,

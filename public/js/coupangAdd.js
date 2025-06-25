@@ -11,7 +11,6 @@ $(function () {
     searching: false,
     info: true,
     pageLength: 50,
-    order: [[0, 'asc']],
     columnDefs: [
       { targets: '_all', className: 'text-center' },
       // 텍스트 컬러는 기본 색상 사용
