@@ -20,16 +20,13 @@ const { startCronJobs } = require("./services/cronJobs");
 const app = express();
 
 async function initApp() {
-  // 1. MongoDB 연결
   const db = await connectDB();
   await initIndexes(db);
   app.locals.db = db;
   startCronJobs(db);
 
-  // 2. Passport 설정
   require("./config/passport")(passport, db);
 
-  // 3. 보안 & 성능 미들웨어
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -45,29 +42,25 @@ async function initApp() {
   );
   app.use(compression());
   app.use(morgan("dev"));
-
-  // 4. 기본 설정
   app.use(express.static(path.join(__dirname, "public")));
   app.set("view engine", "ejs");
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
   app.use(methodOverride("_method"));
 
-  // 5. 세션, Passport, Flash
   app.use(
     session({
-      secret: process.env.SESSION_SECRET,
+      secret: process.env.SESSION_SECRET || "default_secret",
       resave: false,
       saveUninitialized: false,
-      store: process.env.NODE_ENV === 'test'
-      ? undefined
-      : MongoStore.create({
-        mongoUrl:
-          process.env.MONGO_URI || "mongodb://localhost:27017/testdb",
-        dbName: process.env.DB_NAME || "testdb",
-        collectionName: "sessions",
-        ttl: 60 * 60,
-      }),
+      store: process.env.NODE_ENV === "test"
+        ? undefined
+        : MongoStore.create({
+            mongoUrl: process.env.MONGO_URI || "mongodb://localhost:27017/testdb",
+            dbName: process.env.DB_NAME || "testdb",
+            collectionName: "sessions",
+            ttl: 60 * 60,
+          }),
       cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -79,7 +72,6 @@ async function initApp() {
   app.use(passport.session());
   app.use(flash());
 
-  // 6. 전역 변수
   app.use(async (req, res, next) => {
     try {
       const db = req.app.locals.db;
@@ -103,11 +95,9 @@ async function initApp() {
     next();
   });
 
-  // 7. 라우터 연결
   app.use("/api", apiRouter);
   app.use("/", webRouter);
 
-  // 개발 시 라우트 목록 출력
   if (process.env.NODE_ENV !== "production") {
     app._router.stack
       .filter((r) => r.route)
@@ -116,22 +106,20 @@ async function initApp() {
       );
   }
 
-  // 8. 기본 경로 처리
-  // 루트에서는 대시보드로 리다이렉트하여 바로 서비스를 이용할 수 있도록 함
   app.get("/", (req, res) => {
     res.redirect(302, "/stock");
   });
   app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
     const menuIcons = {
-      "/stock": "\ud83d\udce6",
-      "/list": "\ud83d\udccb",
-      "/write": "\u270d\ufe0f",
+      "/stock": "📦",
+      "/list": "📋",
+      "/write": "✍️",
     };
     const menuLabels = {
-      "/stock": "\uc7ac\uace0 \uad00\ub9ac",
-      "/list": "\uac8c\uc2dc\uad8c \ubaa9\ub85d",
-      "/write": "\uae00 \uc791\uc131",
+      "/stock": "재고 관리",
+      "/list": "게시글 목록",
+      "/write": "글 작성",
     };
     res.render("dashboard.ejs", {
       menus,
@@ -141,17 +129,21 @@ async function initApp() {
     });
   });
 
-  // 9. 에러 핸들러
   app.use(errorHandler);
 
   console.log("✅ 서버 초기화 완료");
   return app;
 }
 
+// ─────────────────────────────
+// 서버 실행 조건 분기
+// ─────────────────────────────
 if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
   initApp().then(() => {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`🚀 서버 실행 중: http://localhost:${PORT}`));
+    if (process.env.NODE_ENV !== 'test') {
+      app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    }
   });
 }
 
