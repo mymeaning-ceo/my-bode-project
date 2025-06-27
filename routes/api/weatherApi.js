@@ -8,4 +8,5 @@ router.get('/date/:date', ctrl.getWeatherByDate);
 router.get('/range', ctrl.getWeatherRange);
 router.get('/same-day', ctrl.getWeatherSameDay);
 
+
 module.exports = router;

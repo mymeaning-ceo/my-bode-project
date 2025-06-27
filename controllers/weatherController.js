@@ -123,21 +123,29 @@ exports.getWeatherRange = asyncHandler(async (req, res) => {
   res.json(docs);
 });
 
-// Compare same month/day across years
-exports.getWeatherSameDay = asyncHandler(async (req, res) => {
-  const { date } = req.query;
-  let years = parseInt(req.query.years, 10) || 1;
-  if (!date) return res.status(400).json({ message: 'date required' });
-  years = Math.min(Math.max(years, 1), 10);
-  const base = new Date(date);
-  const fmt = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
-  const coll = req.app.locals.db.collection('weather');
-  const results = [];
-  for (let i = 0; i < years; i++) {
-    const d = new Date(base);
-    d.setFullYear(base.getFullYear() - i);
-    const doc = await coll.findOne({ _id: fmt(d) });
-    if (doc) results.push(doc);
+// Fetch weather data for the same day across past years
+exports.getSameDay = asyncHandler(async (req, res) => {
+  const { date, years = 1 } = req.query;
+
+  if (!date) {
+    return res.status(400).json({ message: 'date query required' });
   }
-  res.json(results);
+
+  const normalized = date.replace(/-/g, '');
+  const baseYear = parseInt(normalized.slice(0, 4), 10);
+  const mmdd = normalized.slice(4);
+
+  const ids = [];
+  for (let i = 0; i < Number(years); i += 1) {
+    ids.push(`${baseYear - i}${mmdd}`);
+  }
+
+  const docs = await req.app.locals.db
+    .collection('weather')
+    .find({ _id: { $in: ids } })
+    .project({ _id: 1 })
+    .sort({ _id: -1 })
+    .toArray();
+
+  res.json(docs);
 });

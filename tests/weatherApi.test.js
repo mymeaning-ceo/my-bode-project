@@ -6,7 +6,7 @@ const mockCollection = {
   project: jest.fn().mockReturnThis(),
   sort: jest.fn().mockReturnThis(),
   toArray: jest.fn().mockResolvedValue([]),
-  findOne: jest.fn(),
+  findOne: jest.fn().mockResolvedValue(null),
 };
 jest.mock('../config/db', () => {
   const mockDb = { collection: jest.fn(() => mockCollection) };
