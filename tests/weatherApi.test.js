@@ -124,3 +124,4 @@ test('GET /api/weather/same-day returns past years data', async () => {
   expect(res.statusCode).toBe(200);
   expect(res.body).toEqual([{ _id: '20240627' }, { _id: '20230627' }]);
 });
+
