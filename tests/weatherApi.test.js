@@ -6,7 +6,7 @@ const mockCollection = {
   project: jest.fn().mockReturnThis(),
   sort: jest.fn().mockReturnThis(),
   toArray: jest.fn().mockResolvedValue([]),
-  findOne: jest.fn(),
+  findOne: jest.fn().mockResolvedValue(null),
 };
 jest.mock('../config/db', () => {
   const mockDb = { collection: jest.fn(() => mockCollection) };
@@ -123,4 +123,3 @@ test('GET /api/weather/same-day returns past years data', async () => {
   const res = await request(app).get('/api/weather/same-day?date=2024-06-27&years=2');
   expect(res.statusCode).toBe(200);
   expect(res.body).toEqual([{ _id: '20240627' }, { _id: '20230627' }]);
-});

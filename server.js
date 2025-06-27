@@ -77,12 +77,21 @@ async function initApp() {
   app.use(async (req, res, next) => {
     try {
       const db = req.app.locals.db;
-      const logoDoc = await db.collection("homepage").findOne({ key: "logo" });
-      const bannerDocs = await db
-        .collection("homepage")
-        .find({ key: /^banner/ })
-        .sort({ key: 1 })
-        .toArray();
+      const homepageColl = db?.collection?.("homepage");
+
+      const logoDoc = await homepageColl?.findOne?.({ key: "logo" });
+
+      let bannerDocs = [];
+      if (typeof homepageColl?.find === "function") {
+        let cursor = homepageColl.find({ key: /^banner/ });
+        if (typeof cursor.sort === "function") {
+          cursor = cursor.sort({ key: 1 });
+        }
+        if (typeof cursor.toArray === "function") {
+          bannerDocs = await cursor.toArray();
+        }
+      }
+
       res.locals.logo = logoDoc?.img || "";
       res.locals.banners = bannerDocs.map((b) => b.img);
     } catch (err) {

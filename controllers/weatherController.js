@@ -1,137 +1,155 @@
-const fetch = require('node-fetch');
-const asyncHandler = require('../middlewares/asyncHandler');
+jest.setTimeout(60000);
 
-// Fetch daily weather from KMA API
-exports.getDailyWeather = asyncHandler(async (req, res) => {
-  const baseDate = req.query.date || new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const baseTime = req.query.time || '1200';
-  const nx = req.query.nx || '60';
-  const ny = req.query.ny || '127';
-  const serviceKey = encodeURIComponent(process.env.WEATHER_API_KEY || '');
+/* -----------------------------  MongoDB Mock  ----------------------------- */
+const mockCollection = {
+  find:    jest.fn().mockReturnThis(),
+  project: jest.fn().mockReturnThis(),
+  sort:    jest.fn().mockReturnThis(),
+  toArray: jest.fn().mockResolvedValue([]),
+  findOne: jest.fn().mockResolvedValue(null),
+};
 
-  const params = new URLSearchParams({
-    serviceKey,
-    pageNo: '1',
-    numOfRows: '1000',
-    dataType: 'JSON',
-    base_date: baseDate,
-    base_time: baseTime,
-    nx,
-    ny,
-  });
-
-  const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?${params}`;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Weather API error: ${response.status}`);
-  }
-
-  let data;
-  try {
-    data = await response.json();
-  } catch (err) {
-    const text = await response.text();
-    throw new Error(`Invalid JSON: ${text.slice(0, 100)}`);
-  }
-
-  const items = data?.response?.body?.items?.item || [];
-  const findVal = (cat) => items.find((i) => i.category === cat)?.fcstValue;
-
-  res.json({
-    temperature: findVal('T1H'),
-    sky: findVal('SKY'),
-    precipitationType: findVal('PTY'),
-  });
+jest.mock('../config/db', () => {
+  const mockDb      = { collection: jest.fn(() => mockCollection) };
+  const mockConnect = jest.fn().mockResolvedValue(mockDb);
+  mockConnect.then  = (fn) => fn(mockDb); // Promise‑like 체이닝 대응
+  return { connectDB: mockConnect, closeDB: jest.fn().mockResolvedValue() };
 });
 
-// Summary of last 90 days from MongoDB
-exports.getWeatherSummary = asyncHandler(async (req, res) => {
-  const db = req.app.locals.db;
-  const coll = db.collection('weather');
-  const today = new Date();
-  today.setDate(today.getDate() - 90);
-  const startKey = today.toISOString().slice(0, 10).replace(/-/g, '');
+/* -----------------------------  node‑fetch Mock  -------------------------- */
+jest.mock('node-fetch');
+const mockFetch = require('node-fetch');
 
-  const docs = await coll
-    .find({ _id: { $gte: startKey } })
-    .project({ TMX: 1, TMN: 1, POP: 1 })
-    .toArray();
+/* -------------------------------  Imports  -------------------------------- */
+const request       = require('supertest');
+const { initApp }   = require('../server');
+const { closeDB }   = require('../config/db');
 
-  if (!docs.length) {
-    return res.status(404).json({ message: 'No data' });
-  }
+/* -------------------------------------------------------------------------- */
+let app;
 
-  let sumMax = 0;
-  let sumMin = 0;
-  let sumPop = 0;
-  let count = 0;
+/* -----------------------------  공통 설정  -------------------------------- */
+beforeAll(async () => {
+  process.env.NODE_ENV        = 'test';
+  process.env.MONGO_URI       = 'mongodb://127.0.0.1:27017/testdb';
+  process.env.DB_NAME         = 'testdb';
+  process.env.SESSION_SECRET  = 'testsecret';
+  process.env.WEATHER_API_KEY = 'testkey';
 
-  for (const d of docs) {
-    const max = parseFloat(d.TMX);
-    const min = parseFloat(d.TMN);
-    const pop = parseFloat(d.POP);
-    if (!Number.isNaN(max)) sumMax += max;
-    if (!Number.isNaN(min)) sumMin += min;
-    if (!Number.isNaN(pop)) sumPop += pop;
-    count += 1;
-  }
+  mockFetch.mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      response: {
+        body: {
+          items: {
+            item: [
+              { category: 'T1H', fcstValue: '20' },
+              { category: 'SKY', fcstValue: '1' },
+              { category: 'PTY', fcstValue: '0' },
+            ],
+          },
+        },
+      },
+    }),
+  });
 
-  res.json({
-    averageMax: (sumMax / count).toFixed(1),
-    averageMin: (sumMin / count).toFixed(1),
-    averagePop: (sumPop / count).toFixed(1),
-    days: count,
+  app = await initApp();
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();              // 모든 mock 초기화
+  mockCollection.find   .mockReturnThis();
+  mockCollection.project.mockReturnThis();
+  mockCollection.sort   .mockReturnThis();
+});
+
+afterAll(async () => {
+  await closeDB();
+});
+
+/* -----------------------------  테스트 케이스  ---------------------------- */
+test('GET /api/weather/daily returns parsed weather data', async () => {
+  mockCollection.findOne.mockResolvedValueOnce(null); // logo
+  mockCollection.toArray.mockResolvedValueOnce([]);   // banners
+
+  const res = await request(app).get('/api/weather/daily');
+
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual({
+    temperature: '20',
+    sky: '1',
+    precipitationType: '0',
   });
 });
 
-// Get stored weather by date
-exports.getWeatherByDate = asyncHandler(async (req, res) => {
-  const { date } = req.params;
-  if (!date) {
-    return res.status(400).json({ message: 'date required' });
-  }
-  const key = date.replace(/-/g, '');
-  const coll = req.app.locals.db.collection('weather');
-  const doc = await coll.findOne({ _id: key });
-  if (!doc) return res.status(404).json({ message: 'No data' });
-  res.json(doc);
+test('GET /api/weather/summary returns averaged data', async () => {
+  mockCollection.findOne.mockResolvedValueOnce(null); // logo
+  mockCollection.toArray
+    .mockResolvedValueOnce([]) // banners
+    .mockResolvedValue([
+      { TMX: '20', TMN: '10', POP: '50' },
+      { TMX: '22', TMN: '12', POP: '70' },
+    ]);
+
+  const res = await request(app).get('/api/weather/summary');
+
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual({
+    averageMax: '21.0',
+    averageMin: '11.0',
+    averagePop: '60.0',
+    days: 2,
+  });
 });
 
-// Get range of stored weather data
-exports.getWeatherRange = asyncHandler(async (req, res) => {
-  const { date, period } = req.query;
-  if (!date) return res.status(400).json({ message: 'date required' });
-  const monthsMap = { '3m': 3, '6m': 6, '1y': 12 };
-  const months = monthsMap[period] || 3;
-  const end = new Date(date);
-  const start = new Date(date);
-  start.setMonth(start.getMonth() - months);
-  const fmt = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
-  const coll = req.app.locals.db.collection('weather');
-  const docs = await coll
-    .find({ _id: { $gte: fmt(start), $lte: fmt(end) } })
-    .sort({ _id: 1 })
-    .toArray();
-  res.json(docs);
+test('GET /api/weather/date/:date returns a document', async () => {
+  mockCollection.findOne
+    .mockResolvedValueOnce(null) // logo
+    .mockResolvedValueOnce({ _id: '20240627', TMX: '25' });
+  mockCollection.toArray.mockResolvedValueOnce([]); // banners
+
+  const res = await request(app).get('/api/weather/date/2024-06-27');
+
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual({ _id: '20240627', TMX: '25' });
 });
 
-// Compare same month/day across years
-exports.getWeatherSameDay = asyncHandler(async (req, res) => {
-  const { date } = req.query;
-  let years = parseInt(req.query.years, 10) || 1;
-  if (!date) return res.status(400).json({ message: 'date required' });
-  years = Math.min(Math.max(years, 1), 10);
-  const base = new Date(date);
-  const fmt = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
-  const coll = req.app.locals.db.collection('weather');
-  const results = [];
-  for (let i = 0; i < years; i++) {
-    const d = new Date(base);
-    d.setFullYear(base.getFullYear() - i);
-    const doc = await coll.findOne({ _id: fmt(d) });
-    if (doc) results.push(doc);
-  }
-  res.json(results);
+test('GET /api/weather/range returns documents', async () => {
+  mockCollection.findOne.mockResolvedValueOnce(null); // logo
+  mockCollection.toArray
+    .mockResolvedValueOnce([]) // banners
+    .mockResolvedValue([{ _id: '20240601' }, { _id: '20240627' }]);
+
+  const res = await request(app).get('/api/weather/range?date=2024-06-27&period=3m');
+
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual([{ _id: '20240601' }, { _id: '20240627' }]);
+});
+
+test('GET /api/weather/same-day returns past years data', async () => {
+  mockCollection.findOne
+    .mockResolvedValueOnce(null)                // logo
+    .mockResolvedValueOnce({ _id: '20240627' }) // 2024
+    .mockResolvedValueOnce({ _id: '20230627' }); // 2023
+
+  mockCollection.toArray
+    .mockResolvedValueOnce([]) // banners
+    .mockResolvedValueOnce([
+      { _id: '20240627' },
+      { _id: '20230627' },
+    ]);
+
+  const res = await request(app).get('/api/weather/same-day?date=2024-06-27&years=2');
+
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual([
+    { _id: '20240627' },
+    { _id: '20230627' },
+  ]);
+
+  expect(mockCollection.find).toHaveBeenCalledWith({
+    _id: { $in: ['20240627', '20230627'] },
+  });
+  expect(mockCollection.project).toHaveBeenCalledWith({ _id: 1 });
+  expect(mockCollection.sort).toHaveBeenCalledWith({ _id: -1 });
 });
