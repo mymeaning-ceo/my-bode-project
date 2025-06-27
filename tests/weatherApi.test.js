@@ -66,10 +66,15 @@ test('GET /api/weather/daily returns parsed weather data', async () => {
 });
 
 test('GET /api/weather/same-day returns past years data', async () => {
-  mockCollection.toArray.mockResolvedValueOnce([
-    { _id: '20240627' },
-    { _id: '20230627' },
-  ]);
+  // The first toArray call comes from the homepage banner lookup middleware,
+  // so return an empty array for that invocation and mock the second call with
+  // the expected weather documents.
+  mockCollection.toArray
+    .mockResolvedValueOnce([])
+    .mockResolvedValueOnce([
+      { _id: '20240627' },
+      { _id: '20230627' },
+    ]);
 
   const res = await request(app).get(
     '/api/weather/same-day?date=2024-06-27&years=2'
