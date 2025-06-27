@@ -4,6 +4,12 @@ import hashlib
 import time
 from urllib.parse import urlencode
 import requests
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
 
 def sign(method: str, url_path: str, secret_key: str, timestamp: str) -> str:
@@ -50,4 +56,4 @@ if __name__ == "__main__":
 
     q = dict(pair.split("=", 1) for pair in args.query.split("&")) if args.query else None
     data = coupang_request(args.method.upper(), args.path, query=q)
-    print(json.dumps(data, ensure_ascii=False, indent=2))
+    logging.info(json.dumps(data, ensure_ascii=False, indent=2))

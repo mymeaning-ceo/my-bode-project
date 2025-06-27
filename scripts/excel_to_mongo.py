@@ -7,6 +7,12 @@ from pathlib import Path
 import re
 from dotenv import load_dotenv
 from typing import Union, IO
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
 # ─────────────────────────────────────────────
 # ① .env 파일에서 환경변수 불러오기 (MONGO_URI 포함)
@@ -155,20 +161,22 @@ def transform_file(path: Union[str, Path, IO]) -> list[dict]:
 # ─────────────────────────────────────────────
 def main():
     if len(sys.argv) < 4:
-        print("❌ 사용법: python file_to_mongo.py <file_path> <db_name> <collection_name>")
+        logging.error(
+            "❌ 사용법: python file_to_mongo.py <file_path> <db_name> <collection_name>"
+        )
         sys.exit(1)
 
     file_path, db_name, collection_name = sys.argv[1:4]
     mongo_uri = os.getenv("MONGO_URI")
     if not mongo_uri:
-        print("❌ 환경 변수 MONGO_URI이 설정되지 않았습니다.")
+        logging.error("❌ 환경 변수 MONGO_URI이 설정되지 않았습니다.")
         sys.exit(1)
 
     try:
         # 🔧 수정 내용: 확장자에 따라 엑셀/CSV를 자동 판단하여 처리
         docs = transform_file(file_path)
     except Exception as e:
-        print("❌ Transform error:", e, file=sys.stderr)
+        logging.error("❌ Transform error: %s", e)
         traceback.print_exc()
         sys.exit(2)
 
@@ -178,11 +186,11 @@ def main():
             if docs:
                 col.delete_many({})  # 기존 데이터 전체 삭제
                 col.insert_many(docs)
-                print(f"✅ MongoDB 저장 완료: {len(docs)}건")
+                logging.info("✅ MongoDB 저장 완료: %d건", len(docs))
             else:
-                print("⚠️ 변환된 데이터가 없습니다.")
+                logging.info("⚠️ 변환된 데이터가 없습니다.")
     except Exception as e:
-        print("❌ MongoDB 저장 실패:", e, file=sys.stderr)
+        logging.error("❌ MongoDB 저장 실패: %s", e)
         traceback.print_exc()
         sys.exit(3)
 

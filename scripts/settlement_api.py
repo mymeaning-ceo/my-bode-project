@@ -1,4 +1,10 @@
 from coupang_api import coupang_request
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
 
 def list_payouts(
@@ -42,13 +48,13 @@ if __name__ == "__main__":
         start_date="2025-05-28",
         end_date="2025-06-27",
     )
-    print("=== Payout List ===")
+    logging.info("=== Payout List ===")
     for p in payouts.get("content", []):
-        print(p["settlementId"], p["payoutAmount"])
+        logging.info("%s %s", p["settlementId"], p["payoutAmount"])
 
     # 2) 특정 정산 ID 상세 조회
     if payouts.get("content"):
         settlement_id = payouts["content"][0]["settlementId"]
         detail = get_payout_detail(settlement_id)
-        print("\n=== Payout Detail ===")
-        print(detail)
+        logging.info("\n=== Payout Detail ===")
+        logging.info("%s", detail)
