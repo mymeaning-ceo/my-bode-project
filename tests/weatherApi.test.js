@@ -2,6 +2,7 @@ jest.setTimeout(60000);
 
 // Mock MongoDB config
 const mockCollection = {
+  findOne: jest.fn().mockResolvedValue(null),
   find: jest.fn().mockReturnThis(),
   project: jest.fn().mockReturnThis(),
   sort: jest.fn().mockReturnThis(),
@@ -49,6 +50,13 @@ beforeAll(async () => {
   });
 
   app = await initApp();
+});
+
+beforeEach(() => {
+  mockCollection.find.mockClear();
+  mockCollection.project.mockClear();
+  mockCollection.sort.mockClear();
+  mockCollection.toArray.mockReset();
 });
 
 afterAll(async () => {
