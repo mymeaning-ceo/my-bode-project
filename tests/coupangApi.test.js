@@ -3,6 +3,7 @@ jest.setTimeout(60000);
 const mockCollection = {
   bulkWrite: jest.fn().mockResolvedValue(),
   deleteMany: jest.fn().mockResolvedValue(),
+  findOne: jest.fn().mockResolvedValue(null),
   find: jest.fn().mockReturnThis(),
   sort: jest.fn().mockReturnThis(),
   toArray: jest.fn().mockResolvedValue([]),

@@ -56,7 +56,7 @@ beforeEach(() => {
   mockCollection.find.mockClear();
   mockCollection.project.mockClear();
   mockCollection.sort.mockClear();
-  mockCollection.toArray.mockReset();
+  mockCollection.toArray.mockClear();
 });
 
 afterAll(async () => {
