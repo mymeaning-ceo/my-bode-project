@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const asyncHandler = require('../middlewares/asyncHandler');
 
 // Fetch daily weather from KMA API
-exports.getDailyWeather = asyncHandler(async (req, res) => {
+const getDailyWeather = asyncHandler(async (req, res) => {
   const baseDate = req.query.date || new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const baseTime = req.query.time || '1200';
   const nx = req.query.nx || '60';
@@ -47,7 +47,7 @@ exports.getDailyWeather = asyncHandler(async (req, res) => {
 });
 
 // Fetch weather data for the same day across past years
-exports.getSameDay = asyncHandler(async (req, res) => {
+const getSameDay = asyncHandler(async (req, res) => {
   const { date, years = 1 } = req.query;
 
   if (!date) {
@@ -72,3 +72,8 @@ exports.getSameDay = asyncHandler(async (req, res) => {
 
   res.json(docs);
 });
+
+module.exports = {
+  getDailyWeather,
+  getSameDay,
+};
