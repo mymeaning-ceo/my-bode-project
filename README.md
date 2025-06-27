@@ -98,9 +98,6 @@ const createProduct = async (body) => {
 createProduct({ name: 'Sample' });
 ```
 
-=======
-
-
 ## Weather integration
 
 The project exposes `/api/weather/daily` which fetches forecast data from the
@@ -121,7 +118,6 @@ Additional API endpoints allow querying stored weather data:
 
 
 Server-side requests use `node-fetch`, which is listed in `package.json`.
-=======
 
 
 ## Weather API details
@@ -166,8 +162,6 @@ const fetchWeather = async () => {
 
 fetchWeather();
 ```
-
-=======
 
 ## Order quantity calculator
 
