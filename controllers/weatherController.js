@@ -45,3 +45,30 @@ exports.getDailyWeather = asyncHandler(async (req, res) => {
     precipitationType: findVal('PTY'),
   });
 });
+
+// Fetch weather data for the same day across past years
+exports.getSameDay = asyncHandler(async (req, res) => {
+  const { date, years = 1 } = req.query;
+
+  if (!date) {
+    return res.status(400).json({ message: 'date query required' });
+  }
+
+  const normalized = date.replace(/-/g, '');
+  const baseYear = parseInt(normalized.slice(0, 4), 10);
+  const mmdd = normalized.slice(4);
+
+  const ids = [];
+  for (let i = 0; i < Number(years); i += 1) {
+    ids.push(`${baseYear - i}${mmdd}`);
+  }
+
+  const docs = await req.app.locals.db
+    .collection('weather')
+    .find({ _id: { $in: ids } })
+    .project({ _id: 1 })
+    .sort({ _id: -1 })
+    .toArray();
+
+  res.json(docs);
+});
