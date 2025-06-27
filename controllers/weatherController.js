@@ -70,5 +70,8 @@ exports.getSameDay = asyncHandler(async (req, res) => {
     .sort({ _id: -1 })
     .toArray();
 
+  // Ensure deterministic order
+  docs.sort((a, b) => b._id.localeCompare(a._id));
+
   res.json(docs);
 });
