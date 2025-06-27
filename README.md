@@ -43,6 +43,16 @@ Example:
 python scripts/coupang_api.py GET /v2/providers/openapi/apis/api/v1/marketplace/seller-products/12345
 ```
 
+### Settlement API helper
+
+`scripts/settlement_api.py` provides a small CLI for Coupang's settlement endpoints. It requires `CP_ACCESS_KEY`, `CP_SECRET_KEY` and `CP_VENDOR_ID` to be set in the environment. `CP_API_HOST` may be used to target a custom host.
+
+Example:
+
+```bash
+python scripts/settlement_api.py GET /v2/providers/openapi/apis/api/v1/settlement/summary
+```
+
 ## Router structure
 
 Routes are organized under the `routes/` directory. `server.js` mounts two routers directly:
