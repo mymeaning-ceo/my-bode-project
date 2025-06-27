@@ -107,6 +107,18 @@ The project exposes `/api/weather/daily` which fetches forecast data from the
 Korean Meteorological Administration using `WEATHER_API_KEY`. An accompanying
 `/weather` page displays the information via AJAX.
 
+Historical data can be loaded with `scripts/weather_ingest.py`. The script
+requests the last 90 days of forecasts and upserts them into the `weather`
+collection of the MongoDB specified by `MONGO_URI`.
+
+Additional API endpoints allow querying stored weather data:
+
+- `GET /api/weather/date/:date` – fetch the document for `YYYY-MM-DD`
+- `GET /api/weather/range?date=YYYY-MM-DD&period=3m` – return records for the
+  preceding period (`3m`, `6m` or `1y`)
+- `GET /api/weather/same-day?date=YYYY-MM-DD&years=5` – fetch the same
+  month/day for up to 10 previous years.
+
 
 Server-side requests use `node-fetch`, which is listed in `package.json`.
 =======

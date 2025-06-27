@@ -26,6 +26,58 @@
         </tr>
       </tbody>
     </table>
+
+    <h3 class="fw-bold mt-5">최근 3개월 평균</h3>
+    <table class="table table-bordered bg-white text-center">
+      <thead class="table-light">
+        <tr>
+          <th>평균 최고기온</th>
+          <th>평균 최저기온</th>
+          <th>평균 강수확률</th>
+        </tr>
+      </thead>
+      <tbody id="summaryBody">
+        <tr>
+          <td colspan="3">Loading...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="fw-bold mt-5">날씨 조회</h3>
+    <form id="historyForm" class="row g-2 align-items-end">
+      <div class="col-auto">
+        <input type="date" id="queryDate" class="form-control" required>
+      </div>
+      <div class="col-auto">
+        <select id="periodSelect" class="form-select">
+          <option value="day">하루</option>
+          <option value="3m">3개월</option>
+          <option value="6m">6개월</option>
+          <option value="1y">1년</option>
+          <option value="same">동일날짜</option>
+        </select>
+      </div>
+      <div class="col-auto" id="yearsGroup" style="display:none;">
+        <input type="number" id="yearsInput" class="form-control" value="5" min="1" max="10">
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">조회</button>
+      </div>
+    </form>
+    <table class="table table-bordered bg-white text-center mt-3">
+      <thead class="table-light">
+        <tr>
+          <th>날짜</th>
+          <th>TMX</th>
+          <th>TMN</th>
+          <th>POP</th>
+          <th>PCP</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+        <tr><td colspan="5">No data</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
