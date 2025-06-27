@@ -1,8 +1,14 @@
 jest.setTimeout(60000);
 
 // Mock MongoDB config
+const mockCollection = {
+  find: jest.fn().mockReturnThis(),
+  project: jest.fn().mockReturnThis(),
+  sort: jest.fn().mockReturnThis(),
+  toArray: jest.fn().mockResolvedValue([]),
+};
 jest.mock('../config/db', () => {
-  const mockDb = { collection: jest.fn() };
+  const mockDb = { collection: jest.fn(() => mockCollection) };
   const mockConnect = jest.fn().mockResolvedValue(mockDb);
   mockConnect.then = (fn) => fn(mockDb);
   return { connectDB: mockConnect, closeDB: jest.fn().mockResolvedValue() };
@@ -57,4 +63,26 @@ test('GET /api/weather/daily returns parsed weather data', async () => {
     sky: '1',
     precipitationType: '0',
   });
+});
+
+test('GET /api/weather/same-day returns past years data', async () => {
+  mockCollection.toArray.mockResolvedValueOnce([
+    { _id: '20240627' },
+    { _id: '20230627' },
+  ]);
+
+  const res = await request(app).get(
+    '/api/weather/same-day?date=2024-06-27&years=2'
+  );
+
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual([
+    { _id: '20240627' },
+    { _id: '20230627' },
+  ]);
+  expect(mockCollection.find).toHaveBeenCalledWith({
+    _id: { $in: ['20240627', '20230627'] },
+  });
+  expect(mockCollection.project).toHaveBeenCalledWith({ _id: 1 });
+  expect(mockCollection.sort).toHaveBeenCalledWith({ _id: -1 });
 });
