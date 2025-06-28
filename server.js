@@ -9,6 +9,7 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
 const flash = require("connect-flash");
+const fs = require("fs");
 const { connectDB } = require("./config/db");
 const { initIndexes } = require("./config/initIndexes");
 const webRouter = require("./routes/web");
@@ -117,14 +118,18 @@ async function initApp() {
   }
 
   // 기본 경로에서 React 정적 페이지 제공
+  const reactRoot = fs.existsSync(path.join(__dirname, 'client', 'build'))
+    ? path.join(__dirname, 'client', 'build')
+    : path.join(__dirname, 'client', 'public');
+
   app.get("/", (req, res) => {
-    const reactIndex = path.join(__dirname, "client", "public", "index.html");
+    const reactIndex = path.join(reactRoot, "index.html");
     res.sendFile(reactIndex);
   });
-  app.use(express.static(path.join(__dirname, "client", "public")));
+  app.use(express.static(reactRoot));
   app.use(express.static(path.join(__dirname, "public")));
   app.get("/dashboard", checkAuth, (req, res) => {
-    const reactIndex = path.join(__dirname, "client", "public", "index.html");
+    const reactIndex = path.join(reactRoot, "index.html");
     res.sendFile(reactIndex);
   });
 
