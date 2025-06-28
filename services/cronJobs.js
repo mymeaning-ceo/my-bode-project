@@ -1,4 +1,5 @@
 const { coupangRequest } = require('../lib/coupangApiClient');
+const { fetchDaily } = require('../controllers/weatherController');
 
 async function updateInventory(db) {
   const ids = await db.collection('coupang').distinct('Option ID');
@@ -66,9 +67,34 @@ async function calcAdMetrics(db) {
   }
 }
 
+async function saveTodayWeather(db) {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  try {
+    const data = await fetchDaily(date);
+    await db.collection('weather').updateOne(
+      { _id: date },
+      { $set: { ...data, updatedAt: new Date() } },
+      { upsert: true },
+    );
+  } catch (err) {
+    console.error('❌ Weather fetch failed:', err.message);
+  }
+}
+
 function startCronJobs(db) {
   // Update inventory every hour
   setInterval(() => updateInventory(db), 60 * 60 * 1000);
+
+  // Save today's weather at 00:10
+  const nowWeather = new Date();
+  const firstWeather = new Date(nowWeather);
+  firstWeather.setHours(0, 10, 0, 0);
+  if (firstWeather <= nowWeather) firstWeather.setDate(firstWeather.getDate() + 1);
+
+  setTimeout(() => {
+    saveTodayWeather(db);
+    setInterval(() => saveTodayWeather(db), 24 * 60 * 60 * 1000);
+  }, firstWeather - nowWeather);
 
   // Calculate ad metrics daily at 00:30
   const now = new Date();

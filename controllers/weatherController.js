@@ -44,6 +44,18 @@ const getDailyWeather = asyncHandler(async (req, res) => {
   const ny = req.query.ny || '127';
 
   const data = await fetchDaily(baseDate, baseTime, nx, ny);
+
+  try {
+    const db = req.app.locals.db;
+    await db.collection('weather').updateOne(
+      { _id: baseDate },
+      { $set: { ...data, updatedAt: new Date() } },
+      { upsert: true },
+    );
+  } catch (err) {
+    console.error('❌ Weather DB update failed:', err.message);
+  }
+
   res.json(data);
 });
 
@@ -141,6 +153,7 @@ const getAverageTemperature = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  fetchDaily,
   getDailyWeather,
   getSameDay,
   getMonthlyWeather,
