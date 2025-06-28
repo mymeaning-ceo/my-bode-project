@@ -14,3 +14,9 @@
 .app-header .btn {
   font-size: 1.25rem;
 }
+
+.user-info {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}

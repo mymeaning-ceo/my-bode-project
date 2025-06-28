@@ -12,7 +12,8 @@ function AverageTemp() {
     try {
       const [year, month, day] = date.split('-');
       const res = await fetch(
-        `/api/weather/average?year=${year}&month=${month}&day=${day}`
+        `/api/weather/average?year=${year}&month=${month}&day=${day}`,
+        { credentials: 'include' }
       );
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();

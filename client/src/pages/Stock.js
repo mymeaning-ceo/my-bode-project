@@ -12,7 +12,9 @@ function Stock() {
       color: form.color,
       size: form.size,
     });
-    const res = await fetch(`/api/stock?${params.toString()}`);
+    const res = await fetch(`/api/stock?${params.toString()}`, {
+      credentials: 'include',
+    });
     if (res.ok) {
       const data = await res.json();
       setRows(data.data || []);
