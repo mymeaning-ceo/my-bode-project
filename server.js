@@ -116,8 +116,10 @@ async function initApp() {
       );
   }
 
+  // 기본 경로에서 React 정적 페이지 제공
   app.get("/", (req, res) => {
-    res.redirect(302, "/stock");
+    const reactIndex = path.join(__dirname, "client", "public", "index.html");
+    res.sendFile(reactIndex);
   });
   app.use(express.static(path.join(__dirname, "public")));
   app.get("/dashboard", checkAuth, (req, res) => {
