@@ -6,11 +6,9 @@ const stockCtrl = require("../../controllers/stockController");
 // 0. GET /stock (페이지 표시)
 // ───────────────────────────────────────────
 router.get("/", (req, res) => {
-  // stock.ejs를 렌더링
-  res.render("stock", {
-    title: "재고 관리",
-    user: req.user, // 필요 시 전달
-  });
+  const path = require("path");
+  const reactIndex = path.join(__dirname, "..", "..", "client", "public", "index.html");
+  res.sendFile(reactIndex);
 });
 // ───────────────────────────────────────────
 // 2. POST /stock/upload (엑셀 업로드)
