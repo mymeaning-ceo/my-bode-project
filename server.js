@@ -127,6 +127,16 @@ async function initApp() {
     const reactIndex = path.join(__dirname, "client", "public", "index.html");
     res.sendFile(reactIndex);
   });
+  app.get("/help", (req, res) => {
+    const reactIndex = path.join(__dirname, "client", "public", "index.html");
+    res.sendFile(reactIndex);
+  });
+
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    const reactIndex = path.join(__dirname, "client", "public", "index.html");
+    res.sendFile(reactIndex);
+  });
 
   app.use(errorHandler);
 

@@ -14,6 +14,7 @@ import DashboardLayout from './pages/DashboardLayout';
 import Board from './pages/Board';
 import SalesAmount from './pages/SalesAmount';
 import SalesVolume from './pages/SalesVolume';
+import Help from './pages/Help';
 import Admin from './pages/Admin';
 import AdminBanner from './pages/admin/Banner';
 import AdminLogo from './pages/admin/Logo';
@@ -28,6 +29,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/help" element={<Help />} />
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/board" element={<Board />} />

@@ -224,4 +224,6 @@ client authenticates by sending credentials to the Express endpoint
 `/api/auth/login`. In production the server serves `client/public/index.html` for
 `/login`, so navigating directly to `/login` loads the React app.
 
+The Help page has also been converted to React and is accessible at `/help`.
+
 
