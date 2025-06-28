@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 function Weather() {
   const [weather, setWeather] = useState(null);
