@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 
 function Board() {
@@ -11,7 +11,7 @@ function Board() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const loadPosts = async () => {
+  const loadPosts = useCallback(async () => {
     const params = new URLSearchParams();
     params.set('board', board);
     params.set('page', page);
@@ -24,11 +24,11 @@ function Board() {
       setPosts(data.data || []);
       setTotal(data.total || 0);
     }
-  };
+  }, [board, page, search]);
 
   useEffect(() => {
     loadPosts();
-  }, [board, page, search]);
+  }, [loadPosts]);
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
