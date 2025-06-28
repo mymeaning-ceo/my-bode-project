@@ -44,7 +44,6 @@ async function initApp() {
   );
   app.use(compression());
   app.use(morgan("dev"));
-  app.use(express.static(path.join(__dirname, "public")));
   app.set("view engine", "ejs");
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
@@ -120,6 +119,7 @@ async function initApp() {
   app.get("/", (req, res) => {
     res.redirect(302, "/stock");
   });
+  app.use(express.static(path.join(__dirname, "public")));
   app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
     const menuIcons = {
