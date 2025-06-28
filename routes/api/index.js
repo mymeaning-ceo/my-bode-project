@@ -25,6 +25,8 @@ router.use("/weather", require("./weatherApi"));
 router.use("/analytics", require("./analytics"));
 // 게시판 API
 router.use("/posts", require("./postApi"));
+// 게시판 목록 API
+router.use("/boards", require("./boardApi"));
 
 // TODO: 다른 API 라우터 추가 시 아래와 같이 등록
 // router.use("/user", require("./userApi"));
