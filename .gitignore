@@ -27,3 +27,7 @@ Thumbs.db
 
 yarn.lock
 pnpm-lock.yaml
+# ignore npm wrappers
+client/client@0.1.0
+client/npm
+client/react-scripts
