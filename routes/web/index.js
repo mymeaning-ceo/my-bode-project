@@ -31,6 +31,8 @@ fs.readdirSync(routesDir)
       mountPaths = ['/coupang/add'];
     } else if (name === 'post') {
       mountPaths = ['/' + name, '/list'];
+    } else if (name === 'board') {
+      mountPaths = ['/board', '/:shop/board'];
     }
 
   mountPaths.forEach((mountPath) => {

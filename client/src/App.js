@@ -31,6 +31,7 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/board" element={<Board />} />
+          <Route path="/:shop/board" element={<Board />} />
           <Route path="/sales-amount" element={<SalesAmount />} />
           <Route path="/sales-volume" element={<SalesVolume />} />
           <Route path="/admin" element={<Admin />} />
