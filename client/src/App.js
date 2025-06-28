@@ -20,7 +20,6 @@ function App() {
           <Route path="/stock" element={<Stock />} />
           <Route path="/weather" element={<Weather />} />
         </Route>
-      </Routes>
     </BrowserRouter>
   );
 }

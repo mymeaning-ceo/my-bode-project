@@ -101,8 +101,48 @@ const getMonthlyWeather = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+// Calculate average temperature for a specific day
+const getAverageTemperature = asyncHandler(async (req, res) => {
+  const { year, month, day } = req.query;
+
+  if (!year || !month || !day) {
+    return res
+      .status(400)
+      .json({ message: 'year, month and day query required' });
+  }
+
+  const paddedMonth = month.toString().padStart(2, '0');
+  const paddedDay = day.toString().padStart(2, '0');
+  const date = `${year}${paddedMonth}${paddedDay}`;
+  const times = ['0000', '0600', '1200', '1800'];
+  let sum = 0;
+  let count = 0;
+
+  for (const time of times) {
+    try {
+      const { temperature } = await fetchDaily(date, time);
+      if (temperature !== undefined) {
+        sum += Number(temperature);
+        count += 1;
+      }
+    } catch (err) {
+      // Ignore individual fetch errors
+    }
+  }
+
+  if (count === 0) {
+    return res.status(500).json({ message: 'Failed to fetch weather data' });
+  }
+
+  res.json({
+    date: `${year}-${paddedMonth}-${paddedDay}`,
+    averageTemperature: Number(sum / count).toFixed(1),
+  });
+});
+
 module.exports = {
   getDailyWeather,
   getSameDay,
   getMonthlyWeather,
+  getAverageTemperature,
 };

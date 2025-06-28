@@ -96,3 +96,14 @@ test('GET /api/weather/monthly returns array of daily data', async () => {
   expect(Array.isArray(res.body)).toBe(true);
   expect(res.body.length).toBeGreaterThan(0);
 });
+
+test('GET /api/weather/average returns average temperature', async () => {
+  const res = await request(app).get(
+    '/api/weather/average?year=2024&month=06&day=01'
+  );
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual({
+    date: '2024-06-01',
+    averageTemperature: '20.0',
+  });
+});
