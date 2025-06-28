@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 function Stock() {
   const [rows, setRows] = useState([]);
@@ -21,7 +21,7 @@ function Stock() {
 
   useEffect(() => {
     loadData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
