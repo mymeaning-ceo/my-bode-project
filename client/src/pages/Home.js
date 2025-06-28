@@ -7,6 +7,9 @@ function Home() {
       <p>
         <Link to="/stock">재고 페이지로 이동</Link>
       </p>
+      <p className="mt-3">
+        <Link to="/login">로그인 페이지로 이동</Link>
+      </p>
     </div>
   );
 }
