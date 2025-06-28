@@ -208,4 +208,12 @@ npm start
 The React client relies on `chart.js` and `react-chartjs-2` for visualizations,
 so a successful install is required before `npm start` will compile.
 
+If the development server fails with "Module not found" errors, run `npm install`
+again inside the `client/` directory. The Express backend also uses port `3000`,
+so start React on a different port to avoid conflicts:
+
+```bash
+PORT=3001 npm start
+```
+
 
