@@ -38,7 +38,6 @@ function Header({ onToggleSidebar }) {
       <Link to="/dashboard" className="ms-2 fw-bold brand-link">
         내의미
       </Link>
-      <Link to="/help" className="ms-3">도움말</Link>
       {weather && (
         <div className="weather-info ms-3">
           <span>
@@ -48,6 +47,7 @@ function Header({ onToggleSidebar }) {
         </div>
       )}
       <div className="user-info ms-auto">
+        <Link to="/weather" className="me-3">날씨</Link>
         {user && <span className="me-3">{user.name || user.username}</span>}
         <button type="button" className="btn btn-link" onClick={handleLogout}>
           로그아웃
