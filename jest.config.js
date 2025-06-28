@@ -15,7 +15,13 @@ module.exports = {
     collectCoverage: true,
     coverageDirectory: "coverage",
     collectCoverageFrom: [
-      "src/**/*.js",
-      "!src/**/index.js" // 제외할 파일
+      "controllers/**/*.js",
+      "routes/**/*.js",
+      "middlewares/**/*.js",
+      "services/**/*.js",
+      "config/**/*.js",
+      "server.js",
+      "!routes/**/index.js",
+      "!config/**/index.js"
     ]
   };
