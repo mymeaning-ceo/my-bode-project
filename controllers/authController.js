@@ -1,8 +1,10 @@
+const path = require('path');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 
 exports.renderLoginPage = (req, res) => {
-  res.render('login');
+  const reactIndex = path.join(__dirname, '..', 'client', 'public', 'index.html');
+  res.sendFile(reactIndex);
 };
 
 exports.login = async (req, res, next) => {
