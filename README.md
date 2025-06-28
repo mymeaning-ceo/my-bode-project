@@ -21,7 +21,18 @@ This project requires several environment variables to run:
 - `CP_RG_AUTH_TOKEN` – Token for RocketGross API calls (enable the feature in WING first)
 
 
+
 Copy `.env.example` to `.env` in the project root and define these values before starting the server. Make sure the file is saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
+
+## Node packages
+
+`node_modules` is excluded from version control. Install the dependencies before running the server or any tests:
+
+```bash
+npm ci # or `npm install`
+```
+
+After the packages are installed you can run `npm test` or start `server.js`.
 
 ## Python scripts
 
