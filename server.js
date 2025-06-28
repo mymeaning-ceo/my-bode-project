@@ -121,6 +121,7 @@ async function initApp() {
     const reactIndex = path.join(__dirname, "client", "public", "index.html");
     res.sendFile(reactIndex);
   });
+  app.use(express.static(path.join(__dirname, "client", "public")));
   app.use(express.static(path.join(__dirname, "public")));
   app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
