@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 function Stock() {
   const [rows, setRows] = useState([]);
   const [form, setForm] = useState({ itemCode: '', color: '', size: '' });
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     const params = new URLSearchParams({
       start: '0',
       length: '100',
@@ -17,11 +17,11 @@ function Stock() {
       const data = await res.json();
       setRows(data.data || []);
     }
-  };
+  }, [form]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
