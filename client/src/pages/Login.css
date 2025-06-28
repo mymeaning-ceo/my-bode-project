@@ -1,4 +1,4 @@
-.login-wrapper {
+.login-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -6,9 +6,9 @@
   background-color: #f8f9fa;
 }
 
-.login-box {
+.login-form {
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
   padding: 2rem;
   background-color: #fff;
   border-radius: 8px;
