@@ -7,18 +7,28 @@ function Board() {
   const [posts, setPosts] = useState([]);
   const [form, setForm] = useState({ title: '', content: '' });
   const [editingId, setEditingId] = useState(null);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const loadPosts = async () => {
-    const res = await fetch(`/api/posts?board=${board}`, { credentials: 'include' });
+    const params = new URLSearchParams();
+    params.set('board', board);
+    params.set('page', page);
+    if (search) params.set('search', search);
+    const res = await fetch(`/api/posts?${params.toString()}`, {
+      credentials: 'include',
+    });
     if (res.ok) {
       const data = await res.json();
       setPosts(data.data || []);
+      setTotal(data.total || 0);
     }
   };
 
   useEffect(() => {
     loadPosts();
-  }, [board]);
+  }, [board, page, search]);
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -55,9 +65,30 @@ function Board() {
     setForm({ title: '', content: '' });
   };
 
+  const totalPages = Math.ceil(total / 10) || 1;
+
   return (
     <div className="container">
       <h2>{board} 게시판</h2>
+      <div className="mb-3 d-flex">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="form-control me-2"
+          placeholder="검색"
+        />
+        <button
+          type="button"
+          className="btn btn-outline-secondary"
+          onClick={() => {
+            setPage(1);
+            loadPosts();
+          }}
+        >
+          검색
+        </button>
+      </div>
       <form onSubmit={handleSubmit} className="mb-3">
         <input
           type="text"
@@ -121,6 +152,39 @@ function Board() {
           ))}
         </tbody>
       </table>
+      <nav className="d-flex justify-content-center">
+        <ul className="pagination">
+          <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              이전
+            </button>
+          </li>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <li key={p} className={`page-item ${p === page ? 'active' : ''}`}>
+              <button
+                type="button"
+                className="page-link"
+                onClick={() => setPage(p)}
+              >
+                {p}
+              </button>
+            </li>
+          ))}
+          <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              다음
+            </button>
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 }
