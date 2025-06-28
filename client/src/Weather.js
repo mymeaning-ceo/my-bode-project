@@ -7,7 +7,7 @@ function Weather() {
   useEffect(() => {
     async function fetchWeather() {
       try {
-        const res = await fetch('/api/weather/daily');
+        const res = await fetch('/api/weather/daily?nx=60&ny=127');
         if (!res.ok) {
           throw new Error('Failed to fetch');
         }
@@ -24,7 +24,9 @@ function Weather() {
   const ptyMap = { '0': '없음', '1': '비', '2': '비/눈', '3': '눈', '4': '소나기' };
 
   return (
-    <table className="table">
+    <div>
+      <h2>서울의 날씨 정보</h2>
+      <table className="table">
       <thead>
         <tr>
           <th>기온(℃)</th>
@@ -52,6 +54,7 @@ function Weather() {
         )}
       </tbody>
     </table>
+    </div>
   );
 }
 
