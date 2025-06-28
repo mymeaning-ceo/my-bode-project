@@ -1,0 +1,16 @@
+.app-header {
+  background: #fff;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #dee2e6;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rem;
+  z-index: 1000;
+}
+.app-header .btn {
+  font-size: 1.25rem;
+}
