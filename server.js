@@ -11,9 +11,7 @@ const compression = require("compression");
 const flash = require("connect-flash");
 const { connectDB } = require("./config/db");
 const { initIndexes } = require("./config/initIndexes");
-const webRouter = require("./routes/web");
 const apiRouter = require("./routes/api");
-const { checkAuth } = require("./middlewares/auth");
 const errorHandler = require("./middlewares/errorHandler");
 const { startCronJobs } = require("./services/cronJobs");
 
@@ -45,7 +43,7 @@ async function initApp() {
   app.use(compression());
   app.use(morgan("dev"));
   app.use(express.static(path.join(__dirname, "public")));
-  app.set("view engine", "ejs");
+  app.use(express.static(path.join(__dirname, "client", "build")));
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
   app.use(methodOverride("_method"));
@@ -107,7 +105,10 @@ async function initApp() {
   });
 
   app.use("/api", apiRouter);
-  app.use("/", webRouter);
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "build", "index.html"));
+  });
 
   if (process.env.NODE_ENV !== "production") {
     app._router.stack
@@ -117,28 +118,6 @@ async function initApp() {
       );
   }
 
-  app.get("/", (req, res) => {
-    res.redirect(302, "/stock");
-  });
-  app.get("/dashboard", checkAuth, (req, res) => {
-    const menus = ["/stock", "/list", "/write"];
-    const menuIcons = {
-      "/stock": "📦",
-      "/list": "📋",
-      "/write": "✍️",
-    };
-    const menuLabels = {
-      "/stock": "재고 관리",
-      "/list": "게시글 목록",
-      "/write": "글 작성",
-    };
-    res.render("dashboard.ejs", {
-      menus,
-      menuIcons,
-      menuLabels,
-      banners: res.locals.banners,
-    });
-  });
 
   app.use(errorHandler);
 
