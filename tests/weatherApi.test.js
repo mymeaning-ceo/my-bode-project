@@ -96,3 +96,20 @@ test('GET /api/weather/monthly returns array of daily data', async () => {
   expect(Array.isArray(res.body)).toBe(true);
   expect(res.body.length).toBeGreaterThan(0);
 });
+
+test('GET /api/weather/average returns average temperature', async () => {
+  mockFetch.mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      response: {
+        body: { items: { item: [{ category: 'T1H', fcstValue: '15' }] } },
+      },
+    }),
+  });
+
+  const res = await request(app).get('/api/weather/average?date=20240627');
+
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual({ date: '20240627', averageTemperature: 15 });
+  expect(mockFetch).toHaveBeenCalledTimes(8);
+});

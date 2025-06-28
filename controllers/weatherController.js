@@ -101,8 +101,40 @@ const getMonthlyWeather = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+// Calculate average temperature for a specific date by sampling multiple times
+const getAverageTemperature = asyncHandler(async (req, res) => {
+  const dateParam =
+    req.query.date ||
+    `${req.query.year}${(req.query.month || '').padStart(2, '0')}${(
+      req.query.day || ''
+    ).padStart(2, '0')}`;
+
+  const date = dateParam.replace(/-/g, '');
+  if (!/^\d{8}$/.test(date)) {
+    return res.status(400).json({ message: 'Invalid date' });
+  }
+
+  const times = ['0000', '0300', '0600', '0900', '1200', '1500', '1800', '2100'];
+  const temps = await Promise.all(
+    times.map((t) =>
+      fetchDaily(date, t)
+        .then((d) => Number(d.temperature))
+        .catch(() => null)
+    )
+  );
+
+  const valid = temps.filter((v) => typeof v === 'number' && !Number.isNaN(v));
+  if (!valid.length) {
+    return res.status(500).json({ message: 'No data' });
+  }
+
+  const avg = valid.reduce((a, b) => a + b, 0) / valid.length;
+  res.json({ date, averageTemperature: Number(avg.toFixed(1)) });
+});
+
 module.exports = {
   getDailyWeather,
   getSameDay,
   getMonthlyWeather,
+  getAverageTemperature,
 };

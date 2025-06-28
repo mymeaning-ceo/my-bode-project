@@ -116,7 +116,9 @@ createProduct({ name: 'Sample' });
 
 The project exposes `/api/weather/daily` which fetches forecast data from the
 Korean Meteorological Administration using `WEATHER_API_KEY`. An accompanying
-`/weather` page displays the information via AJAX.
+`/weather` page displays the information via AJAX. A new endpoint
+`/api/weather/average` calculates the average temperature for a given
+`date` by sampling multiple times throughout the day.
 
 
 Server-side requests use `node-fetch`, which is listed in `package.json`.
