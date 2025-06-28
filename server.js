@@ -116,10 +116,11 @@ async function initApp() {
       );
   }
 
-  app.get("/", (req, res) => {
-    res.redirect(302, "/stock");
-  });
+  app.use(express.static(path.join(__dirname, "client", "public")));
   app.use(express.static(path.join(__dirname, "public")));
+  app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "public", "index.html"));
+  });
   app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
     const menuIcons = {
