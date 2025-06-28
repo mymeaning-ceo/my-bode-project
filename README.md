@@ -196,8 +196,8 @@ initial ordering without writing extra JavaScript.
 
 ## React client
 
-The project includes a React frontend under `client/`. Install its dependencies
-separately before starting the development server:
+개발 단계에서는 기존 EJS 템플릿 대신 React 클라이언트를 사용합니다.
+`client/` 디렉터리에서 의존성을 설치한 뒤 개발 서버를 실행하세요:
 
 ```bash
 cd client
@@ -209,12 +209,15 @@ The React client relies on `chart.js` and `react-chartjs-2` for visualizations,
 so a successful install is required before `npm start` will compile.
 
 If the development server fails with "Module not found" errors, run `npm install`
-again inside the `client/` directory. The Express backend also uses port `3000`,
-so start React on a different port to avoid conflicts:
+again inside the `client/` directory. Express uses port `3000`, so start React on
+a different port to avoid conflicts:
 
 ```bash
 PORT=3001 npm start
 ```
+
+`client/package.json`에는 `"proxy": "http://localhost:3000"`가 포함되어 있어
+`/api` 경로의 요청이 자동으로 백엔드로 전달됩니다.
 
 The login page was migrated from an EJS template to a React component. The
 client authenticates by sending credentials to the Express endpoint
