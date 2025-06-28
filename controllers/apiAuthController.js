@@ -36,3 +36,36 @@ exports.getUser = (req, res) => {
   const { password, ...safeUser } = req.user;
   res.json({ user: safeUser });
 };
+exports.register = async (req, res, next) => {
+  const { username, name, email, password, password2 } = req.body;
+  const db = req.app.locals.db;
+
+  if (!username || !name || !email || !password || !password2) {
+    return res.status(400).json({ success: false, message: '모든 항목을 입력해주세요.' });
+  }
+  if (password !== password2) {
+    return res.status(400).json({ success: false, message: '비밀번호가 일치하지 않습니다.' });
+  }
+  if (!email.includes('@')) {
+    return res.status(400).json({ success: false, message: '이메일 형식이 올바르지 않습니다.' });
+  }
+
+  try {
+    const userExists = await db.collection('user').findOne({ username });
+    if (userExists) {
+      return res.status(400).json({ success: false, message: '이미 사용 중인 아이디입니다.' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await db.collection('user').insertOne({
+      username,
+      name,
+      email,
+      password: hashedPassword,
+      createdAt: new Date(),
+    });
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('❌ 회원가입 오류:', err);
+    next(err);
+  }
+};
