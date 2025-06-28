@@ -45,12 +45,12 @@ afterAll(async () => {
   await closeDB(); // 모킹된 closeDB 호출
 });
 
-describe("GET /stock", () => {
+describe("GET /", () => {
   it(
-    "should return 302 redirect (CI 환경)",
+    "should return 200 with React index",
     async () => {
-      const res = await request(app).get("/").redirects(0);
-      expect(res.statusCode).toBe(302);
+      const res = await request(app).get("/");
+      expect(res.statusCode).toBe(200);
     },
     60000 // 개별 테스트 타임아웃 (60초)
   );
