@@ -1,12 +1,8 @@
 const fetch = require('node-fetch');
 const asyncHandler = require('../middlewares/asyncHandler');
 
-// Fetch daily weather from KMA API
-const getDailyWeather = asyncHandler(async (req, res) => {
-  const baseDate = req.query.date || new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const baseTime = req.query.time || '1200';
-  const nx = req.query.nx || '60';
-  const ny = req.query.ny || '127';
+// Common helper to fetch weather data for a single day
+async function fetchDaily(date, time = '1200', nx = '60', ny = '127') {
   const serviceKey = encodeURIComponent(process.env.WEATHER_API_KEY || '');
 
   const params = new URLSearchParams({
@@ -14,36 +10,41 @@ const getDailyWeather = asyncHandler(async (req, res) => {
     pageNo: '1',
     numOfRows: '1000',
     dataType: 'JSON',
-    base_date: baseDate,
-    base_time: baseTime,
+    base_date: date,
+    base_time: time,
     nx,
     ny,
   });
 
-  const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?${params}`;
+  const url =
+    `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?${params}`;
 
   const response = await fetch(url);
-
   if (!response.ok) {
     throw new Error(`Weather API error: ${response.status}`);
   }
 
-  let data;
-  try {
-    data = await response.json();
-  } catch (err) {
-    const text = await response.text();
-    throw new Error(`Invalid JSON: ${text.slice(0, 100)}`);
-  }
-
+  const data = await response.json();
   const items = data?.response?.body?.items?.item || [];
   const findVal = (cat) => items.find((i) => i.category === cat)?.fcstValue;
 
-  res.json({
+  return {
     temperature: findVal('T1H'),
     sky: findVal('SKY'),
     precipitationType: findVal('PTY'),
-  });
+  };
+}
+
+// Fetch daily weather from KMA API
+const getDailyWeather = asyncHandler(async (req, res) => {
+  const baseDate =
+    req.query.date || new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const baseTime = req.query.time || '1200';
+  const nx = req.query.nx || '60';
+  const ny = req.query.ny || '127';
+
+  const data = await fetchDaily(baseDate, baseTime, nx, ny);
+  res.json(data);
 });
 
 // Fetch weather data for the same day across past years
@@ -76,7 +77,32 @@ const getSameDay = asyncHandler(async (req, res) => {
   res.json(docs);
 });
 
+// Fetch daily weather for an entire month
+const getMonthlyWeather = asyncHandler(async (req, res) => {
+  const year = req.query.year || new Date().getFullYear().toString();
+  const month = (req.query.month || new Date().getMonth() + 1)
+    .toString()
+    .padStart(2, '0');
+
+  const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
+  const result = [];
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = `${year}${month}${String(day).padStart(2, '0')}`;
+    try {
+      const data = await fetchDaily(date);
+      result.push({ date: `${year}-${month}-${String(day).padStart(2, '0')}`, ...data });
+    } catch (err) {
+      // Skip failed days but record error
+      result.push({ date: `${year}-${month}-${String(day).padStart(2, '0')}`, error: err.message });
+    }
+  }
+
+  res.json(result);
+});
+
 module.exports = {
   getDailyWeather,
   getSameDay,
+  getMonthlyWeather,
 };

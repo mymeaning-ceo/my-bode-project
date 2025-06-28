@@ -89,3 +89,10 @@ test('GET /api/weather/same-day returns past years data', async () => {
   expect(mockCollection.project).toHaveBeenCalledWith({ _id: 1 });
   expect(mockCollection.sort).toHaveBeenCalledWith({ _id: -1 });
 });
+
+test('GET /api/weather/monthly returns array of daily data', async () => {
+  const res = await request(app).get('/api/weather/monthly?year=2024&month=06');
+  expect(res.statusCode).toBe(200);
+  expect(Array.isArray(res.body)).toBe(true);
+  expect(res.body.length).toBeGreaterThan(0);
+});
