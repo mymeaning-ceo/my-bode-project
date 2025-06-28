@@ -15,11 +15,7 @@ import Board from './pages/Board';
 import SalesAmount from './pages/SalesAmount';
 import SalesVolume from './pages/SalesVolume';
 import Help from './pages/Help';
-import Admin from './pages/Admin';
-import AdminBanner from './pages/admin/Banner';
-import AdminLogo from './pages/admin/Logo';
-import AdminUsers from './pages/admin/Users';
-import AdminPermissions from './pages/admin/Permissions';
+import AdminRoutes from './routes/AdminRoutes';
 import Placeholder from './pages/Placeholder';
 
 function App() {
@@ -35,11 +31,7 @@ function App() {
           <Route path="/board" element={<Board />} />
           <Route path="/sales-amount" element={<SalesAmount />} />
           <Route path="/sales-volume" element={<SalesVolume />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/banner" element={<AdminBanner />} />
-          <Route path="/admin/logo" element={<AdminLogo />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/permissions" element={<AdminPermissions />} />
+          <Route path="/admin/*" element={<AdminRoutes />} />
           <Route path="/stock" element={<Stock />} />
           <Route path="/coupang" element={<Coupang />} />
           <Route path="/coupang-add" element={<CoupangAdd />} />
