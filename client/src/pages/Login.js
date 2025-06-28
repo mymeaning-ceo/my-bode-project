@@ -11,7 +11,7 @@ function Login() {
     <div className="login-container">
       <div className="card shadow-sm login-card">
         <div className="card-body">
-          <h5 className="card-title mb-4 text-center">🔐 로그인</h5>
+          <h5 className="card-title mb-4 text-center">로그인</h5>
           <form action="/login" method="POST">
             <div className="mb-3">
               <label htmlFor="username" className="form-label">
