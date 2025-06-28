@@ -1,11 +1,10 @@
-const router = require("express").Router();
+const path = require('path');
+const router = require('express').Router();
 
-router.get("/sports", (요청, 응답) => {
-  응답.send("스포츠 게시판");
-});
-
-router.get("/game", (요청, 응답) => {
-  응답.send("게임 게시판");
+// React 페이지 제공
+router.get('/', (req, res) => {
+  const reactIndex = path.join(__dirname, '..', '..', 'client', 'public', 'index.html');
+  res.sendFile(reactIndex);
 });
 
 module.exports = router;
