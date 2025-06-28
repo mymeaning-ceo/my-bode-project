@@ -21,6 +21,8 @@ router.use("/coupang-add", require("./coupangAddApi"));
 router.use("/coupang-open", require("./coupangOpenApi"));
 // 날씨 API
 router.use("/weather", require("./weatherApi"));
+// 프로필 API
+router.use('/profile', require('./profileApi'));
 // 광고 성과 API
 router.use("/analytics", require("./analytics"));
 

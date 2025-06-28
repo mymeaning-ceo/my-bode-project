@@ -7,6 +7,7 @@ import Stock from './pages/Stock';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Weather from './pages/Weather';
+import Profile from './pages/Profile';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './pages/DashboardLayout';
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/stock" element={<Stock />} />
           <Route path="/weather" element={<Weather />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>
     </BrowserRouter>

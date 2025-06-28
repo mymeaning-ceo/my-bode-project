@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Header.css';
 
 function Header({ onToggleSidebar }) {
   const [user, setUser] = useState(null);
+  const [weather, setWeather] = useState(null);
 
   useEffect(() => {
     fetch('/api/auth/user', { credentials: 'include' })
@@ -10,6 +12,10 @@ function Header({ onToggleSidebar }) {
       .then((data) => {
         setUser(data.user);
       })
+      .catch(() => {});
+    fetch('/api/weather/daily')
+      .then((res) => res.json())
+      .then((data) => setWeather(data))
       .catch(() => {});
   }, []);
 
@@ -25,7 +31,14 @@ function Header({ onToggleSidebar }) {
       </button>
       <span className="ms-2 fw-bold">내의미</span>
       <div className="user-info ms-auto">
-        {user && <span className="me-3">{user.name || user.username}</span>}
+        {weather && (
+          <span className="me-3">🌡 {weather.temperature ?? '-'}℃</span>
+        )}
+        {user && (
+          <Link to="/profile" className="me-3 text-decoration-none">
+            {user.name || user.username}
+          </Link>
+        )}
         <button type="button" className="btn btn-link" onClick={handleLogout}>
           로그아웃
         </button>
