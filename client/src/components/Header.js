@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Header.css';
 
 function Header({ onToggleSidebar }) {
@@ -20,10 +21,12 @@ function Header({ onToggleSidebar }) {
 
   return (
     <header className="app-header shadow-sm">
-      <button type="button" className="btn btn-link" onClick={onToggleSidebar}>
+      <button type="button" className="btn menu-btn" onClick={onToggleSidebar}>
         ☰
       </button>
-      <span className="ms-2 fw-bold">내의미</span>
+      <Link to="/dashboard" className="ms-2 fw-bold brand-link">
+        내의미
+      </Link>
       <div className="user-info ms-auto">
         {user && <span className="me-3">{user.name || user.username}</span>}
         <button type="button" className="btn btn-link" onClick={handleLogout}>
