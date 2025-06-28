@@ -238,3 +238,54 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
 
   python.on("close", () => clearTimeout(timeout));
 });
+
+// 단일 재고 조회
+exports.getStockItem = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const { ObjectId } = require("mongodb");
+  const id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid id" });
+  }
+
+  const item = await db.collection("stock").findOne({ _id: new ObjectId(id) });
+  if (!item) return res.status(404).json({ message: "Not found" });
+  res.json(item);
+});
+
+// 재고 추가
+exports.addStockItem = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const doc = {
+    item_code: req.body.item_code,
+    item_name: req.body.item_name,
+    color: req.body.color,
+    size: req.body.size,
+    qty: Number(req.body.qty) || 0,
+    allocation: Number(req.body.allocation) || 0,
+    uploadedBy: req.user ? req.user.username : "api",
+    createdAt: new Date(),
+  };
+
+  const result = await db.collection("stock").insertOne(doc);
+  res.json({ insertedId: result.insertedId });
+});
+
+// 재고 수정
+exports.updateStockItem = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const { ObjectId } = require("mongodb");
+  const id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid id" });
+  }
+
+  const update = { ...req.body };
+  delete update._id;
+
+  await db
+    .collection("stock")
+    .updateOne({ _id: new ObjectId(id) }, { $set: update });
+
+  res.json({ message: "updated" });
+});
