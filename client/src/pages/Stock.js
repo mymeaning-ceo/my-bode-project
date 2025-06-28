@@ -43,21 +43,6 @@ function Stock() {
             $(td).addClass(cellData < 10 ? 'low-stock' : 'high-stock');
           },
         },
-        {
-          targets: 8,
-          render: function (data) {
-            if (!data) return '';
-            const d = new Date(data);
-            return d.toLocaleString('ko-KR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-            });
-          },
-        },
       ],
       language: {
         paginate: { previous: '이전', next: '다음' },
@@ -82,8 +67,6 @@ function Stock() {
         { data: 'size' },
         { data: 'qty' },
         { data: 'allocation' },
-        { data: 'uploadedBy' },
-        { data: 'createdAt' },
       ],
       createdRow: function (row, data) {
         if (data.qty < 10) {
@@ -244,8 +227,6 @@ function Stock() {
               <th>사이즈</th>
               <th>수량</th>
               <th>할당</th>
-              <th>업로드 사용자</th>
-              <th>업로드 시각</th>
             </tr>
           </thead>
           <tbody></tbody>
