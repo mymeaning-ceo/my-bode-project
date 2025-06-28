@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import Header from './Header';
 
 beforeEach(() => {
@@ -29,7 +30,11 @@ afterEach(() => {
 });
 
 test('displays weather info in header', async () => {
-  render(<Header onToggleSidebar={() => {}} />);
+  render(
+    <MemoryRouter>
+      <Header onToggleSidebar={() => {}} />
+    </MemoryRouter>
+  );
   await waitFor(() => screen.getByText(/맑음/));
   expect(screen.getByText('맑음')).toBeInTheDocument();
   expect(screen.getByText('20℃ 맑음 없음')).toBeInTheDocument();
