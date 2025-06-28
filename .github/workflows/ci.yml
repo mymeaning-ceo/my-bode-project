@@ -30,6 +30,9 @@ jobs:
 
       # 4) 의존성 설치
       - run: npm ci
+      - run: npm install --prefix client
+      - run: npm run lint --prefix client
+      - run: npm test --prefix client
 
       # 5) 테스트
       - name: Run Jest tests
