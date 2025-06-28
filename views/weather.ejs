@@ -11,7 +11,7 @@
   <%- include('nav.ejs') %>
 
   <div class="container my-5">
-    <h2 class="fw-bold mb-4">🌤️ 날씨 정보</h2>
+    <h2 class="fw-bold mb-4">🌤️ 서울의 날씨 정보</h2>
     <div id="weather-root"></div>
   </div>
 
@@ -27,7 +27,7 @@
       React.useEffect(() => {
         async function fetchWeather() {
           try {
-            const res = await fetch('/api/weather/daily');
+            const res = await fetch('/api/weather/daily?nx=60&ny=127');
             if (!res.ok) throw new Error('Failed to fetch');
             const data = await res.json();
             setWeather(data);

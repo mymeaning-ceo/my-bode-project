@@ -117,7 +117,12 @@ async function initApp() {
   }
 
   app.get("/", (req, res) => {
-    res.redirect(302, "/stock");
+    const routes = webRouter.stack
+      .filter((layer) => layer.route)
+      .map((layer) => layer.route.path)
+      .filter((p, idx, arr) => arr.indexOf(p) === idx)
+      .sort();
+    res.render("routes.ejs", { routes });
   });
   app.use(express.static(path.join(__dirname, "public")));
   app.get("/dashboard", checkAuth, (req, res) => {
