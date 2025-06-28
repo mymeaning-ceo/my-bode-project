@@ -79,3 +79,33 @@ describe("DELETE /api/stock", () => {
     expect(mockColl.deleteMany).toHaveBeenCalledWith({});
   });
 });
+
+describe("POST /api/stock", () => {
+  it("should insert a new item", async () => {
+    mockCollection.insertOne = jest
+      .fn()
+      .mockResolvedValue({ insertedId: "507f1f77bcf86cd799439011" });
+
+    const res = await request(app)
+      .post("/api/stock")
+      .send({ item_code: "A1", qty: 1 });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ insertedId: "507f1f77bcf86cd799439011" });
+    expect(mockCollection.insertOne).toHaveBeenCalled();
+  });
+});
+
+describe("PUT /api/stock/:id", () => {
+  it("should update an item", async () => {
+    mockCollection.updateOne = jest.fn().mockResolvedValue({ matchedCount: 1 });
+
+    const res = await request(app)
+      .put("/api/stock/507f1f77bcf86cd799439011")
+      .send({ qty: 2 });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ message: "updated" });
+    expect(mockCollection.updateOne).toHaveBeenCalled();
+  });
+});
