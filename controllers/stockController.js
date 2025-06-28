@@ -43,8 +43,6 @@ exports.getStockData = asyncHandler(async (req, res) => {
     4: "size",
     5: "qty",
     6: "allocation",
-    7: "uploadedBy",
-    8: "createdAt",
   };
   const orderCol = columns[req.query["order[0][column]"]] || "item_code";
   const orderDir = req.query["order[0][dir]"] === "desc" ? -1 : 1;
@@ -114,18 +112,6 @@ exports.uploadExcel = asyncHandler(async (req, res) => {
 
     if (code === 0) {
       try {
-        const db = req.app.locals.db;
-        if (db) {
-          await db.collection(collectionName).updateMany(
-            {},
-            {
-              $set: {
-                createdAt: new Date(),
-                uploadedBy: req.user ? req.user.username : "알 수 없음",
-              },
-            },
-          );
-        }
         if (req.flash)
           req.flash("성공메시지", "✅ 엑셀 업로드가 완료되었습니다.");
         res.redirect("/stock");
@@ -199,17 +185,6 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
     if (code === 0) {
       try {
         const db = req.app.locals.db;
-        if (db) {
-          await db.collection(collectionName).updateMany(
-            {},
-            {
-              $set: {
-                createdAt: new Date(),
-                uploadedBy: req.user ? req.user.username : "알 수 없음",
-              },
-            },
-          );
-        }
         res.json({ status: "success" });
       } catch (err) {
         console.error("❌ 업로드 후 처리 실패:", err);
@@ -263,8 +238,6 @@ exports.addStockItem = asyncHandler(async (req, res) => {
     size: req.body.size,
     qty: Number(req.body.qty) || 0,
     allocation: Number(req.body.allocation) || 0,
-    uploadedBy: req.user ? req.user.username : "api",
-    createdAt: new Date(),
   };
 
   const result = await db.collection("stock").insertOne(doc);

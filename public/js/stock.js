@@ -34,23 +34,7 @@ $(document).ready(function () {
           $(td).addClass(cellData < 10 ? "low-stock" : "high-stock");
         },
         render: function (data) {
-          // 이모지 대신 수량만 표시
           return data;
-        },
-      },
-      {
-        targets: 8,
-        render: function (data) {
-          if (!data) return "";
-          const d = new Date(data);
-          return d.toLocaleString("ko-KR", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          });
         },
       },
     ],
@@ -77,8 +61,6 @@ $(document).ready(function () {
       { data: "size" },
       { data: "qty" },
       { data: "allocation" },
-      { data: "uploadedBy" },
-      { data: "createdAt" },
     ],
     createdRow: function (row, data) {
       if (data.qty < 10) {
