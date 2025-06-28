@@ -124,23 +124,8 @@ async function initApp() {
   app.use(express.static(path.join(__dirname, "client", "public")));
   app.use(express.static(path.join(__dirname, "public")));
   app.get("/dashboard", checkAuth, (req, res) => {
-    const menus = ["/stock", "/list", "/write"];
-    const menuIcons = {
-      "/stock": "📦",
-      "/list": "📋",
-      "/write": "✍️",
-    };
-    const menuLabels = {
-      "/stock": "재고 관리",
-      "/list": "게시글 목록",
-      "/write": "글 작성",
-    };
-    res.render("dashboard.ejs", {
-      menus,
-      menuIcons,
-      menuLabels,
-      banners: res.locals.banners,
-    });
+    const reactIndex = path.join(__dirname, "client", "public", "index.html");
+    res.sendFile(reactIndex);
   });
 
   app.use(errorHandler);

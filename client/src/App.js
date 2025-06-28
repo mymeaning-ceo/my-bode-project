@@ -6,7 +6,8 @@ import Home from './pages/Home';
 import Stock from './pages/Stock';
 import Login from './pages/Login';
 import Weather from './pages/Weather';
-import AverageTemp from './pages/AverageTemp';
+import Dashboard from './pages/Dashboard';
+import DashboardLayout from './pages/DashboardLayout';
 
 function App() {
   return (
@@ -14,10 +15,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/stock" element={<Stock />} />
-        <Route path="/weather" element={<Weather />} />
-        <Route path="/weather/average" element={<AverageTemp />} />
-      </Routes>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/stock" element={<Stock />} />
+          <Route path="/weather" element={<Weather />} />
+        </Route>
     </BrowserRouter>
   );
 }
