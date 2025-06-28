@@ -3,7 +3,11 @@ const asyncHandler = require('../middlewares/asyncHandler');
 
 // Common helper to fetch weather data for a single day
 async function fetchDaily(date, time = '1200', nx = '60', ny = '127') {
-  const serviceKey = encodeURIComponent(process.env.WEATHER_API_KEY || '');
+  if (!process.env.WEATHER_API_KEY) {
+    throw new Error('WEATHER_API_KEY not configured');
+  }
+
+  const serviceKey = encodeURIComponent(process.env.WEATHER_API_KEY);
 
   const params = new URLSearchParams({
     serviceKey,
@@ -43,7 +47,25 @@ const getDailyWeather = asyncHandler(async (req, res) => {
   const nx = req.query.nx || '60';
   const ny = req.query.ny || '127';
 
-  const data = await fetchDaily(baseDate, baseTime, nx, ny);
+  let data;
+  try {
+    data = await fetchDaily(baseDate, baseTime, nx, ny);
+  } catch (err) {
+    console.error('❌ fetchDaily failed:', err.message);
+    // Try to return cached data from MongoDB
+    const cached = await req.app.locals.db
+      .collection('weather')
+      .findOne({ _id: baseDate });
+    if (cached) {
+      return res.json({
+        temperature: cached.temperature,
+        sky: cached.sky,
+        precipitationType: cached.precipitationType,
+        cached: true,
+      });
+    }
+    throw err;
+  }
 
   try {
     const db = req.app.locals.db;
