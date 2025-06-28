@@ -232,5 +232,10 @@ client authenticates by sending credentials to the Express endpoint
 
 The Help page has also been converted to React and is accessible at `/help`.
 
+### Board management API
+Boards are stored in the `board` collection. CRUD operations are available via
+`/api/boards`. A simple management page is located at `/admin/boards` in the
+React client.
+
 
 
