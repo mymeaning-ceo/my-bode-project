@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 /**
@@ -7,12 +8,42 @@ import './Login.css';
  */
 
 function Login() {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ username: '', password: '' });
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.success) {
+        navigate('/dashboard');
+      } else {
+        setError(data.message || '로그인 실패');
+      }
+    } catch (err) {
+      setError('서버 오류');
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="card shadow-sm login-card">
         <div className="card-body">
           <h5 className="card-title mb-4 text-center">로그인</h5>
-          <form action="/login" method="POST">
+          {error && <div className="alert alert-danger">{error}</div>}
+          <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="username" className="form-label">
                 아이디
@@ -22,6 +53,8 @@ function Login() {
                 name="username"
                 id="username"
                 className="form-control"
+                value={form.username}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -34,6 +67,8 @@ function Login() {
                 name="password"
                 id="password"
                 className="form-control"
+                value={form.password}
+                onChange={handleChange}
                 required
               />
             </div>
