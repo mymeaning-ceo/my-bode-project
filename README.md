@@ -194,4 +194,18 @@ Tables can specify the default sort column via `data-order-col` and
 These values are passed to DataTables when initializing so you can control the
 initial ordering without writing extra JavaScript.
 
+## React client
+
+The project includes a React frontend under `client/`. Install its dependencies
+separately before starting the development server:
+
+```bash
+cd client
+npm install
+npm start
+```
+
+The React client relies on `chart.js` and `react-chartjs-2` for visualizations,
+so a successful install is required before `npm start` will compile.
+
 

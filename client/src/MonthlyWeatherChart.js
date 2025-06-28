@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -64,3 +65,8 @@ function MonthlyWeatherChart({ year, month }) {
 }
 
 export default MonthlyWeatherChart;
+
+MonthlyWeatherChart.propTypes = {
+  year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  month: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+};
