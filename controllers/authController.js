@@ -40,7 +40,8 @@ exports.logout = (req, res) => {
 };
 
 exports.renderRegisterPage = (req, res) => {
-  res.render('register');
+  const reactIndex = path.join(__dirname, '..', 'client', 'public', 'index.html');
+  res.sendFile(reactIndex);
 };
 
 exports.register = async (req, res) => {
