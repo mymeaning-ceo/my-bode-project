@@ -18,6 +18,8 @@ router.use("/coupang-add", require("./coupangAddApi"));
 router.use("/coupang-open", require("./coupangOpenApi"));
 // 날씨 API
 router.use("/weather", require("./weatherApi"));
+// Express routes info
+router.use("/routes", require("./routesInfo"));
 // 광고 성과 API
 router.use("/analytics", require("./analytics"));
 

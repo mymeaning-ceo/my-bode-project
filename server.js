@@ -117,7 +117,7 @@ async function initApp() {
   }
 
   app.get("/", (req, res) => {
-    res.redirect(302, "/stock");
+    res.render("routes");
   });
   app.use(express.static(path.join(__dirname, "public")));
   app.get("/dashboard", checkAuth, (req, res) => {
