@@ -17,10 +17,7 @@ beforeAll(async () => {
   process.env.NODE_ENV = "test";
   process.env.SESSION_SECRET = "testsecret";
 
-  await mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await mongoose.connect(uri);
 
   // Express 앱 불러오기 및 listen
   const { app } = require("../server");
