@@ -225,10 +225,12 @@ client authenticates by sending credentials to the Express endpoint
 `/login`, so navigating directly to `/login` loads the React app.
 
 ### 게시판
-
 `/board`와 `/:shop/board` 경로는 React 기반 게시판을 제공합니다. `shop`
 파라미터에는 `내의미`, `TRY`, `BYC`, `제임스딘`, `쿠팡`, `네이버` 중 하나가
 들어갑니다. 게시글 API는 `board` 값을 사용해 컬렉션을 구분하므로 각 브랜드별
 게시판 데이터를 독립적으로 관리할 수 있습니다.
+
+The Help page has also been converted to React and is accessible at `/help`.
+
 
 
