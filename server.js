@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const passport = require("passport");
@@ -116,10 +117,23 @@ async function initApp() {
       );
   }
 
-  app.get("/", (req, res) => {
-    res.redirect(302, "/stock");
-  });
+  // ───────────────────────────────────────────────────────
+  // Static asset handling
+  // ───────────────────────────────────────────────────────
+  const clientBuildPath = path.join(__dirname, "client", "build");
+
   app.use(express.static(path.join(__dirname, "public")));
+  if (fs.existsSync(clientBuildPath)) {
+    app.use(express.static(clientBuildPath));
+  }
+
+  app.get("/", (req, res) => {
+    const indexHtml = path.join(clientBuildPath, "index.html");
+    if (fs.existsSync(indexHtml)) {
+      return res.sendFile(indexHtml);
+    }
+    return res.redirect(302, "/stock");
+  });
   app.get("/dashboard", checkAuth, (req, res) => {
     const menus = ["/stock", "/list", "/write"];
     const menuIcons = {
