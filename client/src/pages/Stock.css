@@ -1,0 +1,9 @@
+.stock-actions .form-control {
+  height: calc(1.5em + 0.75rem + 2px);
+}
+
+.stock-actions .btn,
+.stock-search .btn {
+  white-space: nowrap;
+  width: auto;
+}
