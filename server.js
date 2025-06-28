@@ -11,6 +11,7 @@ const compression = require("compression");
 const flash = require("connect-flash");
 const { connectDB } = require("./config/db");
 const { initIndexes } = require("./config/initIndexes");
+const { initBoards } = require("./config/initBoards");
 const webRouter = require("./routes/web");
 const apiRouter = require("./routes/api");
 const { checkAuth } = require("./middlewares/auth");
@@ -22,6 +23,7 @@ const app = express();
 async function initApp() {
   const db = await connectDB();
   await initIndexes(db);
+  await initBoards(db);
   app.locals.db = db;
   if (process.env.NODE_ENV !== 'test') {
     startCronJobs(db);

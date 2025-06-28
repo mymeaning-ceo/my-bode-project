@@ -224,4 +224,18 @@ client authenticates by sending credentials to the Express endpoint
 `/api/auth/login`. In production the server serves `client/public/index.html` for
 `/login`, so navigating directly to `/login` loads the React app.
 
+### Board API
+
+Each brand has its own board managed through `/api/board/:name`. Supported
+names are `내의미`, `TRY`, `BYC`, `제임스딘`, `쿠팡` and `네이버`. Posts can be read
+with a GET request and created with a POST request:
+
+```bash
+curl http://localhost:3000/api/board/TRY/posts
+
+curl -X POST http://localhost:3000/api/board/TRY/posts \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"hello","content":"world"}'
+```
+
 
