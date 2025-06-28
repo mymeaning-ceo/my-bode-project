@@ -29,7 +29,9 @@ function MonthlyWeatherChart({ year, month }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch(`/api/weather/monthly?year=${year}&month=${month}`);
+        const res = await fetch(`/api/weather/monthly?year=${year}&month=${month}`, {
+          credentials: 'include',
+        });
         if (!res.ok) throw new Error('Failed to fetch');
         const json = await res.json();
         setData(json.filter((d) => !d.error));

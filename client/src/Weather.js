@@ -7,7 +7,7 @@ function Weather() {
   useEffect(() => {
     async function fetchWeather() {
       try {
-        const res = await fetch('/api/weather/daily');
+        const res = await fetch('/api/weather/daily', { credentials: 'include' });
         if (!res.ok) {
           throw new Error('Failed to fetch');
         }
