@@ -9,6 +9,11 @@ import Register from './pages/Register';
 import Weather from './pages/Weather';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './pages/DashboardLayout';
+import Board from './pages/Board';
+import SalesAmount from './pages/SalesAmount';
+import SalesVolume from './pages/SalesVolume';
+import Admin from './pages/Admin';
+import Placeholder from './pages/Placeholder';
 
 function App() {
   return (
@@ -19,8 +24,13 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/board" element={<Board />} />
+          <Route path="/sales-amount" element={<SalesAmount />} />
+          <Route path="/sales-volume" element={<SalesVolume />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/stock" element={<Stock />} />
           <Route path="/weather" element={<Weather />} />
+          <Route path="/:shop/:section" element={<Placeholder />} />
         </Route>
       </Routes>
     </BrowserRouter>
