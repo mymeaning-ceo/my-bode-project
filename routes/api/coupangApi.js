@@ -20,6 +20,50 @@ const DEFAULT_COLUMNS = [
   "Shortage quantity",
 ];
 
+// 재고 목록 조회 API
+router.get("/", async (req, res) => {
+  const db = req.app.locals.db;
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const skip = (page - 1) * limit;
+    const keyword = req.query.keyword || "";
+    const brand = req.query.brand || "";
+
+    const conditions = [];
+    if (keyword) {
+      const regex = new RegExp(keyword, "i");
+      conditions.push({
+        $or: [
+          { "Product name": regex },
+          { "Option name": regex },
+          { "Option ID": regex },
+        ],
+      });
+    }
+    if (brand) {
+      conditions.push({ "Product name": new RegExp(brand, "i") });
+    }
+
+    const query = conditions.length ? { $and: conditions } : {};
+
+    const [rows, total] = await Promise.all([
+      db
+        .collection("coupang")
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      db.collection("coupang").countDocuments(query),
+    ]);
+
+    res.json({ data: rows, total });
+  } catch (err) {
+    console.error("GET /api/coupang 오류:", err);
+    res.status(500).json({ status: "error", message: "조회 실패" });
+  }
+});
+
 router.post("/upload", upload.single("excelFile"), async (req, res) => {
   const db = req.app.locals.db;
   try {

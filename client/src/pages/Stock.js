@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 function Stock() {
   const [rows, setRows] = useState([]);
   const [form, setForm] = useState({ itemCode: '', color: '', size: '' });
+  const [excelFile, setExcelFile] = useState(null);
 
   const loadData = useCallback(async () => {
     const params = new URLSearchParams({
@@ -29,9 +30,46 @@ function Stock() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    setExcelFile(e.target.files[0] || null);
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!excelFile) return;
+    const fd = new FormData();
+    fd.append('excelFile', excelFile);
+    await fetch('/api/stock/upload', {
+      method: 'POST',
+      body: fd,
+      credentials: 'include',
+    });
+    setExcelFile(null);
+    loadData();
+  };
+
+  const handleReset = async () => {
+    if (!window.confirm('모든 데이터를 삭제하시겠습니까?')) return;
+    await fetch('/api/stock', { method: 'DELETE', credentials: 'include' });
+    loadData();
+  };
+
   return (
     <div className="container">
       <h2>재고 관리</h2>
+      <form onSubmit={handleUpload} className="mb-3 d-flex gap-2">
+        <input type="file" accept=".xlsx,.xls" onChange={handleFileChange} />
+        <button type="submit" className="btn btn-success">
+          엑셀 업로드
+        </button>
+        <button
+          type="button"
+          className="btn btn-danger"
+          onClick={handleReset}
+        >
+          데이터 초기화
+        </button>
+      </form>
       <div className="row g-2 mb-3">
         <div className="col">
           <input
@@ -87,7 +125,7 @@ function Stock() {
               <td>{row.item_name}</td>
               <td>{row.color}</td>
               <td>{row.size}</td>
-              <td>{row.qty}</td>
+              <td>{Number(row.qty || 0).toLocaleString()}</td>
             </tr>
           ))}
         </tbody>

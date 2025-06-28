@@ -79,94 +79,11 @@ async function attachAdData(items, db) {
   return items;
 }
 
-// ✅ 목록 조회
-router.get("/", async (req, res) => {
-  const db = req.app.locals.db; // DB 인스턴스 재사용
-  const page = parseInt(req.query.page) || 1;
-  const limit = 50;
-  const skip = (page - 1) * limit;
-  const keyword = "";
-  const brand = req.query.brand || "";
-  const sortField =
-    DEFAULT_COLUMNS.includes(req.query.sort) ? req.query.sort : "Product name";
-  const sortOrder = req.query.order === "desc" ? -1 : 1;
-  const shortageOnly = req.query.shortage === "1";
-  try {
-    const query = brand ? { "Product name": new RegExp(brand, "i") } : {};
-    if (shortageOnly) query["Shortage quantity"] = { $gt: 0 };
-    const [rows, total, reorderCount] = await Promise.all([
-      db
-        .collection("coupang")
-        .find(query)
-        .sort({ [sortField]: sortOrder })
-        .skip(skip)
-        .limit(limit)
-        .toArray(),
-      db.collection("coupang").countDocuments(query),
-      db.collection("coupang").countDocuments({
-        ...(brand ? { "Product name": new RegExp(brand, "i") } : {}),
-        "Shortage quantity": { $gt: 0 },
-      }),
-    ]);
-    let result = rows.map((row) => {
-      const newRow = normalizeItemFields({ ...row });
-      if (typeof newRow["Option ID"] === "number") {
-        newRow["Option ID"] = String(newRow["Option ID"]);
-      }
-      NUMERIC_COLUMNS.forEach((col) => {
-        const num = Number(String(newRow[col]).replace(/,/g, ""));
-        newRow[col] = isNaN(num) ? 0 : num;
-      });
-      return newRow;
-    });
-
-    const resultWithShortage = addShortage(result);
-    const resultWithAds = await attachAdData(resultWithShortage, db);
-    let selected = req.query.fields;
-    if (selected && !Array.isArray(selected)) selected = selected.split(",");
-    const fields =
-      selected && selected.length > 0
-        ? DEFAULT_COLUMNS.filter((col) => selected.includes(col))
-        : DEFAULT_COLUMNS;
-
-    const totalPage = Math.ceil(total / limit);
-    const totalCount = total;
-    const baseParams = new URLSearchParams();
-    if (brand) baseParams.append("brand", brand);
-    if (selected && selected.length > 0)
-      selected.forEach((f) => baseParams.append("fields", f));
-    if (shortageOnly) baseParams.append("shortage", "1");
-    if (page > 1) baseParams.append("page", page);
-    const baseQuery = baseParams.toString();
-    const params = new URLSearchParams(baseQuery);
-    if (sortField !== "Product name") params.append("sort", sortField);
-    if (req.query.order) params.append("order", req.query.order);
-    const queryString = params.toString();
-
-    res.render("coupang.ejs", {
-      결과: resultWithAds,
-      필드: fields,
-      전체필드: DEFAULT_COLUMNS,
-      성공메시지: null,
-      한글,
-      keyword,
-      brand,
-      brandOptions: BRANDS,
-      현재페이지: page,
-      전체페이지: totalPage,
-      전체건수: totalCount,
-      추가쿼리: queryString ? `&${queryString}` : "",
-      기본쿼리: baseQuery,
-      페이지크기: limit,
-      sortField,
-      sortOrder,
-      shortageOnly,
-      reorderCount,
-    });
-  } catch (err) {
-    console.error("GET /coupang 오류:", err);
-    res.status(500).send("❌ 재고 목록 불러오기 실패");
-  }
+// ✅ 목록 조회 - React 페이지 제공
+router.get("/", (req, res) => {
+  const path = require("path");
+  const reactIndex = path.join(__dirname, "..", "..", "client", "public", "index.html");
+  res.sendFile(reactIndex);
 });
 
 // ✅ 엑셀 업로드

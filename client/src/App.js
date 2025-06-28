@@ -4,6 +4,8 @@ import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Stock from './pages/Stock';
+import Coupang from './pages/Coupang';
+import CoupangAdd from './pages/CoupangAdd';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Weather from './pages/Weather';
@@ -29,6 +31,8 @@ function App() {
           <Route path="/sales-volume" element={<SalesVolume />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/stock" element={<Stock />} />
+          <Route path="/coupang" element={<Coupang />} />
+          <Route path="/coupang-add" element={<CoupangAdd />} />
           <Route path="/weather" element={<Weather />} />
           <Route path="/:shop/:section" element={<Placeholder />} />
         </Route>
