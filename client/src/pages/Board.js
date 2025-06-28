@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 function Board() {
+  const { shop } = useParams();
+  const board = shop || 'default';
   const [posts, setPosts] = useState([]);
   const [form, setForm] = useState({ title: '', content: '' });
   const [editingId, setEditingId] = useState(null);
 
   const loadPosts = async () => {
-    const res = await fetch('/api/posts', { credentials: 'include' });
+    const res = await fetch(`/api/posts?board=${board}`, { credentials: 'include' });
     if (res.ok) {
       const data = await res.json();
       setPosts(data.data || []);
@@ -15,7 +18,7 @@ function Board() {
 
   useEffect(() => {
     loadPosts();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [board]);
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,7 +32,7 @@ function Board() {
       method,
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, board }),
     });
     setForm({ title: '', content: '' });
     setEditingId(null);
@@ -54,7 +57,7 @@ function Board() {
 
   return (
     <div className="container">
-      <h2>게시판</h2>
+      <h2>{board} 게시판</h2>
       <form onSubmit={handleSubmit} className="mb-3">
         <input
           type="text"

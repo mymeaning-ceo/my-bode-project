@@ -8,14 +8,21 @@ exports.list = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit, 10) || 10;
   const skip = (page - 1) * limit;
   const search = req.query.search;
-  const query = search
-    ? {
-        $or: [
-          { title: { $regex: search, $options: 'i' } },
-          { content: { $regex: search, $options: 'i' } },
-        ],
-      }
-    : {};
+  const board = req.query.board || 'default';
+  let query = { board };
+  if (search) {
+    query = {
+      $and: [
+        { board },
+        {
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { content: { $regex: search, $options: 'i' } },
+          ],
+        },
+      ],
+    };
+  }
   const [posts, total] = await Promise.all([
     db
       .collection('post')
@@ -38,6 +45,7 @@ exports.create = asyncHandler(async (req, res) => {
   const doc = {
     title: req.body.title,
     content: req.body.content,
+    board: req.body.board || 'default',
     user: req.user._id,
     username: req.user.username,
     createdAt: new Date(),
