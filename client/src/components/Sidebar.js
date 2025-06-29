@@ -10,6 +10,7 @@ const navData = [
       { label: '재고관리', path: '/stock' },
       { label: '매출금액', path: '/sales-amount' },
       { label: '판매량', path: '/sales-volume' },
+      { label: '광고내역', path: '/ad-history' },
       { label: '관리자', path: '/admin' }
     ]
   },
@@ -20,6 +21,7 @@ const navData = [
       { label: '재고관리', path: '/try/stock' },
       { label: '매출금액', path: '/try/sales-amount' },
       { label: '판매량', path: '/try/sales-volume' },
+      { label: '광고내역', path: '/try/ad-history' },
       { label: '입고요청', path: '/try/inbound-request' }
     ]
   },
@@ -30,6 +32,7 @@ const navData = [
       { label: '재고관리', path: '/byc/stock' },
       { label: '매출금액', path: '/byc/sales-amount' },
       { label: '판매량', path: '/byc/sales-volume' },
+      { label: '광고내역', path: '/byc/ad-history' },
       { label: '입고요청', path: '/byc/inbound-request' }
     ]
   },
@@ -40,6 +43,7 @@ const navData = [
       { label: '재고관리', path: '/james-dean/stock' },
       { label: '매출금액', path: '/james-dean/sales-amount' },
       { label: '판매량', path: '/james-dean/sales-volume' },
+      { label: '광고내역', path: '/james-dean/ad-history' },
       { label: '입고요청', path: '/james-dean/inbound-request' }
     ]
   },
@@ -50,6 +54,7 @@ const navData = [
       { label: '재고관리', path: '/coupang/stock' },
       { label: '매출금액', path: '/coupang/sales-amount' },
       { label: '판매량', path: '/coupang/sales-volume' },
+      { label: '광고내역', path: '/coupang/ad-history' },
       { label: '입고요청', path: '/coupang/inbound-request' }
     ]
   },
@@ -60,6 +65,7 @@ const navData = [
       { label: '재고관리', path: '/naver/stock' },
       { label: '매출금액', path: '/naver/sales-amount' },
       { label: '판매량', path: '/naver/sales-volume' },
+      { label: '광고내역', path: '/naver/ad-history' },
       { label: '입고요청', path: '/naver/inbound-request' }
     ]
   }
