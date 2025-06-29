@@ -1,6 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Stock.css';
 
+const columnIndex = {
+  item_code: 1,
+  item_name: 2,
+  color: 3,
+  size: 4,
+  qty: 5,
+  allocation: 6,
+};
+
 function Stock() {
   const itemCodeRef = useRef(null);
   const itemNameRef = useRef(null);
@@ -13,117 +22,39 @@ function Stock() {
   const searchSizeRef = useRef(null);
   const excelFormRef = useRef(null);
   const manageFormRef = useRef(null);
-  const tableRef = useRef(null);
+
   const [editing, setEditing] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
+  const pageSize = 50;
+  const [sortCol, setSortCol] = useState('item_code');
+  const [sortDir, setSortDir] = useState('asc');
+
+  const fetchData = async () => {
+    const params = new URLSearchParams({
+      start: page * pageSize,
+      length: pageSize,
+      'order[0][column]': columnIndex[sortCol],
+      'order[0][dir]': sortDir,
+      item_code: searchItemCodeRef.current.value.trim(),
+      color: searchColorRef.current.value.trim(),
+      size: searchSizeRef.current.value.trim(),
+    });
+    const res = await fetch(`/api/stock?${params.toString()}`, {
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setRows(data.data);
+      setTotal(data.recordsTotal);
+    }
+  };
 
   useEffect(() => {
-    const $ = window.$;
-    const table = $('#stockTable').DataTable({
-      serverSide: true,
-      processing: true,
-      ordering: true,
-      paging: true,
-      searching: false,
-      dom: 'Brtip',
-      buttons: ['excel'],
-      fixedHeader: true,
-      lengthChange: true,
-      pageLength: 50,
-      columnDefs: [
-        { targets: '_all', className: 'text-center' },
-        {
-          targets: 0,
-          render: function (data, type, row, meta) {
-            return meta.row + meta.settings._iDisplayStart + 1;
-          },
-        },
-        {
-          targets: 5,
-          createdCell: function (td, cellData) {
-            $(td).addClass(cellData < 10 ? 'low-stock' : 'high-stock');
-          },
-        },
-      ],
-      language: {
-        paginate: { previous: '이전', next: '다음' },
-        info: '총 _TOTAL_건 중 _START_ ~ _END_',
-        infoEmpty: '데이터가 없습니다',
-      },
-      ajax: {
-        url: '/api/stock',
-        type: 'GET',
-        data: function (d) {
-          d.item_code = searchItemCodeRef.current.value.trim();
-          d.color = searchColorRef.current.value.trim();
-          d.size = searchSizeRef.current.value.trim();
-        },
-        dataSrc: 'data',
-      },
-      columns: [
-        { data: null },
-        { data: 'item_code' },
-        { data: 'item_name' },
-        { data: 'color' },
-        { data: 'size' },
-        { data: 'qty' },
-        { data: 'allocation' },
-      ],
-      createdRow: function (row, data) {
-        if (data.qty < 10) {
-          $(row).addClass('table-danger');
-        }
-      },
-    });
-    tableRef.current = table;
-
-    $('#btnSearch').on('click', function () {
-      table.ajax.reload();
-    });
-
-    $('#btnRefresh').on('click', function () {
-      searchItemCodeRef.current.value = '';
-      searchColorRef.current.value = '';
-      searchSizeRef.current.value = '';
-      table.ajax.reload();
-    });
-
-    $(excelFormRef.current).on('submit', function (e) {
-      e.preventDefault();
-      const formData = new FormData(excelFormRef.current);
-      $.ajax({
-        url: '/stock/upload',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: () => {
-          alert('업로드 성공!');
-          table.ajax.reload(null, false);
-        },
-        error: (xhr) => {
-          alert('업로드 실패: ' + xhr.responseText);
-        },
-      });
-    });
-
-    $('#stockTable tbody').on('click', 'tr', function () {
-      const data = table.row(this).data();
-      if (data) {
-        setEditing(data);
-        itemCodeRef.current.value = data.item_code || '';
-        itemNameRef.current.value = data.item_name || '';
-        colorRef.current.value = data.color || '';
-        sizeRef.current.value = data.size || '';
-        qtyRef.current.value = data.qty || 0;
-        allocationRef.current.value = data.allocation || 0;
-      }
-    });
-
-    return () => {
-      $('#stockTable tbody').off('click');
-      table.destroy();
-    };
-  }, []);
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, sortCol, sortDir]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -143,8 +74,8 @@ function Stock() {
       body: JSON.stringify(body),
       credentials: 'include',
     });
-    if (res.ok && tableRef.current) {
-      tableRef.current.ajax.reload(null, false);
+    if (res.ok) {
+      fetchData();
     }
     manageFormRef.current.reset();
     setEditing(null);
@@ -155,16 +86,70 @@ function Stock() {
     setEditing(null);
   };
 
+  const handleRowClick = (row) => {
+    setEditing(row);
+    itemCodeRef.current.value = row.item_code || '';
+    itemNameRef.current.value = row.item_name || '';
+    colorRef.current.value = row.color || '';
+    sizeRef.current.value = row.size || '';
+    qtyRef.current.value = row.qty || 0;
+    allocationRef.current.value = row.allocation || 0;
+  };
+
+  const handleSearch = () => {
+    setPage(0);
+    fetchData();
+  };
+
+  const handleRefresh = () => {
+    searchItemCodeRef.current.value = '';
+    searchColorRef.current.value = '';
+    searchSizeRef.current.value = '';
+    setPage(0);
+    fetchData();
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(excelFormRef.current);
+    const res = await fetch('/stock/upload', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    if (res.ok) {
+      alert('업로드 성공!');
+      fetchData();
+    } else {
+      alert('업로드 실패');
+    }
+  };
+
+  const totalPages = Math.ceil(total / pageSize);
+
+  const changeSort = (col) => {
+    if (sortCol === col) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortCol(col);
+      setSortDir('asc');
+    }
+  };
   return (
     <div className="container my-5">
       <h2 className="fw-bold mb-4">재고 관리</h2>
 
       <div className="action-form mb-4">
-        <form ref={excelFormRef} className="d-flex gap-2 flex-nowrap" encType="multipart/form-data">
+        <form
+          ref={excelFormRef}
+          className="d-flex gap-2 flex-nowrap"
+          encType="multipart/form-data"
+          onSubmit={handleUpload}
+        >
           <input type="file" name="excelFile" accept=".xlsx,.xls" className="form-control" required />
           <button type="submit" className="btn btn-success btn-upload">엑셀 업로드</button>
         </form>
-        <button id="btnRefresh" className="btn btn-danger btn-reset ms-2">데이터 초기화</button>
+        <button onClick={handleRefresh} className="btn btn-danger btn-reset ms-2">데이터 초기화</button>
       </div>
 
       <form ref={manageFormRef} className="row g-2 mb-4 stock-actions" onSubmit={handleSave}>
@@ -193,45 +178,106 @@ function Stock() {
         </div>
         {editing && (
           <div className="col-auto">
-            <button type="button" className="btn btn-secondary" onClick={handleCancel}>취소</button>
+            <button type="button" className="btn btn-secondary" onClick={handleCancel}>
+              취소
+            </button>
           </div>
         )}
       </form>
 
       <div className="row g-3 align-items-end mb-4 stock-search">
         <div className="col-md-3">
-          <label htmlFor="itemCode" className="form-label">품번</label>
+          <label htmlFor="itemCode" className="form-label">
+            품번
+          </label>
           <input ref={searchItemCodeRef} type="text" id="itemCode" className="form-control" placeholder="품번 입력" />
         </div>
         <div className="col-md-3">
-          <label htmlFor="color" className="form-label">색상</label>
+          <label htmlFor="color" className="form-label">
+            색상
+          </label>
           <input ref={searchColorRef} type="text" id="color" className="form-control" placeholder="색상 입력" />
         </div>
         <div className="col-md-3">
-          <label htmlFor="size" className="form-label">사이즈</label>
+          <label htmlFor="size" className="form-label">
+            사이즈
+          </label>
           <input ref={searchSizeRef} type="text" id="size" className="form-control" placeholder="사이즈 입력" />
         </div>
         <div className="col-md-3 d-flex gap-2">
-          <button id="btnSearch" className="btn btn-outline-primary">검색</button>
+          <button onClick={handleSearch} className="btn btn-outline-primary">
+            검색
+          </button>
+          <button onClick={handleRefresh} className="btn btn-secondary">
+            새로고침
+          </button>
         </div>
       </div>
 
       <div className="table-responsive table-container">
-        <table id="stockTable" data-order-col="1" data-order-dir="asc" className="table table-striped table-hover table-bordered shadow-sm rounded bg-white align-middle text-center auto-width">
+        <table className="table table-striped table-hover table-bordered shadow-sm rounded bg-white align-middle text-center auto-width">
           <thead className="table-light">
             <tr>
-              <th>번호</th>
-              <th>품번</th>
-              <th>품명</th>
-              <th>색상</th>
-              <th>사이즈</th>
-              <th>수량</th>
-              <th>할당</th>
+              <th>#</th>
+              <th onClick={() => changeSort('item_code')} role="button">
+                품번 {sortCol === 'item_code' && (sortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th onClick={() => changeSort('item_name')} role="button">
+                품명 {sortCol === 'item_name' && (sortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th onClick={() => changeSort('color')} role="button">
+                색상 {sortCol === 'color' && (sortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th onClick={() => changeSort('size')} role="button">
+                사이즈 {sortCol === 'size' && (sortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th onClick={() => changeSort('qty')} role="button">
+                수량 {sortCol === 'qty' && (sortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th onClick={() => changeSort('allocation')} role="button">
+                할당 {sortCol === 'allocation' && (sortDir === 'asc' ? '▲' : '▼')}
+              </th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+            {rows.map((r, idx) => (
+              <tr
+                key={r._id}
+                onClick={() => handleRowClick(r)}
+                className={r.qty < 10 ? 'table-danger' : ''}
+              >
+                <td>{page * pageSize + idx + 1}</td>
+                <td>{r.item_code}</td>
+                <td>{r.item_name}</td>
+                <td>{r.color}</td>
+                <td>{r.size}</td>
+                <td>{r.qty}</td>
+                <td>{r.allocation}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
+
+      <nav className="d-flex justify-content-center align-items-center gap-2">
+        <button
+          className="btn btn-outline-secondary btn-sm"
+          disabled={page === 0}
+          onClick={() => setPage((p) => Math.max(0, p - 1))}
+        >
+          이전
+        </button>
+        <span>
+          {page + 1} / {totalPages || 1}
+        </span>
+        <button
+          className="btn btn-outline-secondary btn-sm"
+          disabled={page + 1 >= totalPages}
+          onClick={() => setPage((p) => p + 1)}
+        >
+          다음
+        </button>
+      </nav>
     </div>
   );
 }
