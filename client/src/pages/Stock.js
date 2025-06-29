@@ -1,14 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Stock.css';
 
-const columnIndex = {
-  item_code: 1,
-  item_name: 2,
-  color: 3,
-  size: 4,
-  qty: 5,
-  allocation: 6,
-};
+const columns = [
+  { key: 'item_code', label: '품번' },
+  { key: 'item_name', label: '품명' },
+  { key: 'color', label: '색상' },
+  { key: 'size', label: '사이즈' },
+  { key: 'qty', label: '수량' },
+  { key: 'allocation', label: '할당' },
+];
+
+const columnIndex = columns.reduce((acc, col, idx) => {
+  acc[col.key] = idx + 1;
+  return acc;
+}, {});
 
 function Stock() {
   const itemCodeRef = useRef(null);
@@ -30,8 +35,12 @@ function Stock() {
   const pageSize = 50;
   const [sortCol, setSortCol] = useState('item_code');
   const [sortDir, setSortDir] = useState('asc');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState('');
 
   const fetchData = async () => {
+    setLoading(true);
     const params = new URLSearchParams({
       start: page * pageSize,
       length: pageSize,
@@ -49,6 +58,7 @@ function Stock() {
       setRows(data.data);
       setTotal(data.recordsTotal);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -120,11 +130,14 @@ function Stock() {
       credentials: 'include',
     });
     if (res.ok) {
-      alert('업로드 성공!');
+      setMessage('업로드 성공!');
+      setMessageType('success');
       fetchData();
     } else {
-      alert('업로드 실패');
+      setMessage('업로드 실패');
+      setMessageType('danger');
     }
+    setTimeout(() => setMessage(null), 3000);
   };
 
   const totalPages = Math.ceil(total / pageSize);
@@ -140,6 +153,12 @@ function Stock() {
   return (
     <div className="container my-5">
       <h2 className="fw-bold mb-4">재고 관리</h2>
+
+      {message && (
+        <div className={`alert alert-${messageType} fade show`} role="alert">
+          {message}
+        </div>
+      )}
 
       <div className="action-form mb-4">
         <form
@@ -247,48 +266,47 @@ function Stock() {
       </div>
 
       <div className="table-responsive table-container">
-        <table className="table table-striped table-hover table-bordered shadow-sm rounded bg-white align-middle text-center stock-table">
-          <thead className="table-light">
-            <tr>
-              <th>#</th>
-              <th onClick={() => changeSort('item_code')} role="button">
-                품번 {sortCol === 'item_code' && (sortDir === 'asc' ? '▲' : '▼')}
-              </th>
-              <th onClick={() => changeSort('item_name')} role="button">
-                품명 {sortCol === 'item_name' && (sortDir === 'asc' ? '▲' : '▼')}
-              </th>
-              <th onClick={() => changeSort('color')} role="button">
-                색상 {sortCol === 'color' && (sortDir === 'asc' ? '▲' : '▼')}
-              </th>
-              <th onClick={() => changeSort('size')} role="button">
-                사이즈 {sortCol === 'size' && (sortDir === 'asc' ? '▲' : '▼')}
-              </th>
-              <th onClick={() => changeSort('qty')} role="button">
-                수량 {sortCol === 'qty' && (sortDir === 'asc' ? '▲' : '▼')}
-              </th>
-              <th onClick={() => changeSort('allocation')} role="button">
-                할당 {sortCol === 'allocation' && (sortDir === 'asc' ? '▲' : '▼')}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, idx) => (
-              <tr
-                key={r._id}
-                onClick={() => handleRowClick(r)}
-                className={r.qty < 10 ? 'table-danger' : ''}
-              >
-                <td>{page * pageSize + idx + 1}</td>
-                <td>{r.item_code}</td>
-                <td>{r.item_name}</td>
-                <td>{r.color}</td>
-                <td>{r.size}</td>
-                <td>{r.qty}</td>
-                <td>{r.allocation}</td>
+        {loading ? (
+          <div className="text-center py-5">로딩 중...</div>
+        ) : (
+          <table className="table table-striped table-hover table-bordered shadow-sm rounded bg-white align-middle text-center stock-table">
+            <thead className="table-light">
+              <tr>
+                <th>#</th>
+                {columns.map((col) => (
+                  <th
+                    key={col.key}
+                    onClick={() => changeSort(col.key)}
+                    role="button"
+                  >
+                    {col.label}{' '}
+                    {sortCol === col.key && (sortDir === 'asc' ? '▲' : '▼')}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((r, idx) => (
+                <tr
+                  key={r._id}
+                  onClick={() => handleRowClick(r)}
+                  className={
+                    editing?._id === r._id
+                      ? 'table-warning'
+                      : r.qty < 10
+                      ? 'table-danger'
+                      : ''
+                  }
+                >
+                  <td>{page * pageSize + idx + 1}</td>
+                  {columns.map((col) => (
+                    <td key={col.key}>{r[col.key]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <nav className="d-flex justify-content-center align-items-center gap-2">

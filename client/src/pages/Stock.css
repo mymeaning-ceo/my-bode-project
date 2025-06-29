@@ -24,3 +24,15 @@
 .stock-table tbody tr:hover {
   background-color: #eaeaea;
 }
+
+.stock-table th[role='button'] {
+  cursor: pointer;
+}
+
+.stock-table tbody tr.table-danger {
+  background-color: #ffecec;
+}
+
+.table-container {
+  overflow-x: auto;
+}
