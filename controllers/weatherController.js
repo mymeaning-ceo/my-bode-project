@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const multer = require('multer');
 const asyncHandler = require('../middlewares/asyncHandler');
 
 // Common helper to fetch weather data for a single day
@@ -174,10 +175,29 @@ const getAverageTemperature = asyncHandler(async (req, res) => {
   });
 });
 
+// Stub upload middleware and API to keep old routes working
+const upload = multer({ dest: 'uploads/' }).single('excelFile');
+
+const uploadExcelApi = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ status: 'error', message: '파일이 없습니다.' });
+  }
+  res.json({ status: 'success' });
+});
+
+const getHistory = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const history = await db.collection('weather').find().sort({ _id: -1 }).limit(50).toArray();
+  res.json(history);
+});
+
 module.exports = {
   fetchDaily,
   getDailyWeather,
   getSameDay,
   getMonthlyWeather,
   getAverageTemperature,
+  upload,
+  uploadExcelApi,
+  getHistory,
 };
