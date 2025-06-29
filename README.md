@@ -120,6 +120,18 @@ Korean Meteorological Administration using `WEATHER_API_KEY`. An accompanying
 
 
 Server-side requests use `node-fetch`, which is listed in `package.json`.
+
+### Initializing sample weather data
+
+Run the script below once to create the `weather` collection with an example
+document. The script respects `MONGO_URI` and `DB_NAME` environment variables:
+
+```bash
+node scripts/init_weather.js
+```
+
+This inserts a document for `2025-06-25` so the weather API endpoints return
+data even before the daily cron job populates the database.
 =======
 
 
