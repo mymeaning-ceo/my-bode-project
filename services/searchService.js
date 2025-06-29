@@ -19,7 +19,8 @@ async function searchPosts(
   page = 1,
   limit = 5,
   sortField = 'createdAt',
-  sortOrder = -1
+  sortOrder = -1,
+  board = 'default'
 ) {
   const skip = (page - 1) * limit;
   const pipeline = [
@@ -52,23 +53,24 @@ async function searchPosts(
 
   let docs, countRes;
   try {
+    const postsCol = db.collection(`post_${String(board).replace(/[^a-zA-Z0-9_-]/g, '_')}`);
     [docs, countRes] = await Promise.all([
-      db.collection('post').aggregate(pipeline).toArray(),
-      db.collection('post').aggregate(countPipeline).toArray(),
+      postsCol.aggregate(pipeline).toArray(),
+      postsCol.aggregate(countPipeline).toArray(),
     ]);
   } catch (err) {
     // Atlas Search may not be enabled (e.g. local MongoDB). Fallback to regex search.
     const regex = new RegExp(escapeRegExp(term), 'i');
     const filter = { $or: [{ title: regex }, { content: regex }] };
+    const postsCol = db.collection(`post_${String(board).replace(/[^a-zA-Z0-9_-]/g, '_')}`);
     [docs, countRes] = await Promise.all([
-      db
-        .collection('post')
+      postsCol
         .find(filter)
         .sort({ [sortField]: sortOrder })
         .skip(skip)
         .limit(limit)
         .toArray(),
-      db.collection('post').countDocuments(filter),
+      postsCol.countDocuments(filter),
     ]);
     countRes = [{ total: countRes }];
   }
