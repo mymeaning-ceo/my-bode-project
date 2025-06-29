@@ -1,5 +1,16 @@
 const fetch = require('node-fetch');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+const xlsx = require('xlsx');
 const asyncHandler = require('../middlewares/asyncHandler');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) =>
+    cb(null, `excel_${Date.now()}${path.extname(file.originalname)}`),
+});
+const upload = multer({ storage }).single('excelFile');
 
 // Common helper to fetch weather data for a single day
 async function fetchDaily(date, time = '1200', nx = '60', ny = '127') {
@@ -41,9 +52,13 @@ async function fetchDaily(date, time = '1200', nx = '60', ny = '127') {
 
 // Fetch daily weather from KMA API
 const getDailyWeather = asyncHandler(async (req, res) => {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - 30);
   const baseDate =
-    req.query.date || new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const baseTime = req.query.time || '1200';
+    req.query.date || now.toISOString().slice(0, 10).replace(/-/g, '');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = now.getMinutes() >= 30 ? '30' : '00';
+  const baseTime = req.query.time || `${hh}${mm}`;
   const nx = req.query.nx || '60';
   const ny = req.query.ny || '127';
 
@@ -111,26 +126,26 @@ const getSameDay = asyncHandler(async (req, res) => {
   res.json(docs);
 });
 
-// Fetch daily weather for an entire month
+// Fetch daily weather for an entire month from DB
 const getMonthlyWeather = asyncHandler(async (req, res) => {
   const year = req.query.year || new Date().getFullYear().toString();
   const month = (req.query.month || new Date().getMonth() + 1)
     .toString()
     .padStart(2, '0');
 
-  const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
-  const result = [];
+  const regex = new RegExp(`^${year}${month}`);
+  const docs = await req.app.locals.db
+    .collection('monthlyWeather')
+    .find({ _id: { $regex: regex } })
+    .sort({ _id: 1 })
+    .toArray();
 
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    const date = `${year}${month}${String(day).padStart(2, '0')}`;
-    try {
-      const data = await fetchDaily(date);
-      result.push({ date: `${year}-${month}-${String(day).padStart(2, '0')}`, ...data });
-    } catch (err) {
-      // Skip failed days but record error
-      result.push({ date: `${year}-${month}-${String(day).padStart(2, '0')}`, error: err.message });
-    }
-  }
+  const result = docs.map((d) => ({
+    date: d.date || `${d._id.slice(0, 4)}-${d._id.slice(4, 6)}-${d._id.slice(6, 8)}`,
+    temperature: d.temperature,
+    sky: d.sky,
+    precipitationType: d.precipitationType,
+  }));
 
   res.json(result);
 });
@@ -174,10 +189,47 @@ const getAverageTemperature = asyncHandler(async (req, res) => {
   });
 });
 
+// Upload monthly weather Excel and save to DB
+const uploadMonthlyExcel = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: '파일이 없습니다.' });
+  }
+  const filePath = req.file.path;
+  const workbook = xlsx.readFile(filePath, { cellDates: true });
+  const sheetName = workbook.SheetNames[0];
+  const rows = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+  const docs = [];
+
+  for (const row of rows) {
+    const rawDate = row.date || row.날짜 || row.Date;
+    if (!rawDate) continue;
+    const d = new Date(rawDate);
+    if (Number.isNaN(d)) continue;
+    const id = d.toISOString().slice(0, 10).replace(/-/g, '');
+    docs.push({
+      _id: id,
+      date: d.toISOString().slice(0, 10),
+      temperature: row.temperature ?? row.temp ?? row.기온,
+      sky: row.sky ?? row.하늘상태,
+      precipitationType: row.precipitationType ?? row.강수형태,
+      updatedAt: new Date(),
+    });
+  }
+
+  const col = req.app.locals.db.collection('monthlyWeather');
+  for (const doc of docs) {
+    await col.updateOne({ _id: doc._id }, { $set: doc }, { upsert: true });
+  }
+  fs.unlink(filePath, () => {});
+  res.json({ status: 'success', inserted: docs.length });
+});
+
 module.exports = {
   fetchDaily,
   getDailyWeather,
   getSameDay,
   getMonthlyWeather,
   getAverageTemperature,
+  upload,
+  uploadMonthlyExcel,
 };

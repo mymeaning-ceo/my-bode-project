@@ -91,10 +91,22 @@ test('GET /api/weather/same-day returns past years data', async () => {
 });
 
 test('GET /api/weather/monthly returns array of daily data', async () => {
+  mockCollection.find.mockReturnThis();
+  mockCollection.sort.mockReturnThis();
+  mockCollection.toArray.mockResolvedValueOnce([
+    { _id: '20240601', temperature: 20, sky: '1', precipitationType: '0' },
+  ]);
+
   const res = await request(app).get('/api/weather/monthly?year=2024&month=06');
   expect(res.statusCode).toBe(200);
-  expect(Array.isArray(res.body)).toBe(true);
-  expect(res.body.length).toBeGreaterThan(0);
+  expect(res.body).toEqual([
+    {
+      date: '2024-06-01',
+      temperature: 20,
+      sky: '1',
+      precipitationType: '0',
+    },
+  ]);
 });
 
 test('GET /api/weather/average returns average temperature', async () => {

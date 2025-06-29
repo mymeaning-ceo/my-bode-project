@@ -10,6 +10,7 @@ import CoupangStock from './pages/CoupangStock';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Weather from './pages/Weather';
+import WeatherUpload from './pages/WeatherUpload';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './pages/DashboardLayout';
 import Board from './pages/Board';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/coupang/stock" element={<CoupangStock />} />
           <Route path="/coupang-add" element={<CoupangAdd />} />
           <Route path="/weather" element={<Weather />} />
+          <Route path="/weather/upload" element={<WeatherUpload />} />
           <Route path="/:shop/:section" element={<Placeholder />} />
         </Route>
       </Routes>
