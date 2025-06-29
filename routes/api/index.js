@@ -23,6 +23,8 @@ router.use("/coupang-open", require("./coupangOpenApi"));
 router.use("/weather", require("./weatherApi"));
 // 광고 성과 API
 router.use("/analytics", require("./analytics"));
+// 광고 내역 API
+router.use('/ad-history', require('./adHistory'));
 // 게시판 API
 router.use("/posts", require("./postApi"));
 // 게시판 목록 API
