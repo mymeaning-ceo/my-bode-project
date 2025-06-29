@@ -244,6 +244,12 @@ client authenticates by sending credentials to the Express endpoint
 
 The Help page has also been converted to React and is accessible at `/help`.
 
+### Post pages migrated to React
+Legacy EJS templates under `/post` are now served by the React client. Visiting
+`/post`, `/post/write` or a detail page loads `client/public/index.html`. CRUD
+operations continue to use the `/api/posts` endpoints so the frontend can evolve
+independently of Express routes.
+
 ### Board management API
 Boards are stored in the `board` collection. CRUD operations are available via
 `/api/boards`. A simple management page is located at `/admin/boards` in the
