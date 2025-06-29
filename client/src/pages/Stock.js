@@ -17,9 +17,9 @@ function Stock() {
   const sizeRef = useRef(null);
   const qtyRef = useRef(null);
   const allocationRef = useRef(null);
-  const searchItemCodeRef = useRef(null);
-  const searchColorRef = useRef(null);
-  const searchSizeRef = useRef(null);
+  const [searchItemCode, setSearchItemCode] = useState('');
+  const [searchColor, setSearchColor] = useState('');
+  const [searchSize, setSearchSize] = useState('');
   const excelFormRef = useRef(null);
   const manageFormRef = useRef(null);
 
@@ -37,9 +37,9 @@ function Stock() {
       length: pageSize,
       'order[0][column]': columnIndex[sortCol],
       'order[0][dir]': sortDir,
-      item_code: searchItemCodeRef.current.value.trim(),
-      color: searchColorRef.current.value.trim(),
-      size: searchSizeRef.current.value.trim(),
+      item_code: searchItemCode.trim(),
+      color: searchColor.trim(),
+      size: searchSize.trim(),
     });
     const res = await fetch(`/api/stock?${params.toString()}`, {
       credentials: 'include',
@@ -52,9 +52,12 @@ function Stock() {
   };
 
   useEffect(() => {
-    fetchData();
+    const t = setTimeout(() => {
+      fetchData();
+    }, 300);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, sortCol, sortDir]);
+  }, [page, sortCol, sortDir, searchItemCode, searchColor, searchSize]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -102,11 +105,10 @@ function Stock() {
   };
 
   const handleRefresh = () => {
-    searchItemCodeRef.current.value = '';
-    searchColorRef.current.value = '';
-    searchSizeRef.current.value = '';
+    setSearchItemCode('');
+    setSearchColor('');
+    setSearchSize('');
     setPage(0);
-    fetchData();
   };
 
   const handleUpload = async (e) => {
@@ -190,19 +192,49 @@ function Stock() {
           <label htmlFor="itemCode" className="form-label">
             품번
           </label>
-          <input ref={searchItemCodeRef} type="text" id="itemCode" className="form-control" placeholder="품번 입력" />
+          <input
+            type="text"
+            id="itemCode"
+            className="form-control"
+            placeholder="품번 입력"
+            value={searchItemCode}
+            onChange={(e) => {
+              setSearchItemCode(e.target.value);
+              setPage(0);
+            }}
+          />
         </div>
         <div className="col-md-3">
           <label htmlFor="color" className="form-label">
             색상
           </label>
-          <input ref={searchColorRef} type="text" id="color" className="form-control" placeholder="색상 입력" />
+          <input
+            type="text"
+            id="color"
+            className="form-control"
+            placeholder="색상 입력"
+            value={searchColor}
+            onChange={(e) => {
+              setSearchColor(e.target.value);
+              setPage(0);
+            }}
+          />
         </div>
         <div className="col-md-3">
           <label htmlFor="size" className="form-label">
             사이즈
           </label>
-          <input ref={searchSizeRef} type="text" id="size" className="form-control" placeholder="사이즈 입력" />
+          <input
+            type="text"
+            id="size"
+            className="form-control"
+            placeholder="사이즈 입력"
+            value={searchSize}
+            onChange={(e) => {
+              setSearchSize(e.target.value);
+              setPage(0);
+            }}
+          />
         </div>
         <div className="col-md-3 d-flex gap-2">
           <button onClick={handleSearch} className="btn btn-outline-primary">
@@ -215,7 +247,7 @@ function Stock() {
       </div>
 
       <div className="table-responsive table-container">
-        <table className="table table-striped table-hover table-bordered shadow-sm rounded bg-white align-middle text-center auto-width">
+        <table className="table table-striped table-hover table-bordered shadow-sm rounded bg-white align-middle text-center stock-table">
           <thead className="table-light">
             <tr>
               <th>#</th>
