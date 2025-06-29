@@ -29,6 +29,10 @@ router.get("/", async (req, res) => {
     const skip = (page - 1) * limit;
     const keyword = req.query.keyword || "";
     const brand = req.query.brand || "";
+    const sortField = DEFAULT_COLUMNS.includes(req.query.sort)
+      ? req.query.sort
+      : "Product name";
+    const sortOrder = req.query.order === "desc" ? -1 : 1;
 
     const conditions = [];
     if (keyword) {
@@ -51,6 +55,7 @@ router.get("/", async (req, res) => {
       db
         .collection("coupang")
         .find(query)
+        .sort({ [sortField]: sortOrder })
         .skip(skip)
         .limit(limit)
         .toArray(),

@@ -14,7 +14,7 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 const upload = multer({ dest: uploadsDir });
 
 // 검색 가능한 브랜드 목록
-const BRANDS = ["BYC", "트라이", "제임스딘", "스페클로", "물랑루즈"];
+const BRANDS = ["트라이", "BYC", "제임스딘"];
 
 const 한글 = {
   "Option ID": "옵션ID",
