@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
 function Board() {
   const { shop } = useParams();
@@ -78,12 +78,12 @@ function Board() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="form-control me-2"
+          className="form-control form-control-sm me-2"
           placeholder="검색"
         />
         <button
           type="button"
-          className="btn btn-outline-secondary"
+          className="btn btn-outline-secondary btn-sm"
           onClick={() => {
             setPage(1);
             loadPosts();
@@ -98,7 +98,7 @@ function Board() {
           name="title"
           value={form.title}
           onChange={onChange}
-          className="form-control mb-2"
+          className="form-control form-control-sm mb-2"
           placeholder="제목"
           required
         />
@@ -106,16 +106,16 @@ function Board() {
           name="content"
           value={form.content}
           onChange={onChange}
-          className="form-control mb-2"
+          className="form-control form-control-sm mb-2"
           rows="3"
           placeholder="내용"
           required
         />
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary btn-sm">
           {editingId ? '수정' : '등록'}
         </button>
         {editingId && (
-          <button type="button" className="btn btn-secondary ms-2" onClick={cancelEdit}>
+          <button type="button" className="btn btn-secondary btn-sm ms-2" onClick={cancelEdit}>
             취소
           </button>
         )}
@@ -132,7 +132,9 @@ function Board() {
         <tbody>
           {posts.map((post) => (
             <tr key={post._id}>
-              <td className="text-start">{post.title}</td>
+              <td className="text-start">
+                <Link to={shop ? `/${shop}/board/${post._id}` : `/board/${post._id}`}>{post.title}</Link>
+              </td>
               <td>{post.username}</td>
               <td>{new Date(post.createdAt).toLocaleString()}</td>
               <td>
