@@ -7,7 +7,7 @@ async function fetchDaily(date, time = '1200', nx = '60', ny = '127') {
     throw new Error('WEATHER_API_KEY not configured');
   }
 
-  const serviceKey = encodeURIComponent(process.env.WEATHER_API_KEY);
+  const serviceKey = process.env.WEATHER_API_KEY;
 
   const params = new URLSearchParams({
     serviceKey,
