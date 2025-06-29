@@ -1,5 +1,6 @@
 const { ObjectId } = require('mongodb');
 const asyncHandler = require('../middlewares/asyncHandler');
+const { getPostCollection } = require('../utils/postCollection');
 
 // 게시판 목록 조회
 exports.list = asyncHandler(async (req, res) => {
@@ -25,6 +26,12 @@ exports.create = asyncHandler(async (req, res) => {
     createdAt: new Date(),
   };
   await db.collection('board').insertOne(doc);
+  try {
+    const postsCol = getPostCollection(db, doc.slug);
+    await postsCol.createIndex({ createdAt: -1 });
+  } catch (err) {
+    console.error('Failed to init post collection:', err.message);
+  }
   res.json({ success: true });
 });
 
@@ -65,10 +72,18 @@ exports.remove = asyncHandler(async (req, res) => {
     return res.status(401).json({ message: '로그인이 필요합니다.' });
   }
   const db = req.app.locals.db;
-  const result = await db.collection('board').deleteOne({
-    _id: new ObjectId(req.params.id),
-  });
-  if (result.deletedCount === 0)
-    return res.status(404).json({ message: '존재하지 않는 게시판입니다.' });
+  const board = await db
+    .collection('board')
+    .findOne({ _id: new ObjectId(req.params.id) });
+  if (!board) return res.status(404).json({ message: '존재하지 않는 게시판입니다.' });
+  const result = await db.collection('board').deleteOne({ _id: board._id });
+  try {
+    const postsCol = getPostCollection(db, board.slug);
+    await postsCol.drop();
+  } catch (err) {
+    if (err.codeName !== 'NamespaceNotFound') {
+      console.error('Failed to drop post collection:', err.message);
+    }
+  }
   res.json({ success: true });
 });

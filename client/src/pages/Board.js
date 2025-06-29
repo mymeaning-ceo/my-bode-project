@@ -56,7 +56,10 @@ function Board() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('삭제하시겠습니까?')) return;
-    await fetch(`/api/posts/${id}`, { method: 'DELETE', credentials: 'include' });
+    await fetch(`/api/posts/${id}?board=${board}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
     loadPosts();
   };
 

@@ -1,5 +1,6 @@
 const { ObjectId } = require('mongodb');
 const asyncHandler = require('../middlewares/asyncHandler');
+const { getPostCollection } = require('../utils/postCollection');
 
 // 게시글 목록 조회
 exports.list = asyncHandler(async (req, res) => {
@@ -9,6 +10,7 @@ exports.list = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   const search = req.query.search;
   const board = req.query.board || 'default';
+  const postsCol = getPostCollection(db, board);
   let query = { board };
   if (search) {
     query = {
@@ -24,14 +26,13 @@ exports.list = asyncHandler(async (req, res) => {
     };
   }
   const [posts, total] = await Promise.all([
-    db
-      .collection('post')
+    postsCol
       .find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .toArray(),
-    db.collection('post').countDocuments(query),
+    postsCol.countDocuments(query),
   ]);
   res.json({ data: posts, total });
 });
@@ -50,16 +51,17 @@ exports.create = asyncHandler(async (req, res) => {
     username: req.user.username,
     createdAt: new Date(),
   };
-  await db.collection('post').insertOne(doc);
+  const postsCol = getPostCollection(db, doc.board);
+  await postsCol.insertOne(doc);
   res.json({ success: true });
 });
 
 // 게시글 상세 조회
 exports.detail = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
-  const post = await db
-    .collection('post')
-    .findOne({ _id: new ObjectId(req.params.id) });
+  const board = req.query.board || 'default';
+  const postsCol = getPostCollection(db, board);
+  const post = await postsCol.findOne({ _id: new ObjectId(req.params.id) });
   if (!post) return res.status(404).json({ message: '존재하지 않는 게시글입니다.' });
   res.json(post);
 });
@@ -70,7 +72,9 @@ exports.update = asyncHandler(async (req, res) => {
     return res.status(401).json({ message: '로그인이 필요합니다.' });
   }
   const db = req.app.locals.db;
-  const result = await db.collection('post').updateOne(
+  const board = req.body.board || 'default';
+  const postsCol = getPostCollection(db, board);
+  const result = await postsCol.updateOne(
     { _id: new ObjectId(req.params.id), user: req.user._id },
     { $set: { title: req.body.title, content: req.body.content } },
   );
@@ -85,7 +89,9 @@ exports.remove = asyncHandler(async (req, res) => {
     return res.status(401).json({ message: '로그인이 필요합니다.' });
   }
   const db = req.app.locals.db;
-  const result = await db.collection('post').deleteOne({
+  const board = req.query.board || 'default';
+  const postsCol = getPostCollection(db, board);
+  const result = await postsCol.deleteOne({
     _id: new ObjectId(req.params.id),
     user: req.user._id,
   });

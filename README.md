@@ -227,8 +227,8 @@ client authenticates by sending credentials to the Express endpoint
 ### 게시판
 `/board`와 `/:shop/board` 경로는 React 기반 게시판을 제공합니다. `shop`
 파라미터에는 `내의미`, `TRY`, `BYC`, `제임스딘`, `쿠팡`, `네이버` 중 하나가
-들어갑니다. 게시글 API는 `board` 값을 사용해 컬렉션을 구분하므로 각 브랜드별
-게시판 데이터를 독립적으로 관리할 수 있습니다.
+들어갑니다. 게시글 API는 `board` 값을 사용해 **`post_{slug}`** 형식의
+컬렉션을 생성하여 각 브랜드별 게시판 데이터를 독립적으로 관리합니다.
 
 The Help page has also been converted to React and is accessible at `/help`.
 
@@ -236,6 +236,7 @@ The Help page has also been converted to React and is accessible at `/help`.
 Boards are stored in the `board` collection. CRUD operations are available via
 `/api/boards`. A simple management page is located at `/admin/boards` in the
 React client.
+Deleting a board also removes its corresponding `post_{slug}` collection.
 
 
 
