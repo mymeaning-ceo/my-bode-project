@@ -7,3 +7,20 @@
   white-space: nowrap;
   width: auto;
 }
+
+.stock-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.stock-table th {
+  background-color: #f0f2f5;
+}
+
+.stock-table tbody tr:nth-of-type(odd) {
+  background-color: #fafafa;
+}
+
+.stock-table tbody tr:hover {
+  background-color: #eaeaea;
+}
