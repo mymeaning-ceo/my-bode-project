@@ -27,6 +27,8 @@ router.use("/analytics", require("./analytics"));
 router.use('/ad-history', require('./adHistory'));
 // 게시판 API
 router.use("/posts", require("./postApi"));
+// 댓글 API
+router.use("/comments", require("./commentApi"));
 // 게시판 목록 API
 router.use("/boards", require("./boardApi"));
 

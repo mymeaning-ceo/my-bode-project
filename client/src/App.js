@@ -13,6 +13,7 @@ import Weather from './pages/Weather';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './pages/DashboardLayout';
 import Board from './pages/Board';
+import PostDetail from './pages/PostDetail';
 import SalesAmount from './pages/SalesAmount';
 import SalesVolume from './pages/SalesVolume';
 import Help from './pages/Help';
@@ -31,7 +32,9 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/board" element={<Board />} />
+          <Route path="/board/:id" element={<PostDetail />} />
           <Route path="/:shop/board" element={<Board />} />
+          <Route path="/:shop/board/:id" element={<PostDetail />} />
           <Route path="/sales-amount" element={<SalesAmount />} />
         <Route path="/sales-volume" element={<SalesVolume />} />
         <Route path="/admin/*" element={<AdminRoutes />} />
