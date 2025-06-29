@@ -41,9 +41,14 @@ async function fetchDaily(date, time = '1200', nx = '60', ny = '127') {
 
 // Fetch daily weather from KMA API
 const getDailyWeather = asyncHandler(async (req, res) => {
-  const baseDate =
-    req.query.date || new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const baseTime = req.query.time || '1200';
+  const now = new Date(Date.now() - 30 * 60 * 1000);
+  const defaultDate = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const hour = String(now.getHours()).padStart(2, '0');
+  const minute = now.getMinutes() < 30 ? '00' : '30';
+  const defaultTime = `${hour}${minute}`;
+
+  const baseDate = req.query.date || defaultDate;
+  const baseTime = req.query.time || defaultTime;
   const nx = req.query.nx || '60';
   const ny = req.query.ny || '127';
 
@@ -121,14 +126,33 @@ const getMonthlyWeather = asyncHandler(async (req, res) => {
   const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
   const result = [];
 
+  const now = new Date();
   for (let day = 1; day <= daysInMonth; day += 1) {
     const date = `${year}${month}${String(day).padStart(2, '0')}`;
-    try {
-      const data = await fetchDaily(date);
-      result.push({ date: `${year}-${month}-${String(day).padStart(2, '0')}`, ...data });
-    } catch (err) {
-      // Skip failed days but record error
-      result.push({ date: `${year}-${month}-${String(day).padStart(2, '0')}`, error: err.message });
+
+    let doc = await req.app.locals.db.collection('weather').findOne({ _id: date });
+    if (!doc) {
+      const target = new Date(`${year}-${month}-${String(day).padStart(2, '0')}`);
+      const diffDays = (now - target) / (1000 * 60 * 60 * 24);
+      if (diffDays <= 3) {
+        try {
+          doc = await fetchDaily(date);
+          await req.app.locals.db.collection('weather').updateOne(
+            { _id: date },
+            { $set: { ...doc, updatedAt: new Date() } },
+            { upsert: true },
+          );
+        } catch (err) {
+          result.push({ date: `${year}-${month}-${String(day).padStart(2, '0')}`, error: err.message });
+          continue;
+        }
+      }
+    }
+
+    if (doc) {
+      result.push({ date: `${year}-${month}-${String(day).padStart(2, '0')}`, ...doc });
+    } else {
+      result.push({ date: `${year}-${month}-${String(day).padStart(2, '0')}`, error: 'no data' });
     }
   }
 
@@ -174,10 +198,69 @@ const getAverageTemperature = asyncHandler(async (req, res) => {
   });
 });
 
+const xlsx = require('xlsx');
+const fs = require('fs');
+
+const uploadMonthlyExcel = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'no file' });
+  }
+  const workbook = xlsx.readFile(req.file.path, { cellDates: true });
+  const sheetName = workbook.SheetNames[0];
+  const rows = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+  const ops = rows.map((row) => {
+    const date =
+      typeof row.date === 'string'
+        ? row.date.replace(/-/g, '')
+        : row.date instanceof Date
+          ? row.date.toISOString().slice(0, 10).replace(/-/g, '')
+          : String(row.date || '').replace(/-/g, '');
+    return {
+      updateOne: {
+        filter: { _id: date },
+        update: {
+          $set: {
+            temperature: row.temperature,
+            sky: row.sky,
+            precipitationType: row.precipitationType,
+            updatedAt: new Date(),
+          },
+        },
+        upsert: true,
+      },
+    };
+  });
+
+  if (ops.length) {
+    await req.app.locals.db.collection('weather').bulkWrite(ops);
+  }
+
+  fs.unlink(req.file.path, () => {});
+  res.json({ inserted: ops.length });
+});
+
+const getHistory = asyncHandler(async (req, res) => {
+  const { from, to } = req.query;
+  if (!from || !to) {
+    return res.status(400).json({ message: 'from and to required' });
+  }
+  const start = from.replace(/-/g, '');
+  const end = to.replace(/-/g, '');
+  const docs = await req.app.locals.db
+    .collection('weather')
+    .find({ _id: { $gte: start, $lte: end } })
+    .sort({ _id: 1 })
+    .toArray();
+  res.json(docs);
+});
+
 module.exports = {
   fetchDaily,
   getDailyWeather,
   getSameDay,
   getMonthlyWeather,
   getAverageTemperature,
+  uploadMonthlyExcel,
+  getHistory,
 };

@@ -8,6 +8,7 @@ function Weather() {
   const [date, setDate] = useState(now.toISOString().slice(0, 10));
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [uploadMsg, setUploadMsg] = useState(null);
 
   const handleSearch = async () => {
     setError(null);
@@ -24,6 +25,21 @@ function Weather() {
     } catch (e) {
       setError('데이터 없음');
     }
+  };
+
+  const handleUpload = async (e) => {
+    setUploadMsg(null);
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('excelFile', file);
+    const res = await fetch('/api/weather/upload', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    setUploadMsg(res.ok ? '업로드 완료' : '업로드 실패');
+    e.target.value = '';
   };
 
   return (
@@ -84,6 +100,10 @@ function Weather() {
         </div>
       </div>
       <MonthlyWeatherChart year={year} month={month} />
+      <div className="mt-3">
+        <input type="file" accept=".xlsx,.xls" onChange={handleUpload} />
+        {uploadMsg && <p>{uploadMsg}</p>}
+      </div>
     </div>
   );
 }
