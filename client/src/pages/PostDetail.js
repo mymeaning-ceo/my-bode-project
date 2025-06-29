@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 function PostDetail() {
@@ -8,25 +8,25 @@ function PostDetail() {
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState('');
 
-  const loadPost = async () => {
+  const loadPost = useCallback(async () => {
     const res = await fetch(`/api/posts/${id}?board=${board}`, { credentials: 'include' });
     if (res.ok) {
       setPost(await res.json());
     }
-  };
+  }, [id, board]);
 
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     const res = await fetch(`/api/comments/${id}`, { credentials: 'include' });
     if (res.ok) {
       const data = await res.json();
       setComments(data);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     loadPost();
     loadComments();
-  }, [id]);
+  }, [loadPost, loadComments]);
 
   const submitComment = async (e) => {
     e.preventDefault();
