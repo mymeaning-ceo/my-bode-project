@@ -1,5 +1,66 @@
 const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+const xlsx = require('xlsx');
 const asyncHandler = require('../middlewares/asyncHandler');
+
+const upload = multer({ dest: 'uploads/' });
+
+// Upload weather data via Excel file
+const uploadExcelApi = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+
+  const filePath = path.resolve(req.file.path);
+  let rows = [];
+  try {
+    const workbook = xlsx.readFile(filePath, { cellDates: true });
+    const sheetName = workbook.SheetNames[0];
+    rows = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+  } catch (err) {
+    console.error('❌ Failed to parse Excel:', err.message);
+    fs.unlink(filePath, () => {});
+    return res.status(500).json({ message: 'Failed to parse excel' });
+  }
+
+  const ops = rows.map((row) => {
+    const id = (row._id || row.date || '').toString().replace(/-/g, '');
+    return {
+      updateOne: {
+        filter: { _id: id },
+        update: { $set: { ...row, updatedAt: new Date() } },
+        upsert: true,
+      },
+    };
+  });
+
+  const collection = req.app.locals.db.collection('weather');
+  if (ops.length) {
+    await collection.bulkWrite(ops);
+  }
+
+  fs.unlink(filePath, () => {});
+  res.json({ inserted: ops.length });
+});
+
+// Fetch weather history between dates
+const getHistory = asyncHandler(async (req, res) => {
+  const { from, to } = req.query;
+  if (!from || !to) {
+    return res.status(400).json({ message: 'from and to required' });
+  }
+
+  const collection = req.app.locals.db.collection('weather');
+  const docs = await collection
+    .find({ _id: { $gte: from.replace(/-/g, ''), $lte: to.replace(/-/g, '') } })
+    .project({ _id: 1 })
+    .sort({ _id: -1 })
+    .toArray();
+
+  res.json(docs);
+});
 
 // Common helper to fetch weather data for a single day
 async function fetchDaily(date, time = '1200', nx = '60', ny = '127') {
@@ -180,4 +241,7 @@ module.exports = {
   getSameDay,
   getMonthlyWeather,
   getAverageTemperature,
+  upload,
+  uploadExcelApi,
+  getHistory,
 };
