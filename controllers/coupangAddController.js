@@ -1,5 +1,6 @@
 const path = require('path');
-const multer = require('multer');
+const multerImport = require('multer');
+const multer = multerImport.default || multerImport;
 const xlsx = require('xlsx');
 const fs = require('fs');
 const asyncHandler = require('../middlewares/asyncHandler');
