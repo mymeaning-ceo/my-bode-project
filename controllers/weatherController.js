@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
-const multer = require('multer');
+const multerImport = require('multer');
+const multer = multerImport.default || multerImport;
 const asyncHandler = require('../middlewares/asyncHandler');
 
 // Common helper to fetch weather data for a single day

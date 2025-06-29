@@ -1,6 +1,7 @@
 // upload.js
 require("dotenv").config();
-const multer = require("multer");
+const multerImport = require("multer");
+const multer = multerImport.default || multerImport;
 
 let upload;   // ← 공통 export용 변수
 
