@@ -42,6 +42,6 @@ test('GET /api/dashboard/ad-cost-daily returns aggregated data', async () => {
     { date: '2024-06-01', totalCost: 100 },
     { date: '2024-06-02', totalCost: 200 },
   ]);
-  expect(app.locals.db.collection).toHaveBeenCalledWith('coupangAdd');
+  expect(app.locals.db.collection).toHaveBeenCalledWith('adHistory');
   expect(mockCollection.aggregate).toHaveBeenCalled();
 });

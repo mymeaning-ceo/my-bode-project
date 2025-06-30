@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Tooltip,
   Legend,
 } from 'chart.js';
@@ -13,8 +12,7 @@ import {
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Tooltip,
   Legend,
 );
@@ -35,17 +33,26 @@ function DailyAdCostChart() {
       {
         label: '광고비',
         data: data.map((d) => d.totalCost),
+        backgroundColor: 'rgba(75,192,192,0.6)',
         borderColor: 'rgba(75,192,192,1)',
-        backgroundColor: 'rgba(75,192,192,0.2)',
-        tension: 0.1,
       },
     ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: { beginAtZero: true },
+    },
   };
 
   return (
     <div>
       <h3>쿠팡 광고비 (일자별)</h3>
-      <Line data={chartData} />
+      <div style={{ height: '300px' }}>
+        <Bar options={options} data={chartData} />
+      </div>
     </div>
   );
 }

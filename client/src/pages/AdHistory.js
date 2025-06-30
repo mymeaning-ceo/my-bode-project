@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import DailyAdCostChart from '../components/DailyAdCostChart';
 
 // React version of coupangAdd functionality for ad-history
 function AdHistory() {
@@ -308,28 +309,31 @@ function AdHistory() {
       )}
 
       {viewMode === 'date' && (
-        <table className="table table-bordered text-center">
-          <thead>
-            <tr>
-              <th
-                style={{ whiteSpace: 'nowrap' }}
-                onClick={toggleDateSort}
-                role="button"
-              >
-                날짜 {dateSortDir === 'asc' ? '▲' : '▼'}
-              </th>
-              <th>광고비 합</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedDateSummary.map((row) => (
-              <tr key={row.날짜}>
-                <td>{row.날짜}</td>
-                <td>{row.광고비.toLocaleString()}</td>
+        <>
+          <DailyAdCostChart />
+          <table className="table table-bordered text-center mt-3">
+            <thead>
+              <tr>
+                <th
+                  style={{ whiteSpace: 'nowrap' }}
+                  onClick={toggleDateSort}
+                  role="button"
+                >
+                  날짜 {dateSortDir === 'asc' ? '▲' : '▼'}
+                </th>
+                <th>광고비 합</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sortedDateSummary.map((row) => (
+                <tr key={row.날짜}>
+                  <td>{row.날짜}</td>
+                  <td>{row.광고비.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
       )}
       <nav className="d-flex justify-content-center my-3">
         <ul className="pagination">

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import DailyAdCostChart from '../components/DailyAdCostChart';
 
 /**
  * 쿠팡 광고비 페이지 - React 버전
@@ -195,22 +196,25 @@ function CoupangAdd() {
       )}
 
       {viewMode === 'date' && (
-        <table className="table table-bordered text-center">
-          <thead>
-            <tr>
-              <th style={{ whiteSpace: 'nowrap' }}>날짜</th>
-              <th>광고비 합</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dateSummary.map((row) => (
-              <tr key={row.날짜}>
-                <td>{row.날짜}</td>
-                <td>{row.광고비.toLocaleString()}</td>
+        <>
+          <DailyAdCostChart />
+          <table className="table table-bordered text-center mt-3">
+            <thead>
+              <tr>
+                <th style={{ whiteSpace: 'nowrap' }}>날짜</th>
+                <th>광고비 합</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {dateSummary.map((row) => (
+                <tr key={row.날짜}>
+                  <td>{row.날짜}</td>
+                  <td>{row.광고비.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
       )}
     </div>
   );
