@@ -87,5 +87,6 @@ exports.register = async (req, res) => {
 };
 
 exports.renderRegisterSuccess = (req, res) => {
-  res.render('register-success');
+  const reactIndex = path.join(__dirname, '..', 'client', 'public', 'index.html');
+  res.sendFile(reactIndex);
 };
