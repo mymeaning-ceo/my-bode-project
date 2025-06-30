@@ -1,0 +1,53 @@
+import React, { useEffect, useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+);
+
+function DailyAdCostChart() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/dashboard/ad-cost-daily', { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((d) => setData(d))
+      .catch(() => {});
+  }, []);
+
+  const chartData = {
+    labels: data.map((d) => d.date),
+    datasets: [
+      {
+        label: '광고비',
+        data: data.map((d) => d.totalCost),
+        borderColor: 'rgba(75,192,192,1)',
+        backgroundColor: 'rgba(75,192,192,0.2)',
+        tension: 0.1,
+      },
+    ],
+  };
+
+  return (
+    <div>
+      <h3>쿠팡 광고비 (일자별)</h3>
+      <Line data={chartData} />
+    </div>
+  );
+}
+
+export default DailyAdCostChart;
