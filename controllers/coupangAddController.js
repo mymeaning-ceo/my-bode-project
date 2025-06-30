@@ -281,3 +281,25 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
   fs.unlink(filePath, () => {});
   res.json({ status: 'success' });
 });
+
+// Get single document by ID
+exports.getItem = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const row = await db
+    .collection('coupangAdd')
+    .findOne({ _id: new require('mongodb').ObjectId(req.params.id) });
+  if (!row) return res.status(404).json({ message: 'Not found' });
+  res.json(row);
+});
+
+// Update document by ID
+exports.updateItem = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const result = await db.collection('coupangAdd').updateOne(
+    { _id: new require('mongodb').ObjectId(req.params.id) },
+    { $set: req.body }
+  );
+  if (result.matchedCount === 0)
+    return res.status(404).json({ message: 'Not found' });
+  res.json({ success: true });
+});
