@@ -19,6 +19,8 @@ router.use("/coupang", require("./coupangApi"));
 router.use("/coupang-add", require("./coupangAddApi"));
 // 쿠팡 오픈 API 연동
 router.use("/coupang-open", require("./coupangOpenApi"));
+// 쿠팡 공급가 API
+router.use("/coupang-supply", require("./coupangSupplyApi"));
 // 날씨 API
 router.use("/weather", require("./weatherApi"));
 // 간단한 Item API

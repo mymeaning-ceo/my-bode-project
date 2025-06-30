@@ -113,6 +113,20 @@ const createProduct = async (body) => {
 createProduct({ name: "Sample" });
 ```
 
+## Coupang supply price API
+
+Upload option supply prices and calculate the total stock value. The API exposes
+three endpoints under `/api/coupang-supply`:
+
+- `GET /api/coupang-supply` returns the saved prices with the current total
+  stock value computed from the Coupang inventory collection.
+- `POST /api/coupang-supply/upload` accepts an Excel file containing `Option ID`
+  and `Supply Price` columns. Existing records are upserted.
+- `GET /api/coupang-supply/download` downloads the saved data as an Excel file.
+
+React admin pages provide a simple interface for uploading or downloading the
+Excel file.
+
 =======
 
 ## Weather integration

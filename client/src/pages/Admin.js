@@ -22,6 +22,9 @@ function Admin() {
         <li className="list-group-item">
           <Link to="/admin/boards">게시판 관리</Link>
         </li>
+        <li className="list-group-item">
+          <Link to="/admin/coupang-supply">쿠팡 공급가 관리</Link>
+        </li>
       </ul>
     </div>
   );

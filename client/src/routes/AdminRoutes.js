@@ -6,6 +6,7 @@ import AdminLogo from '../pages/admin/Logo';
 import AdminUsers from '../pages/admin/Users';
 import AdminPermissions from '../pages/admin/Permissions';
 import AdminBoards from '../pages/admin/Boards';
+import CoupangSupply from '../pages/admin/CoupangSupply';
 
 /**
  * Router for admin pages. This nested router keeps admin related
@@ -21,6 +22,7 @@ function AdminRoutes() {
       <Route path="users" element={<AdminUsers />} />
       <Route path="permissions" element={<AdminPermissions />} />
       <Route path="boards" element={<AdminBoards />} />
+      <Route path="coupang-supply" element={<CoupangSupply />} />
       <Route path="*" element={<Navigate to="." />} />
     </Routes>
   );
