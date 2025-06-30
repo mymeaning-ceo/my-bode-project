@@ -29,6 +29,8 @@ router.use('/records', require('./records'));
 router.use("/analytics", require("./analytics"));
 // 광고 내역 API
 router.use('/ad-history', require('./adHistory'));
+// 대시보드 API
+router.use('/dashboard', require('./dashboard'));
 // 게시판 API
 router.use("/posts", require("./postApi"));
 // 댓글 API

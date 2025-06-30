@@ -1,10 +1,16 @@
 import React from 'react';
+import DailyAdCostChart from '../components/DailyAdCostChart';
+import './Dashboard.css';
 
 function Dashboard() {
   return (
-    <div>
-      <h1>대시보드</h1>
-      <p>환영합니다. 원하는 메뉴를 선택하세요.</p>
+    <div className="dashboard-grid">
+      <div className="grid-item">
+        <DailyAdCostChart />
+      </div>
+      <div className="grid-item">2</div>
+      <div className="grid-item">3</div>
+      <div className="grid-item">4</div>
     </div>
   );
 }
