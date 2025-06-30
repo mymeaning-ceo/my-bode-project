@@ -5,6 +5,7 @@ const mockCollection = {
   insertOne: jest.fn().mockResolvedValue({ insertedId: '20250601' }),
   findOne: jest.fn().mockResolvedValue({ _id: '20250601', temperature: 22.6 }),
   findOneAndUpdate: jest.fn().mockResolvedValue({ value: { _id: '20250601', temperature: 25.1 } }),
+  deleteOne: jest.fn().mockResolvedValue({ deletedCount: 1 }),
 };
 
 jest.mock('../config/db', () => {
@@ -56,4 +57,11 @@ test('PUT /api/weather/record/:id updates a record', async () => {
   expect(res.statusCode).toBe(200);
   expect(res.body).toEqual({ _id: '20250601', temperature: 25.1 });
   expect(mockCollection.findOneAndUpdate).toHaveBeenCalled();
+});
+
+test('DELETE /api/weather/record/:id removes a record', async () => {
+  const res = await request(app).delete('/api/weather/record/20250601');
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual({ deleted: '20250601' });
+  expect(mockCollection.deleteOne).toHaveBeenCalledWith({ _id: '20250601' });
 });

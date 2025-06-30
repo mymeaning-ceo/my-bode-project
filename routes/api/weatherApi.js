@@ -12,5 +12,6 @@ router.get('/average', ctrl.getAverageTemperature);
 router.post('/record', ctrl.createRecord);
 router.get('/record/:id', ctrl.getRecord);
 router.put('/record/:id', ctrl.updateRecord);
+router.delete('/record/:id', ctrl.deleteRecord);
 
 module.exports = router;
