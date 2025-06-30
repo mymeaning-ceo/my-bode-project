@@ -121,8 +121,13 @@ async function initApp() {
     const reactIndex = path.join(__dirname, "client", "public", "index.html");
     res.sendFile(reactIndex);
   });
-  app.use(express.static(path.join(__dirname, "client", "public")));
-  app.use(express.static(path.join(__dirname, "public")));
+  // Serve static assets without automatic redirect to avoid status code 302
+  app.use(
+    express.static(path.join(__dirname, "client", "public"), { redirect: false })
+  );
+  app.use(
+    express.static(path.join(__dirname, "public"), { redirect: false })
+  );
   app.get("/dashboard", checkAuth, (req, res) => {
     const reactIndex = path.join(__dirname, "client", "public", "index.html");
     res.sendFile(reactIndex);
