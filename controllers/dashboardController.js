@@ -7,8 +7,8 @@ exports.getDailyAdCost = asyncHandler(async (req, res) => {
   const pipeline = [
     {
       $group: {
-        _id: '$날짜',
-        totalCost: { $sum: '$광고비' },
+        _id: '$date',
+        totalCost: { $sum: '$cost' },
       },
     },
     { $sort: { _id: 1 } },
@@ -20,6 +20,6 @@ exports.getDailyAdCost = asyncHandler(async (req, res) => {
       },
     },
   ];
-  const data = await db.collection('coupangAdd').aggregate(pipeline).toArray();
+  const data = await db.collection('adHistory').aggregate(pipeline).toArray();
   res.json(data);
 });

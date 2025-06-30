@@ -39,10 +39,20 @@ function DailyAdCostChart() {
     ],
   };
 
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: { beginAtZero: true },
+    },
+  };
+
   return (
     <div>
       <h3>쿠팡 광고비 (일자별)</h3>
-      <Bar data={chartData} />
+      <div style={{ height: '300px' }}>
+        <Bar options={options} data={chartData} />
+      </div>
     </div>
   );
 }
