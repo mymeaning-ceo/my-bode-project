@@ -16,9 +16,14 @@ function AdHistory() {
   const [keyword, setKeyword] = useState('');
   const [file, setFile] = useState(null);
   const [viewMode, setViewMode] = useState('detail'); // detail, product, date
+  const [sortCol, setSortCol] = useState('날짜');
+  const [sortDir, setSortDir] = useState('asc');
+  const [prodSortCol, setProdSortCol] = useState('상품명');
+  const [prodSortDir, setProdSortDir] = useState('asc');
+  const [dateSortDir, setDateSortDir] = useState('asc');
 
   const loadData = async () => {
-    const params = new URLSearchParams({ start: '0', length: '1000', search: keyword });
+    const params = new URLSearchParams({ start: '0', length: '10000', search: keyword });
     const res = await fetch(`/api/coupang-add?${params.toString()}`, {
       credentials: 'include',
     });
@@ -52,6 +57,28 @@ function AdHistory() {
     loadData();
   };
 
+  const changeSort = (col) => {
+    if (sortCol === col) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortCol(col);
+      setSortDir('asc');
+    }
+  };
+
+  const changeProdSort = (col) => {
+    if (prodSortCol === col) {
+      setProdSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setProdSortCol(col);
+      setProdSortDir('asc');
+    }
+  };
+
+  const toggleDateSort = () => {
+    setDateSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+  };
+
   const trimmedName = (name = '') => {
     const idx = name.indexOf(',');
     return idx >= 0 ? name.slice(0, idx).trim() : name;
@@ -78,6 +105,40 @@ function AdHistory() {
     }));
   }, [rows]);
 
+  const sortedRows = useMemo(() => {
+    const arr = [...rows];
+    arr.sort((a, b) => {
+      let av = a[sortCol];
+      let bv = b[sortCol];
+      const numericCols = ['노출수', '클릭수', '광고비', '클릭률'];
+      if (numericCols.includes(sortCol)) {
+        av = Number(av) || 0;
+        bv = Number(bv) || 0;
+      }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [rows, sortCol, sortDir]);
+
+  const sortedProductSummary = useMemo(() => {
+    const arr = [...productSummary];
+    arr.sort((a, b) => {
+      let av = a[prodSortCol];
+      let bv = b[prodSortCol];
+      const numericCols = ['노출수', '클릭수', '광고비', '클릭률'];
+      if (numericCols.includes(prodSortCol)) {
+        av = Number(av) || 0;
+        bv = Number(bv) || 0;
+      }
+      if (av < bv) return prodSortDir === 'asc' ? -1 : 1;
+      if (av > bv) return prodSortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [productSummary, prodSortCol, prodSortDir]);
+
   const dateSummary = useMemo(() => {
     const map = new Map();
     rows.forEach((r) => {
@@ -90,6 +151,18 @@ function AdHistory() {
     return Array.from(map.entries()).map(([date, v]) => ({ 날짜: date, 광고비: v.광고비 }));
   }, [rows]);
 
+  const sortedDateSummary = useMemo(() => {
+    const arr = [...dateSummary];
+    arr.sort((a, b) => {
+      const av = a.날짜;
+      const bv = b.날짜;
+      if (av < bv) return dateSortDir === 'asc' ? -1 : 1;
+      if (av > bv) return dateSortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [dateSummary, dateSortDir]);
+
   return (
     <div className="container">
       <h2>광고 내역</h2>
@@ -101,9 +174,9 @@ function AdHistory() {
             accept=".xlsx,.xls"
             onChange={(e) => setFile(e.target.files[0])}
           />
-          <button type="submit" className="btn btn-success">업로드</button>
+          <button type="submit" className="btn btn-success text-nowrap">업로드</button>
         </form>
-        <button type="button" className="btn btn-danger" onClick={handleReset}>
+        <button type="button" className="btn btn-danger text-nowrap" onClick={handleReset}>
           초기화
         </button>
       </div>
@@ -115,7 +188,7 @@ function AdHistory() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <button className="btn btn-outline-primary" onClick={loadData}>
+        <button className="btn btn-outline-primary text-nowrap" onClick={loadData}>
           검색
         </button>
       </div>
@@ -147,14 +220,19 @@ function AdHistory() {
           <thead>
             <tr>
               {Object.keys(initialForm).map((key) => (
-                <th key={key} style={{ whiteSpace: 'nowrap' }}>
-                  {key}
+                <th
+                  key={key}
+                  style={{ whiteSpace: 'nowrap' }}
+                  onClick={() => changeSort(key)}
+                  role="button"
+                >
+                  {key} {sortCol === key && (sortDir === 'asc' ? '▲' : '▼')}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {rows
+            {sortedRows
               .filter((row) => row['광고집행 상품명'].includes(keyword))
               .map((row) => (
                 <tr key={row._id}>
@@ -171,17 +249,31 @@ function AdHistory() {
         <table className="table table-bordered text-center">
           <thead>
             <tr>
-              <th style={{ whiteSpace: 'nowrap' }}>상품명</th>
-              <th>노출수 합</th>
-              <th>클릭수 합</th>
-              <th>광고비 합</th>
-              <th>클릭률(%)</th>
+              <th
+                style={{ whiteSpace: 'nowrap' }}
+                onClick={() => changeProdSort('상품명')}
+                role="button"
+              >
+                상품명 {prodSortCol === '상품명' && (prodSortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th onClick={() => changeProdSort('노출수')} role="button">
+                노출수 합 {prodSortCol === '노출수' && (prodSortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th onClick={() => changeProdSort('클릭수')} role="button">
+                클릭수 합 {prodSortCol === '클릭수' && (prodSortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th onClick={() => changeProdSort('광고비')} role="button">
+                광고비 합 {prodSortCol === '광고비' && (prodSortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th onClick={() => changeProdSort('클릭률')} role="button">
+                클릭률(%) {prodSortCol === '클릭률' && (prodSortDir === 'asc' ? '▲' : '▼')}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {productSummary.map((row) => (
+            {sortedProductSummary.map((row) => (
               <tr key={row.상품명}>
-                <td>{row.상품명}</td>
+                <td style={{ whiteSpace: 'nowrap' }}>{row.상품명}</td>
                 <td>{row.노출수.toLocaleString()}</td>
                 <td>{row.클릭수.toLocaleString()}</td>
                 <td>{row.광고비.toLocaleString()}</td>
@@ -196,12 +288,18 @@ function AdHistory() {
         <table className="table table-bordered text-center">
           <thead>
             <tr>
-              <th style={{ whiteSpace: 'nowrap' }}>날짜</th>
+              <th
+                style={{ whiteSpace: 'nowrap' }}
+                onClick={toggleDateSort}
+                role="button"
+              >
+                날짜 {dateSortDir === 'asc' ? '▲' : '▼'}
+              </th>
               <th>광고비 합</th>
             </tr>
           </thead>
           <tbody>
-            {dateSummary.map((row) => (
+            {sortedDateSummary.map((row) => (
               <tr key={row.날짜}>
                 <td>{row.날짜}</td>
                 <td>{row.광고비.toLocaleString()}</td>
