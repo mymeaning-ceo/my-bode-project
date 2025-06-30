@@ -303,3 +303,67 @@ exports.updateItem = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: 'Not found' });
   res.json({ success: true });
 });
+
+// Get product summary (top 50)
+exports.getProductSummary = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const rows = await db.collection('coupangAdd').aggregate([
+    {
+      $addFields: {
+        trimmedName: {
+          $trim: { input: { $arrayElemAt: [{ $split: ['$광고집행 상품명', ','] }, 0] } }
+        }
+      }
+    },
+    {
+      $group: {
+        _id: '$trimmedName',
+        노출수: { $sum: '$노출수' },
+        클릭수: { $sum: '$클릭수' },
+        광고비: { $sum: '$광고비' }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        상품명: '$_id',
+        노출수: 1,
+        클릭수: 1,
+        광고비: 1,
+        클릭률: {
+          $cond: [
+            { $gt: ['$노출수', 0] },
+            { $round: [{ $multiply: [{ $divide: ['$클릭수', '$노출수'] }, 100] }, 2] },
+            0
+          ]
+        }
+      }
+    },
+    { $sort: { 노출수: -1 } },
+    { $limit: 50 }
+  ]).toArray();
+  res.json(rows);
+});
+
+// Get date summary (top 50)
+exports.getDateSummary = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const rows = await db.collection('coupangAdd').aggregate([
+    {
+      $group: {
+        _id: '$날짜',
+        광고비: { $sum: '$광고비' }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        날짜: '$_id',
+        광고비: 1
+      }
+    },
+    { $sort: { 날짜: 1 } },
+    { $limit: 50 }
+  ]).toArray();
+  res.json(rows);
+});
