@@ -119,9 +119,9 @@ function Stock() {
           onSubmit={handleUpload}
         >
           <input type="file" name="excelFile" accept=".xlsx,.xls" className="form-control" required />
-          <button type="submit" className="btn btn-success btn-upload">엑셀 업로드</button>
+          <button type="submit" className="btn btn-success btn-upload">업로드</button>
         </form>
-        <button onClick={handleRefresh} className="btn btn-danger btn-reset">데이터 초기화</button>
+        <button onClick={handleRefresh} className="btn btn-danger btn-reset">초기화</button>
       </div>
 
 
@@ -191,7 +191,7 @@ function Stock() {
           <table className="table table-bordered shadow-sm rounded bg-white align-middle text-center stock-table">
             <thead className="table-light">
               <tr>
-                <th>#</th>
+                <th># 순번</th>
                 {columns.map((col) => (
                   <th
                     key={col.key}
