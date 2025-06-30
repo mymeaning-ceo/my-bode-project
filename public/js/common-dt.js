@@ -1,3 +1,6 @@
+// limit pagination to show at most 10 page buttons
+$.fn.DataTable.ext.pager.numbers_length = 10;
+
 function createDataTable(selector, opts = {}) {
   const $table = $(selector);
   const orderCol = Number($table.data('order-col'));
