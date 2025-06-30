@@ -262,6 +262,64 @@ const getHistory = asyncHandler(async (req, res) => {
   res.json(history);
 });
 
+// Create or replace a single weather record
+const createRecord = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const id =
+    req.body._id ||
+    (req.body.date ? req.body.date.replace(/-/g, "") : undefined);
+  if (!id) {
+    return res.status(400).json({ message: "_id or date is required" });
+  }
+  const doc = {
+    _id: id,
+    date:
+      req.body.date ||
+      `${id.slice(0, 4)}-${id.slice(4, 6)}-${id.slice(6, 8)}`,
+    temperature:
+      req.body.temperature !== undefined
+        ? Number(req.body.temperature)
+        : undefined,
+    sky: req.body.sky,
+    precipitationType: req.body.precipitationType,
+    updatedAt: new Date(),
+  };
+
+  await db
+    .collection("weather")
+    .updateOne({ _id: id }, { $set: doc }, { upsert: true });
+  const inserted = await db.collection("weather").findOne({ _id: id });
+  res.status(201).json(inserted);
+});
+
+// Retrieve a record by id
+const getRecord = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const record = await db
+    .collection("weather")
+    .findOne({ _id: req.params.id });
+  if (!record) {
+    return res.status(404).json({ message: "not found" });
+  }
+  res.json(record);
+});
+
+// Update an existing record
+const updateRecord = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  const id = req.params.id;
+  const update = { ...req.body, updatedAt: new Date() };
+  delete update._id;
+  const result = await db
+    .collection("weather")
+    .updateOne({ _id: id }, { $set: update });
+  if (result.matchedCount === 0) {
+    return res.status(404).json({ message: "not found" });
+  }
+  const record = await db.collection("weather").findOne({ _id: id });
+  res.json(record);
+});
+
 module.exports = {
   fetchDaily,
   getDailyWeather,
@@ -272,4 +330,7 @@ module.exports = {
   upload,
   uploadExcelApi,
   getHistory,
+  createRecord,
+  getRecord,
+  updateRecord,
 };

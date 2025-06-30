@@ -108,3 +108,34 @@ test('GET /api/weather/average returns average temperature', async () => {
     averageTemperature: '20.0',
   });
 });
+
+test('POST /api/weather/record creates or updates a record', async () => {
+  const res = await request(app)
+    .post('/api/weather/record')
+    .send({ date: '2025-06-01', temperature: 22.6 });
+  expect(res.statusCode).toBe(201);
+  expect(mockCollection.updateOne).toHaveBeenCalled();
+});
+
+test('GET /api/weather/record/:id returns a record', async () => {
+  mockCollection.findOne.mockResolvedValueOnce({
+    _id: '20250601',
+    temperature: 22.6,
+  });
+  const res = await request(app).get('/api/weather/record/20250601');
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual({ _id: '20250601', temperature: 22.6 });
+});
+
+test('PUT /api/weather/record/:id updates a record', async () => {
+  mockCollection.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
+  mockCollection.findOne.mockResolvedValueOnce({
+    _id: '20250601',
+    temperature: 25.1,
+  });
+  const res = await request(app)
+    .put('/api/weather/record/20250601')
+    .send({ temperature: 25.1 });
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual({ _id: '20250601', temperature: 25.1 });
+});

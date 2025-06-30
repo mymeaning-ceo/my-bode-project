@@ -9,5 +9,8 @@ router.get('/same-day', ctrl.getSameDay);
 router.get('/monthly', ctrl.getMonthlyWeather);
 router.get('/monthly-db', ctrl.getMonthlyWeatherFromDb);
 router.get('/average', ctrl.getAverageTemperature);
+router.post('/record', ctrl.createRecord);
+router.get('/record/:id', ctrl.getRecord);
+router.put('/record/:id', ctrl.updateRecord);
 
 module.exports = router;
