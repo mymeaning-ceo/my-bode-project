@@ -5,7 +5,8 @@ const upload = require('../../upload.js');
 const postController = require('../../controllers/postController');
 
 // React page routes
-router.get(['/', '/:page', '/write', '/detail/:id', '/edit/:id'], (req, res) => {
+// Serve React pages without redirecting when trailing slash is omitted
+router.get(['', '/', '/:page', '/write', '/detail/:id', '/edit/:id'], (req, res) => {
   res.sendFile(path.join(__dirname, '../../client/public/index.html'));
 });
 
