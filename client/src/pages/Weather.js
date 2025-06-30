@@ -1,10 +1,7 @@
 import React, { useState, useRef } from 'react';
-import MonthlyWeatherChart from '../MonthlyWeatherChart';
 
 function Weather() {
   const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
   const [date, setDate] = useState(now.toISOString().slice(0, 10));
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -100,33 +97,11 @@ function Weather() {
       )}
       <hr />
       <h2>엑셀 업로드</h2>
-      <form onSubmit={handleUpload} className="d-flex gap-2 mb-3" encType="multipart/form-data">
+      <form onSubmit={handleUpload} className="d-flex flex-nowrap gap-2 mb-3" encType="multipart/form-data">
         <input type="file" ref={fileRef} className="form-control" accept=".xlsx,.xls" />
         <button type="submit" className="btn btn-success">업로드</button>
       </form>
       {uploadMsg && <p>{uploadMsg}</p>}
-      <h2>월별 날씨</h2>
-      <div className="row g-2 mb-3">
-        <div className="col">
-          <input
-            type="number"
-            className="form-control"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-          />
-        </div>
-        <div className="col">
-          <input
-            type="number"
-            min="1"
-            max="12"
-            className="form-control"
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-          />
-        </div>
-      </div>
-      <MonthlyWeatherChart year={year} month={month} />
       <h2 className="mt-4">업로드 데이터 조회</h2>
       <div className="row g-2 mb-3">
         <div className="col">
