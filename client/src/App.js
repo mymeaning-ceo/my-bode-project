@@ -9,6 +9,7 @@ import CoupangAdd from './pages/CoupangAdd';
 import CoupangStock from './pages/CoupangStock';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import RegisterSuccess from './pages/RegisterSuccess';
 import Weather from './pages/Weather';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './pages/DashboardLayout';
@@ -28,6 +29,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/register-success" element={<RegisterSuccess />} />
         <Route path="/help" element={<Help />} />
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
