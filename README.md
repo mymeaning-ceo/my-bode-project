@@ -237,6 +237,8 @@ The login page was migrated from an EJS template to a React component. The
 client authenticates by sending credentials to the Express endpoint
 `/api/auth/login`. In production the server serves `client/public/index.html` for
 `/login`, so navigating directly to `/login` loads the React app.
+Successful registration redirects to `/register-success`, which is also handled
+by the React client.
 
 ### 게시판
 
