@@ -12,7 +12,10 @@ function AdHistory() {
     '클릭률': '',
   };
 
+  const pageSize = 50;
   const [rows, setRows] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState('');
   const [file, setFile] = useState(null);
   const [viewMode, setViewMode] = useState('detail'); // detail, product, date
@@ -21,22 +24,31 @@ function AdHistory() {
   const [prodSortCol, setProdSortCol] = useState('상품명');
   const [prodSortDir, setProdSortDir] = useState('asc');
   const [dateSortDir, setDateSortDir] = useState('asc');
+  const totalPages = Math.ceil(total / pageSize) || 1;
 
   const loadData = async () => {
-    const params = new URLSearchParams({ start: '0', length: '10000', search: keyword });
+    const params = new URLSearchParams({
+      start: String((page - 1) * pageSize),
+      length: String(pageSize),
+      search: keyword,
+    });
     const res = await fetch(`/api/coupang-add?${params.toString()}`, {
       credentials: 'include',
     });
     if (res.ok) {
       const data = await res.json();
       setRows(data.data || []);
+      setTotal(data.recordsFiltered || 0);
     }
   };
 
   useEffect(() => {
-    loadData();
-    // intentionally run only once
-  }, []);
+    const t = setTimeout(() => {
+      loadData();
+    }, 300);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, keyword]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -49,11 +61,13 @@ function AdHistory() {
       credentials: 'include',
     });
     setFile(null);
+    setPage(1);
     loadData();
   };
 
   const handleReset = async () => {
     await fetch('/api/coupang-add', { method: 'DELETE', credentials: 'include' });
+    setPage(1);
     loadData();
   };
 
@@ -186,9 +200,18 @@ function AdHistory() {
           className="form-control"
           placeholder="검색"
           value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
+          onChange={(e) => {
+            setKeyword(e.target.value);
+            setPage(1);
+          }}
         />
-        <button className="btn btn-outline-primary text-nowrap" onClick={loadData}>
+        <button
+          className="btn btn-outline-primary text-nowrap"
+          onClick={() => {
+            setPage(1);
+            loadData();
+          }}
+        >
           검색
         </button>
       </div>
@@ -308,6 +331,40 @@ function AdHistory() {
           </tbody>
         </table>
       )}
+      <nav className="d-flex justify-content-center my-3">
+        <ul className="pagination">
+          <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              이전
+            </button>
+          </li>
+          {(() => {
+            const groupSize = 10;
+            const start = Math.floor((page - 1) / groupSize) * groupSize + 1;
+            const end = Math.min(start + groupSize - 1, totalPages);
+            return Array.from({ length: end - start + 1 }, (_, i) => start + i).map((p) => (
+              <li key={p} className={`page-item ${p === page ? 'active' : ''}`}>
+                <button type="button" className="page-link" onClick={() => setPage(p)}>
+                  {p}
+                </button>
+              </li>
+            ));
+          })()}
+          <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              다음
+            </button>
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 }
