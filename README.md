@@ -134,6 +134,18 @@ node scripts/init_weather.js
 
 This inserts a document for `2025-06-25` so the weather API endpoints return
 data even before the daily cron job populates the database.
+
+### Weather record API
+
+Individual weather entries can be managed via dedicated endpoints:
+
+- `POST /api/weather/record` – create or replace a record. Provide a `date`
+  like `2025-06-01` and optional fields such as `temperature`.
+- `GET /api/weather/record/:id` – fetch a single record by its `YYYYMMDD` id.
+- `PUT /api/weather/record/:id` – update an existing record.
+
+These endpoints allow the React client to add, modify and retrieve weather data
+stored in MongoDB.
 =======
 
 ## Weather API details
