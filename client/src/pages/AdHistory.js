@@ -1,63 +1,105 @@
 import React, { useEffect, useState } from 'react';
 
-/**
- * 광고 내역을 조회하고 수정할 수 있는 테이블 페이지.
- * 기본 리스트에 검색 및 정렬 기능을 추가한다.
- */
-
+// React version of coupangAdd functionality for ad-history
 function AdHistory() {
+  const initialForm = {
+    '날짜': '',
+    '광고집행 옵션ID': '',
+    '광고집행 상품명': '',
+    '노출수': '',
+    '클릭수': '',
+    '광고비': '',
+    '클릭률': '',
+  };
+
   const [rows, setRows] = useState([]);
-  const [form, setForm] = useState({ date: '', campaign: '', clicks: '', cost: '' });
   const [keyword, setKeyword] = useState('');
-  const [sortField, setSortField] = useState('date');
-  const [sortDir, setSortDir] = useState('desc');
+  const [file, setFile] = useState(null);
+  const [form, setForm] = useState(initialForm);
+  const [editId, setEditId] = useState(null);
 
   const loadData = async () => {
-    const res = await fetch('/api/ad-history', { credentials: 'include' });
+    const params = new URLSearchParams({ start: '0', length: '1000', search: keyword });
+    const res = await fetch(`/api/coupang-add?${params.toString()}`, {
+      credentials: 'include',
+    });
     if (res.ok) {
       const data = await res.json();
-      const filtered = data.filter((row) =>
-        row.campaign.toLowerCase().includes(keyword.toLowerCase()),
-      );
-      filtered.sort((a, b) => {
-        const valA = a[sortField];
-        const valB = b[sortField];
-        if (valA < valB) return sortDir === 'asc' ? -1 : 1;
-        if (valA > valB) return sortDir === 'asc' ? 1 : -1;
-        return 0;
-      });
-      setRows(filtered);
+      setRows(data.data || []);
     }
   };
 
   useEffect(() => {
     loadData();
-  }, [keyword, sortField, sortDir]);
+    // intentionally run only once
+  }, []);
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('excelFile', file);
+    await fetch('/api/coupang-add/upload', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    setFile(null);
+    loadData();
+  };
+
+  const handleReset = async () => {
+    await fetch('/api/coupang-add', { method: 'DELETE', credentials: 'include' });
+    loadData();
+  };
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const startEdit = (row) => {
+    setEditId(row._id);
+    setForm({ ...row });
+  };
+
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    await fetch('/api/ad-history', {
-      method: 'POST',
+    if (!editId) return;
+    await fetch(`/api/coupang-add/${editId}`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify(form),
     });
-    setForm({ date: '', campaign: '', clicks: '', cost: '' });
+    setEditId(null);
+    setForm(initialForm);
     loadData();
   };
 
   return (
     <div className="container">
       <h2>광고 내역</h2>
+      <div className="d-flex gap-2 mb-3">
+        <form onSubmit={handleUpload} className="d-flex gap-2">
+          <input
+            type="file"
+            className="form-control"
+            accept=".xlsx,.xls"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
+          <button type="submit" className="btn btn-success">
+            엑셀 업로드
+          </button>
+        </form>
+        <button type="button" className="btn btn-danger" onClick={handleReset}>
+          데이터 초기화
+        </button>
+      </div>
       <div className="input-group mb-3">
         <input
           type="text"
           className="form-control"
-          placeholder="캠페인 검색"
+          placeholder="검색"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
@@ -65,101 +107,57 @@ function AdHistory() {
           검색
         </button>
       </div>
-      <form onSubmit={handleSubmit} className="mb-3">
+      {editId && (
+      <form onSubmit={handleUpdate} className="mb-3">
         <div className="row g-2 mb-2">
-          <div className="col-auto">
-            <input
-              type="date"
-              name="date"
-              value={form.date}
-              onChange={onChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="col-auto">
-            <input
-              type="text"
-              name="campaign"
-              value={form.campaign}
-              onChange={onChange}
-              className="form-control"
-              placeholder="캠페인명"
-            />
-          </div>
-          <div className="col-auto">
-            <input
-              type="number"
-              name="clicks"
-              value={form.clicks}
-              onChange={onChange}
-              className="form-control"
-              placeholder="클릭수"
-            />
-          </div>
-          <div className="col-auto">
-            <input
-              type="number"
-              name="cost"
-              value={form.cost}
-              onChange={onChange}
-              className="form-control"
-              placeholder="광고비"
-            />
-          </div>
+          {Object.keys(initialForm).map((key) => (
+            <div className="col-auto" key={key}>
+              <input
+                type="text"
+                name={key}
+                value={form[key]}
+                onChange={onChange}
+                className="form-control"
+                placeholder={key}
+              />
+            </div>
+          ))}
           <div className="col-auto">
             <button type="submit" className="btn btn-primary">
-              추가
+              수정
             </button>
           </div>
         </div>
       </form>
+      )}
       <table className="table table-bordered text-center">
         <thead>
           <tr>
-            <th
-              onClick={() => {
-                setSortField('date');
-                setSortDir((d) => (sortField === 'date' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'));
-              }}
-            >
-              날짜 {sortField === 'date' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
-            </th>
-            <th
-              onClick={() => {
-                setSortField('campaign');
-                setSortDir((d) => (sortField === 'campaign' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'));
-              }}
-            >
-              캠페인명 {sortField === 'campaign' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
-            </th>
-            <th
-              onClick={() => {
-                setSortField('clicks');
-                setSortDir((d) => (sortField === 'clicks' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'));
-              }}
-            >
-              클릭수 {sortField === 'clicks' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
-            </th>
-            <th
-              onClick={() => {
-                setSortField('cost');
-                setSortDir((d) => (sortField === 'cost' ? (d === 'asc' ? 'desc' : 'asc') : 'asc'));
-              }}
-            >
-              광고비 {sortField === 'cost' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
-            </th>
+            {Object.keys(initialForm).map((key) => (
+              <th key={key}>{key}</th>
+            ))}
+            <th>편집</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row._id}>
-              <td>{row.date}</td>
-              <td className="text-start">{row.campaign}</td>
-              <td>{Number(row.clicks).toLocaleString()}</td>
-              <td>{Number(row.cost).toLocaleString()}</td>
-            </tr>
-          ))}
+          {rows
+            .filter((row) => row['광고집행 상품명'].includes(keyword))
+            .map((row) => (
+              <tr key={row._id}>
+                {Object.keys(initialForm).map((key) => (
+                  <td key={key}>{row[key]}</td>
+                ))}
+                <td>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => startEdit(row)}
+                  >
+                    편집
+                  </button>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
