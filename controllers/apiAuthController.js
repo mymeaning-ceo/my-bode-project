@@ -60,6 +60,7 @@ exports.register = async (req, res, next) => {
       username,
       name,
       email,
+      role: 'user',
       password: hashedPassword,
       createdAt: new Date(),
     });

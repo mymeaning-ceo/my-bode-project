@@ -33,6 +33,8 @@ router.use("/posts", require("./postApi"));
 router.use("/comments", require("./commentApi"));
 // 게시판 목록 API
 router.use("/boards", require("./boardApi"));
+// 관리자 전용 API
+router.use('/admin', require('./adminApi'));
 
 // TODO: 다른 API 라우터 추가 시 아래와 같이 등록
 // router.use("/user", require("./userApi"));
