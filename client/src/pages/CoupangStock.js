@@ -4,18 +4,22 @@ import './CoupangStock.css';
 const BRANDS = ['트라이', 'BYC', '제임스딘'];
 
 function CoupangStock() {
+  const pageSize = 50;
   const [rows, setRows] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState('');
   const [brand, setBrand] = useState('');
   const [sortCol, setSortCol] = useState('Product name');
   const [sortDir, setSortDir] = useState('asc');
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileRef = useRef(null);
+  const totalPages = Math.ceil(total / pageSize) || 1;
 
   const loadData = async () => {
     const params = new URLSearchParams({
-      page: '1',
-      limit: '100',
+      page: String(page),
+      limit: String(pageSize),
       keyword,
       brand,
       sort: sortCol,
@@ -27,6 +31,7 @@ function CoupangStock() {
     if (res.ok) {
       const data = await res.json();
       setRows(data.data || []);
+      setTotal(data.total || 0);
     }
   };
 
@@ -50,6 +55,7 @@ function CoupangStock() {
       if (xhr.status === 200) {
         alert('업로드 완료');
         fileRef.current.value = '';
+        setPage(1);
         loadData();
       } else {
         alert('업로드 실패');
@@ -70,6 +76,7 @@ function CoupangStock() {
     });
     if (res.ok) {
       alert('초기화 완료');
+      setPage(1);
       loadData();
     } else {
       alert('삭제 실패');
@@ -83,6 +90,7 @@ function CoupangStock() {
       setSortCol(col);
       setSortDir('asc');
     }
+    setPage(1);
   };
 
   useEffect(() => {
@@ -91,7 +99,7 @@ function CoupangStock() {
     }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line
-  }, [keyword, brand, sortCol, sortDir]);
+  }, [page, keyword, brand, sortCol, sortDir]);
 
   return (
     <div className="container">
@@ -116,7 +124,14 @@ function CoupangStock() {
       )}
       <div className="row g-2 mb-3 coupang-stock-search align-items-end">
         <div className="col-auto">
-          <select className="form-select" value={brand} onChange={(e) => setBrand(e.target.value)}>
+          <select
+            className="form-select"
+            value={brand}
+            onChange={(e) => {
+              setBrand(e.target.value);
+              setPage(1);
+            }}
+          >
             <option value="">전체 브랜드</option>
             {BRANDS.map((b) => (
               <option key={b} value={b}>
@@ -131,11 +146,21 @@ function CoupangStock() {
             className="form-control"
             placeholder="검색"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            onChange={(e) => {
+              setKeyword(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
         <div className="col-auto">
-          <button type="button" onClick={loadData} className="btn btn-primary text-nowrap">
+          <button
+            type="button"
+            onClick={() => {
+              setPage(1);
+              loadData();
+            }}
+            className="btn btn-primary text-nowrap"
+          >
             검색
           </button>
         </div>
@@ -184,6 +209,40 @@ function CoupangStock() {
           ))}
         </tbody>
       </table>
+      <nav className="d-flex justify-content-center my-3">
+        <ul className="pagination">
+          <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              이전
+            </button>
+          </li>
+          {(() => {
+            const groupSize = 10;
+            const start = Math.floor((page - 1) / groupSize) * groupSize + 1;
+            const end = Math.min(start + groupSize - 1, totalPages);
+            return Array.from({ length: end - start + 1 }, (_, i) => start + i).map((p) => (
+              <li key={p} className={`page-item ${p === page ? 'active' : ''}`}>
+                <button type="button" className="page-link" onClick={() => setPage(p)}>
+                  {p}
+                </button>
+              </li>
+            ));
+          })()}
+          <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              다음
+            </button>
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 }
