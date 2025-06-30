@@ -1,23 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import './Header.css';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import "./Header.css";
 
 function Header({ onToggleSidebar }) {
   const [user, setUser] = useState(null);
   const [weather, setWeather] = useState(null);
 
-  const skyMap = { '1': '맑음', '3': '구름많음', '4': '흐림' };
-  const ptyMap = { '0': '없음', '1': '비', '2': '비/눈', '3': '눈', '4': '소나기' };
-
+  const skyMap = { 1: "맑음", 3: "구름많음", 4: "흐림" };
   useEffect(() => {
-    fetch('/api/auth/user', { credentials: 'include' })
+    fetch("/api/auth/user", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         setUser(data.user);
       })
       .catch(() => {});
 
-    fetch('/api/weather/daily', { credentials: 'include' })
+    fetch("/api/weather/daily", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
         setWeather(data);
@@ -26,8 +24,8 @@ function Header({ onToggleSidebar }) {
   }, []);
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    window.location.href = '/login';
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    window.location.href = "/login";
   };
 
   return (
@@ -41,13 +39,15 @@ function Header({ onToggleSidebar }) {
       {weather && (
         <div className="weather-info ms-3">
           <span>
-            {weather.temperature ?? '-'}℃ {skyMap[weather.sky] ?? weather.sky ?? '-'}{' '}
-            {ptyMap[weather.precipitationType] ?? weather.precipitationType ?? '-'}
+            {weather.temperature ?? "-"}℃{" "}
+            {skyMap[weather.sky] ?? weather.sky ?? "-"}
           </span>
         </div>
       )}
       <div className="user-info ms-auto">
-        <Link to="/weather" className="me-3">날씨</Link>
+        <Link to="/weather" className="me-3">
+          날씨
+        </Link>
         {user && <span className="me-3">{user.name || user.username}</span>}
         <button type="button" className="btn btn-link" onClick={handleLogout}>
           로그아웃

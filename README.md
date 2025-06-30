@@ -13,14 +13,13 @@ This project requires several environment variables to run:
   must allow bucket creation).
 - `WEATHER_API_KEY` – API key from the Korean Meteorological Administration used
   to fetch daily weather data.
-  
+- `WEATHER_NX` – Grid X coordinate for weather data (defaults to Cheonan if unset)
+- `WEATHER_NY` – Grid Y coordinate for weather data (defaults to Cheonan if unset)
 - `CP_ACCESS_KEY` – Coupang Open API access key
 - `CP_SECRET_KEY` – Coupang Open API secret key
 - `CP_VENDOR_ID` – Vendor ID issued by Coupang
 - `CP_API_HOST` – Base URL for the Coupang Open API (optional)
 - `CP_RG_AUTH_TOKEN` – Token for RocketGross API calls (enable the feature in WING first)
-
-
 
 Copy `.env.example` to `.env` in the project root and define these values before starting the server. Make sure the file is saved as **UTF-8 without BOM** so that `dotenv` can read it correctly.
 
@@ -82,14 +81,16 @@ The server must be configured with `CP_ACCESS_KEY`, `CP_SECRET_KEY` and `CP_VEND
 Optionally, `CP_API_HOST` can override the default host.
 
 ```js
-const axios = require('axios');
+const axios = require("axios");
 
 const getProduct = async (id) => {
-  const { data } = await axios.get(`http://localhost:3000/api/coupang-open/product/${id}`);
+  const { data } = await axios.get(
+    `http://localhost:3000/api/coupang-open/product/${id}`,
+  );
   console.log(data);
 };
 
-getProduct('1234');
+getProduct("1234");
 ```
 
 ## RocketGross product creation
@@ -99,25 +100,26 @@ Enable the **RocketGross** API in WING and copy the issued token to
 Then you can register a product through `/api/coupang-open/product/create`:
 
 ```js
-const axios = require('axios');
+const axios = require("axios");
 
 const createProduct = async (body) => {
-  const { data } = await axios.post('http://localhost:3000/api/coupang-open/product/create', body);
+  const { data } = await axios.post(
+    "http://localhost:3000/api/coupang-open/product/create",
+    body,
+  );
   console.log(data);
 };
 
-createProduct({ name: 'Sample' });
+createProduct({ name: "Sample" });
 ```
 
 =======
-
 
 ## Weather integration
 
 The project exposes `/api/weather/daily` which fetches forecast data from the
 Korean Meteorological Administration using `WEATHER_API_KEY`. An accompanying
 `/weather` page displays the information via AJAX.
-
 
 Server-side requests use `node-fetch`, which is listed in `package.json`.
 
@@ -134,12 +136,12 @@ This inserts a document for `2025-06-25` so the weather API endpoints return
 data even before the daily cron job populates the database.
 =======
 
-
 ## Weather API details
 
 The weather data is sourced from the [Korean Meteorological Administration (기상청) 초단기예보 API](https://data.go.kr/iim/api/selectAPIAcountView.do#).
 
 ### API Endpoint
+
 https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
 
 ### Authentication Keys
@@ -166,7 +168,7 @@ const fetchWeather = async () => {
     base_date: "20240620",
     base_time: "1200",
     nx: "60",
-    ny: "127"
+    ny: "127",
   };
 
   const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?${qs.stringify(params)}`;
@@ -237,6 +239,7 @@ client authenticates by sending credentials to the Express endpoint
 `/login`, so navigating directly to `/login` loads the React app.
 
 ### 게시판
+
 `/board`와 `/:shop/board` 경로는 React 기반 게시판을 제공합니다. `shop`
 파라미터에는 `내의미`, `TRY`, `BYC`, `제임스딘`, `쿠팡`, `네이버` 중 하나가
 들어갑니다. 게시글 API는 `board` 값을 사용해 **`post_{slug}`** 형식의
@@ -245,16 +248,15 @@ client authenticates by sending credentials to the Express endpoint
 The Help page has also been converted to React and is accessible at `/help`.
 
 ### Post pages migrated to React
+
 Legacy EJS templates under `/post` are now served by the React client. Visiting
 `/post`, `/post/write` or a detail page loads `client/public/index.html`. CRUD
 operations continue to use the `/api/posts` endpoints so the frontend can evolve
 independently of Express routes.
 
 ### Board management API
+
 Boards are stored in the `board` collection. CRUD operations are available via
 `/api/boards`. A simple management page is located at `/admin/boards` in the
 React client.
 Deleting a board also removes its corresponding `post_{slug}` collection.
-
-
-
