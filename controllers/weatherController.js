@@ -262,6 +262,40 @@ const getHistory = asyncHandler(async (req, res) => {
   res.json(history);
 });
 
+const createRecord = asyncHandler(async (req, res) => {
+  const { _id, temperature } = req.body;
+  if (!_id || temperature === undefined) {
+    return res.status(400).json({ message: "_id and temperature required" });
+  }
+  await req.app.locals.db
+    .collection("weather")
+    .insertOne({ _id, temperature });
+  res.status(201).json({ insertedId: _id });
+});
+
+const getRecord = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const doc = await req.app.locals.db
+    .collection("weather")
+    .findOne({ _id: id });
+  if (!doc) return res.status(404).json({ message: "not found" });
+  res.json({ _id: doc._id, temperature: doc.temperature });
+});
+
+const updateRecord = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const { temperature } = req.body;
+  const result = await req.app.locals.db
+    .collection("weather")
+    .findOneAndUpdate(
+      { _id: id },
+      { $set: { temperature } },
+      { returnDocument: "after" }
+    );
+  if (!result.value) return res.status(404).json(null);
+  res.json({ _id: result.value._id, temperature: result.value.temperature });
+});
+
 module.exports = {
   fetchDaily,
   getDailyWeather,
@@ -272,4 +306,7 @@ module.exports = {
   upload,
   uploadExcelApi,
   getHistory,
+  createRecord,
+  getRecord,
+  updateRecord,
 };
