@@ -14,7 +14,7 @@ function AdHistory() {
 
   useEffect(() => {
     loadData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
