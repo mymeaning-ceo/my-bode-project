@@ -1,6 +1,8 @@
 const fetch = require("node-fetch");
 const multerImport = require("multer");
 const multer = multerImport.default || multerImport;
+const fs = require("fs");
+const xlsx = require("xlsx");
 const asyncHandler = require("../middlewares/asyncHandler");
 
 // Common helper to fetch weather data for a single day
@@ -150,6 +152,21 @@ const getMonthlyWeather = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+// Fetch monthly weather from DB
+const getMonthlyWeatherFromDb = asyncHandler(async (req, res) => {
+  const { year, month } = req.query;
+  if (!year || !month) {
+    return res.status(400).json({ message: "year and month query required" });
+  }
+  const prefix = `${year}${String(month).padStart(2, "0")}`;
+  const docs = await req.app.locals.db
+    .collection("weather")
+    .find({ _id: { $regex: `^${prefix}` } })
+    .sort({ _id: 1 })
+    .toArray();
+  res.json(docs);
+});
+
 // Calculate average temperature for a specific day
 const getAverageTemperature = asyncHandler(async (req, res) => {
   const { year, month, day } = req.query;
@@ -198,7 +215,40 @@ const uploadExcelApi = asyncHandler(async (req, res) => {
       .status(400)
       .json({ status: "error", message: "파일이 없습니다." });
   }
-  res.json({ status: "success" });
+  try {
+    const wb = xlsx.readFile(req.file.path, { cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = xlsx.utils.sheet_to_json(sheet, { defval: null });
+    const docs = rows
+      .map((r) => {
+        const d = r.date || r.날짜 || r.DATE;
+        const date = new Date(d);
+        if (Number.isNaN(date.getTime())) return null;
+        const id = date.toISOString().slice(0, 10).replace(/-/g, "");
+        return {
+          _id: id,
+          date: date.toISOString().slice(0, 10),
+          temperature:
+            r.temperature ?? r.평균기온 ?? r.temp ?? r.TEMP ?? null,
+          sky: r.sky ?? r.하늘상태 ?? null,
+          precipitationType: r.precipitationType ?? r.강수형태 ?? null,
+          updatedAt: new Date(),
+        };
+      })
+      .filter(Boolean);
+
+    const col = req.app.locals.db.collection("weather");
+    const ops = docs.map((doc) => ({
+      updateOne: { filter: { _id: doc._id }, update: { $set: doc }, upsert: true },
+    }));
+    if (ops.length) await col.bulkWrite(ops);
+    res.json({ status: "success", inserted: ops.length });
+  } catch (err) {
+    console.error("❌ Excel upload error:", err);
+    res.status(500).json({ status: "error", message: "Upload failed" });
+  } finally {
+    fs.unlink(req.file.path, () => {});
+  }
 });
 
 const getHistory = asyncHandler(async (req, res) => {
@@ -217,6 +267,7 @@ module.exports = {
   getDailyWeather,
   getSameDay,
   getMonthlyWeather,
+  getMonthlyWeatherFromDb,
   getAverageTemperature,
   upload,
   uploadExcelApi,
