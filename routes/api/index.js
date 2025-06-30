@@ -23,6 +23,8 @@ router.use("/coupang-open", require("./coupangOpenApi"));
 router.use("/weather", require("./weatherApi"));
 // 간단한 Item API
 router.use('/items', require('./itemApi'));
+// Generic record CRUD
+router.use('/records', require('./records'));
 // 광고 성과 API
 router.use("/analytics", require("./analytics"));
 // 광고 내역 API
