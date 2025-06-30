@@ -260,3 +260,10 @@ Boards are stored in the `board` collection. CRUD operations are available via
 `/api/boards`. A simple management page is located at `/admin/boards` in the
 React client.
 Deleting a board also removes its corresponding `post_{slug}` collection.
+
+### Generic record API
+
+The `records` endpoint provides basic CRUD operations for arbitrary
+collections. Use `/api/records/:collection` with POST to insert documents and
+`/api/records/:collection/:id` for GET, PUT and DELETE. This makes it easy to
+experiment with new MongoDB collections without adding dedicated routes.
