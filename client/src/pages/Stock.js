@@ -66,7 +66,7 @@ function Stock() {
       fetchData();
     }, 300);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, [page, sortCol, sortDir, searchItemCode, searchColor, searchSize]);
 
   const handleSave = async (e) => {

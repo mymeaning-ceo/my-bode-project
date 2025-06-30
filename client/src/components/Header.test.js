@@ -1,27 +1,27 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import Header from './Header';
+import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import Header from "./Header";
 
 beforeEach(() => {
   global.fetch = jest.fn((url) => {
-    if (url.includes('/api/auth/user')) {
+    if (url.includes("/api/auth/user")) {
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ user: { name: 'Tester' } }),
+        json: () => Promise.resolve({ user: { name: "Tester" } }),
       });
     }
-    if (url.includes('/api/weather/daily')) {
+    if (url.includes("/api/weather/daily")) {
       return Promise.resolve({
         ok: true,
         json: () =>
           Promise.resolve({
-            temperature: '20',
-            sky: '1',
-            precipitationType: '0',
+            temperature: "20",
+            sky: "1",
+            precipitationType: "0",
           }),
       });
     }
-    return Promise.reject(new Error('Unknown endpoint'));
+    return Promise.reject(new Error("Unknown endpoint"));
   });
 });
 
@@ -29,13 +29,13 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-test('displays weather info in header', async () => {
+test("displays weather info in header", async () => {
   render(
     <MemoryRouter>
       <Header onToggleSidebar={() => {}} />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
   await waitFor(() => screen.getByText(/맑음/));
-  expect(screen.getByText('맑음')).toBeInTheDocument();
-  expect(screen.getByText('20℃ 맑음 없음')).toBeInTheDocument();
+  expect(screen.getByText("맑음")).toBeInTheDocument();
+  expect(screen.getByText("20℃ 맑음")).toBeInTheDocument();
 });

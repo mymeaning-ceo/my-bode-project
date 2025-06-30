@@ -15,7 +15,7 @@ function CoupangAdd() {
 
   useEffect(() => {
     loadData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line
 
   return (
     <div className="container">
