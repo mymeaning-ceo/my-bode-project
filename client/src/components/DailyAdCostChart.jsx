@@ -27,12 +27,13 @@ function DailyAdCostChart() {
       .catch(() => {});
   }, []);
 
+  const sliced = data.slice(0, 50);
   const chartData = {
-    labels: data.map((d) => d.date),
+    labels: sliced.map((d) => d.date),
     datasets: [
       {
         label: '광고비',
-        data: data.map((d) => d.totalCost),
+        data: sliced.map((d) => d.totalCost),
         backgroundColor: 'rgba(75,192,192,0.6)',
         borderColor: 'rgba(75,192,192,1)',
       },
@@ -43,7 +44,19 @@ function DailyAdCostChart() {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      y: { beginAtZero: true },
+      x: {
+        ticks: {
+          maxRotation: 45,
+          autoSkip: true,
+          maxTicksLimit: 10,
+        },
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (v) => v.toLocaleString(),
+        },
+      },
     },
   };
 

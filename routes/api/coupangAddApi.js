@@ -3,6 +3,8 @@ const router = express.Router();
 const ctrl = require('../../controllers/coupangAddController');
 
 router.get('/', ctrl.getData);
+router.get('/summary/product', ctrl.getProductSummary);
+router.get('/summary/date', ctrl.getDateSummary);
 router.get('/:id', ctrl.getItem);
 router.post('/upload', ctrl.upload, ctrl.uploadExcelApi);
 router.put('/:id', ctrl.updateItem);

@@ -14,17 +14,21 @@ function AdHistory() {
   };
 
   const pageSize = 50;
+  const numericFields = ['노출수', '클릭수', '광고비', '클릭률'];
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState('');
   const [file, setFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [viewMode, setViewMode] = useState('detail'); // detail, product, date
   const [sortCol, setSortCol] = useState('날짜');
   const [sortDir, setSortDir] = useState('asc');
   const [prodSortCol, setProdSortCol] = useState('상품명');
   const [prodSortDir, setProdSortDir] = useState('asc');
   const [dateSortDir, setDateSortDir] = useState('asc');
+  const [productSummary, setProductSummary] = useState([]);
+  const [dateSummary, setDateSummary] = useState([]);
   const totalPages = Math.ceil(total / pageSize) || 1;
 
   const loadData = async () => {
@@ -43,6 +47,26 @@ function AdHistory() {
     }
   };
 
+  const fetchProductSummary = async () => {
+    const res = await fetch('/api/coupang-add/summary/product', {
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setProductSummary(data);
+    }
+  };
+
+  const fetchDateSummary = async () => {
+    const res = await fetch('/api/coupang-add/summary/date', {
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setDateSummary(data);
+    }
+  };
+
   useEffect(() => {
     const t = setTimeout(() => {
       loadData();
@@ -51,25 +75,53 @@ function AdHistory() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, keyword]);
 
+  useEffect(() => {
+    if (viewMode === 'product') fetchProductSummary();
+    if (viewMode === 'date') fetchDateSummary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode]);
+
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) return;
     const formData = new FormData();
     formData.append('excelFile', file);
-    await fetch('/api/coupang-add/upload', {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    });
-    setFile(null);
-    setPage(1);
-    loadData();
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/coupang-add/upload');
+    xhr.withCredentials = true;
+    xhr.upload.onprogress = (evt) => {
+      if (evt.lengthComputable) {
+        const percent = Math.round((evt.loaded / evt.total) * 100);
+        setUploadProgress(percent);
+      }
+    };
+    xhr.onload = () => {
+      setUploadProgress(0);
+      if (xhr.status >= 200 && xhr.status < 300) {
+        alert('업로드 완료');
+        setFile(null);
+        setPage(1);
+        loadData();
+        fetchProductSummary();
+        fetchDateSummary();
+      } else {
+        alert('업로드 실패');
+      }
+    };
+    xhr.onerror = () => {
+      setUploadProgress(0);
+      alert('업로드 실패');
+    };
+    xhr.send(formData);
   };
 
   const handleReset = async () => {
     await fetch('/api/coupang-add', { method: 'DELETE', credentials: 'include' });
+    alert('초기화 완료');
     setPage(1);
     loadData();
+    fetchProductSummary();
+    fetchDateSummary();
   };
 
   const changeSort = (col) => {
@@ -94,31 +146,6 @@ function AdHistory() {
     setDateSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
   };
 
-  const trimmedName = (name = '') => {
-    const idx = name.indexOf(',');
-    return idx >= 0 ? name.slice(0, idx).trim() : name;
-  };
-
-  const productSummary = useMemo(() => {
-    const map = new Map();
-    rows.forEach((r) => {
-      const key = trimmedName(r['광고집행 상품명']);
-      if (!map.has(key)) {
-        map.set(key, { 노출수: 0, 클릭수: 0, 광고비: 0 });
-      }
-      const item = map.get(key);
-      item.노출수 += Number(r['노출수']) || 0;
-      item.클릭수 += Number(r['클릭수']) || 0;
-      item.광고비 += Number(r['광고비']) || 0;
-    });
-    return Array.from(map.entries()).map(([name, v]) => ({
-      상품명: name,
-      노출수: v.노출수,
-      클릭수: v.클릭수,
-      광고비: v.광고비,
-      클릭률: v.노출수 ? ((v.클릭수 / v.노출수) * 100).toFixed(2) : '0',
-    }));
-  }, [rows]);
 
   const sortedRows = useMemo(() => {
     const arr = [...rows];
@@ -154,18 +181,6 @@ function AdHistory() {
     return arr;
   }, [productSummary, prodSortCol, prodSortDir]);
 
-  const dateSummary = useMemo(() => {
-    const map = new Map();
-    rows.forEach((r) => {
-      const key = r['날짜'];
-      if (!map.has(key)) {
-        map.set(key, { 광고비: 0 });
-      }
-      map.get(key).광고비 += Number(r['광고비']) || 0;
-    });
-    return Array.from(map.entries()).map(([date, v]) => ({ 날짜: date, 광고비: v.광고비 }));
-  }, [rows]);
-
   const sortedDateSummary = useMemo(() => {
     const arr = [...dateSummary];
     arr.sort((a, b) => {
@@ -191,6 +206,17 @@ function AdHistory() {
           />
           <button type="submit" className="btn btn-success text-nowrap">업로드</button>
         </form>
+        {uploadProgress > 0 && (
+          <div className="progress align-self-center" style={{ width: '150px' }}>
+            <div
+              className="progress-bar"
+              role="progressbar"
+              style={{ width: `${uploadProgress}%` }}
+            >
+              {uploadProgress}%
+            </div>
+          </div>
+        )}
         <button type="button" className="btn btn-danger text-nowrap" onClick={handleReset}>
           초기화
         </button>
@@ -261,7 +287,11 @@ function AdHistory() {
               .map((row) => (
                 <tr key={row._id}>
                   {Object.keys(initialForm).map((key) => (
-                    <td key={key}>{row[key]}</td>
+                    <td key={key}>
+                      {numericFields.includes(key)
+                        ? Number(row[key]).toLocaleString()
+                        : row[key]}
+                    </td>
                   ))}
                 </tr>
               ))}
