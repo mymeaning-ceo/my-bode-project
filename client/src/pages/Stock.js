@@ -16,19 +16,10 @@ const columnIndex = columns.reduce((acc, col, idx) => {
 }, {});
 
 function Stock() {
-  const itemCodeRef = useRef(null);
-  const itemNameRef = useRef(null);
-  const colorRef = useRef(null);
-  const sizeRef = useRef(null);
-  const qtyRef = useRef(null);
-  const allocationRef = useRef(null);
   const [searchItemCode, setSearchItemCode] = useState('');
   const [searchColor, setSearchColor] = useState('');
   const [searchSize, setSearchSize] = useState('');
   const excelFormRef = useRef(null);
-  const manageFormRef = useRef(null);
-
-  const [editing, setEditing] = useState(null);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
@@ -69,45 +60,6 @@ function Stock() {
     // eslint-disable-next-line
   }, [page, sortCol, sortDir, searchItemCode, searchColor, searchSize]);
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    const body = {
-      item_code: itemCodeRef.current.value.trim(),
-      item_name: itemNameRef.current.value.trim(),
-      color: colorRef.current.value.trim(),
-      size: sizeRef.current.value.trim(),
-      qty: Number(qtyRef.current.value) || 0,
-      allocation: Number(allocationRef.current.value) || 0,
-    };
-    const url = editing ? `/api/stock/${editing._id}` : '/api/stock';
-    const method = editing ? 'PUT' : 'POST';
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      credentials: 'include',
-    });
-    if (res.ok) {
-      fetchData();
-    }
-    manageFormRef.current.reset();
-    setEditing(null);
-  };
-
-  const handleCancel = () => {
-    manageFormRef.current.reset();
-    setEditing(null);
-  };
-
-  const handleRowClick = (row) => {
-    setEditing(row);
-    itemCodeRef.current.value = row.item_code || '';
-    itemNameRef.current.value = row.item_name || '';
-    colorRef.current.value = row.color || '';
-    sizeRef.current.value = row.size || '';
-    qtyRef.current.value = row.qty || 0;
-    allocationRef.current.value = row.allocation || 0;
-  };
 
   const handleSearch = () => {
     setPage(0);
@@ -163,48 +115,15 @@ function Stock() {
       <div className="action-form mb-4">
         <form
           ref={excelFormRef}
-          className="d-flex gap-2 flex-nowrap"
           encType="multipart/form-data"
           onSubmit={handleUpload}
         >
           <input type="file" name="excelFile" accept=".xlsx,.xls" className="form-control" required />
           <button type="submit" className="btn btn-success btn-upload">엑셀 업로드</button>
         </form>
-        <button onClick={handleRefresh} className="btn btn-danger btn-reset ms-2">데이터 초기화</button>
+        <button onClick={handleRefresh} className="btn btn-danger btn-reset">데이터 초기화</button>
       </div>
 
-      <form ref={manageFormRef} className="row g-2 mb-4 stock-actions" onSubmit={handleSave}>
-        <div className="col-sm">
-          <input ref={itemCodeRef} className="form-control" placeholder="품번" required />
-        </div>
-        <div className="col-sm">
-          <input ref={itemNameRef} className="form-control" placeholder="품명" required />
-        </div>
-        <div className="col-sm">
-          <input ref={colorRef} className="form-control" placeholder="색상" />
-        </div>
-        <div className="col-sm">
-          <input ref={sizeRef} className="form-control" placeholder="사이즈" />
-        </div>
-        <div className="col-sm">
-          <input ref={qtyRef} type="number" className="form-control" placeholder="수량" />
-        </div>
-        <div className="col-sm">
-          <input ref={allocationRef} type="number" className="form-control" placeholder="할당" />
-        </div>
-        <div className="col-auto">
-          <button type="submit" className="btn btn-primary">
-            {editing ? '수정' : '추가'}
-          </button>
-        </div>
-        {editing && (
-          <div className="col-auto">
-            <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-              취소
-            </button>
-          </div>
-        )}
-      </form>
 
       <div className="row g-3 align-items-end mb-4 stock-search">
         <div className="col-md-3">
@@ -269,7 +188,7 @@ function Stock() {
         {loading ? (
           <div className="text-center py-5">로딩 중...</div>
         ) : (
-          <table className="table table-striped table-hover table-bordered shadow-sm rounded bg-white align-middle text-center stock-table">
+          <table className="table table-bordered shadow-sm rounded bg-white align-middle text-center stock-table">
             <thead className="table-light">
               <tr>
                 <th>#</th>
@@ -287,17 +206,7 @@ function Stock() {
             </thead>
             <tbody>
               {rows.map((r, idx) => (
-                <tr
-                  key={r._id}
-                  onClick={() => handleRowClick(r)}
-                  className={
-                    editing?._id === r._id
-                      ? 'table-warning'
-                      : r.qty < 10
-                      ? 'table-danger'
-                      : ''
-                  }
-                >
+                <tr key={r._id}>
                   <td>{page * pageSize + idx + 1}</td>
                   {columns.map((col) => (
                     <td key={col.key}>{r[col.key]}</td>

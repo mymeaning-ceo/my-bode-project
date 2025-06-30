@@ -3,9 +3,18 @@
 }
 
 .stock-actions .btn,
-.stock-search .btn {
+.stock-search .btn,
+.action-form .btn {
   white-space: nowrap;
   width: auto;
+}
+
+.action-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .stock-table {
@@ -13,25 +22,23 @@
   table-layout: fixed;
 }
 
+
 .stock-table th {
-  background-color: #f0f2f5;
+  background-color: #ffffff;
 }
 
-.stock-table tbody tr:nth-of-type(odd) {
-  background-color: #fafafa;
+.stock-table tbody tr {
+  background-color: #ffffff;
 }
 
 .stock-table tbody tr:hover {
-  background-color: #eaeaea;
+  background-color: #f5f5f5;
 }
 
 .stock-table th[role='button'] {
   cursor: pointer;
 }
 
-.stock-table tbody tr.table-danger {
-  background-color: #ffecec;
-}
 
 .table-container {
   overflow-x: auto;
