@@ -262,6 +262,59 @@ const getHistory = asyncHandler(async (req, res) => {
   res.json(history);
 });
 
+// Create a single weather record
+const createWeather = asyncHandler(async (req, res) => {
+  const { date, temperature, sky, precipitationType } = req.body;
+  if (!date) {
+    return res.status(400).json({ message: "date is required" });
+  }
+  const id = date.replace(/-/g, "");
+  const doc = {
+    _id: id,
+    date,
+    temperature: temperature ?? null,
+    sky: sky ?? null,
+    precipitationType: precipitationType ?? null,
+    updatedAt: new Date(),
+  };
+  await req.app.locals.db
+    .collection("weather")
+    .updateOne({ _id: id }, { $set: doc }, { upsert: true });
+  res.status(201).json(doc);
+});
+
+// Update an existing weather record by id (yyyymmdd)
+const updateWeather = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { temperature, sky, precipitationType } = req.body;
+  const update = {
+    updatedAt: new Date(),
+  };
+  if (temperature !== undefined) update.temperature = temperature;
+  if (sky !== undefined) update.sky = sky;
+  if (precipitationType !== undefined) update.precipitationType = precipitationType;
+
+  const result = await req.app.locals.db
+    .collection("weather")
+    .findOneAndUpdate({ _id: id }, { $set: update }, { returnDocument: "after" });
+
+  if (!result.value) {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  res.json(result.value);
+});
+
+// Fetch a single weather record by id (yyyymmdd)
+const getWeatherRecord = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const doc = await req.app.locals.db.collection("weather").findOne({ _id: id });
+  if (!doc) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  res.json(doc);
+});
+
 module.exports = {
   fetchDaily,
   getDailyWeather,
@@ -272,4 +325,7 @@ module.exports = {
   upload,
   uploadExcelApi,
   getHistory,
+  createWeather,
+  updateWeather,
+  getWeatherRecord,
 };
