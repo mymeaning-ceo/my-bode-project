@@ -296,6 +296,15 @@ const updateRecord = asyncHandler(async (req, res) => {
   res.json({ _id: result.value._id, temperature: result.value.temperature });
 });
 
+const deleteRecord = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const result = await req.app.locals.db
+    .collection("weather")
+    .deleteOne({ _id: id });
+  if (result.deletedCount === 0) return res.status(404).json(null);
+  res.json({ deleted: id });
+});
+
 module.exports = {
   fetchDaily,
   getDailyWeather,
@@ -309,4 +318,5 @@ module.exports = {
   createRecord,
   getRecord,
   updateRecord,
+  deleteRecord,
 };
