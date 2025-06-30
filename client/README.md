@@ -2,6 +2,16 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+Before running any of the scripts below make sure the dependencies are installed
+in this `client` directory:
+
+```bash
+npm install
+```
+
+This will install packages such as `react-chartjs-2` and `chart.js` that are
+required for components like `MonthlyWeatherChart`.
+
 ## Available Scripts
 
 In the project directory, you can run:
