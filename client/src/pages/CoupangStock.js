@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import './CoupangStock.css';
 
 const BRANDS = ['트라이', 'BYC', '제임스딘'];
 
@@ -8,6 +9,7 @@ function CoupangStock() {
   const [brand, setBrand] = useState('');
   const [sortCol, setSortCol] = useState('Product name');
   const [sortDir, setSortDir] = useState('asc');
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileRef = useRef(null);
 
   const loadData = async () => {
@@ -28,21 +30,36 @@ function CoupangStock() {
     }
   };
 
-  const handleUpload = async (e) => {
+  const handleUpload = (e) => {
     e.preventDefault();
-    const formData = new FormData();
     if (fileRef.current.files.length === 0) return;
+    const formData = new FormData();
     formData.append('excelFile', fileRef.current.files[0]);
-    const res = await fetch('/api/coupang/upload', {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    });
-    if (res.ok) {
-      loadData();
-    } else {
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/coupang/upload');
+    xhr.withCredentials = true;
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(percent);
+      }
+    };
+    xhr.onload = () => {
+      setUploadProgress(0);
+      if (xhr.status === 200) {
+        alert('업로드 완료');
+        fileRef.current.value = '';
+        loadData();
+      } else {
+        alert('업로드 실패');
+      }
+    };
+    xhr.onerror = () => {
+      setUploadProgress(0);
       alert('업로드 실패');
-    }
+    };
+    xhr.send(formData);
   };
 
   const handleDeleteAll = async () => {
@@ -52,6 +69,7 @@ function CoupangStock() {
       credentials: 'include',
     });
     if (res.ok) {
+      alert('초기화 완료');
       loadData();
     } else {
       alert('삭제 실패');
@@ -78,15 +96,26 @@ function CoupangStock() {
   return (
     <div className="container">
       <h2>쿠팡 재고</h2>
-      <form onSubmit={handleUpload} className="d-flex gap-2 mb-3">
+      <form onSubmit={handleUpload} className="coupang-stock-actions d-flex gap-2 mb-3">
         <input type="file" ref={fileRef} className="form-control" accept=".xlsx,.xls" />
         <button type="submit" className="btn btn-success">엑셀 업로드</button>
         <button type="button" onClick={handleDeleteAll} className="btn btn-danger ms-auto">
           데이터 초기화
         </button>
       </form>
-      <div className="row g-2 mb-3">
-        <div className="col">
+      {uploadProgress > 0 && (
+        <div className="progress mb-3" style={{ height: '24px' }}>
+          <div
+            className="progress-bar"
+            role="progressbar"
+            style={{ width: `${uploadProgress}%` }}
+          >
+            {uploadProgress}%
+          </div>
+        </div>
+      )}
+      <div className="row g-2 mb-3 coupang-stock-search align-items-end">
+        <div className="col-auto">
           <select className="form-select" value={brand} onChange={(e) => setBrand(e.target.value)}>
             <option value="">전체 브랜드</option>
             {BRANDS.map((b) => (
@@ -105,8 +134,13 @@ function CoupangStock() {
             onChange={(e) => setKeyword(e.target.value)}
           />
         </div>
+        <div className="col-auto">
+          <button type="button" onClick={loadData} className="btn btn-primary text-nowrap">
+            검색
+          </button>
+        </div>
       </div>
-      <table className="table table-bordered text-center auto-width">
+      <table className="table table-bordered text-center auto-width coupang-stock-table">
         <thead>
           <tr>
             <th onClick={() => changeSort('Option ID')} role="button">
