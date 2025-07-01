@@ -63,7 +63,12 @@
         <li class="nav-item">
           <a class="nav-link text-muted" href="/profile">👤 <%= 유저.username %></a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item d-flex align-items-center">
+          <% if (logoutAt) { %>
+            <span class="nav-link text-muted pe-2">
+              로그아웃 <%= new Date(logoutAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }) %>
+            </span>
+          <% } %>
           <a class="nav-link text-danger" href="/logout">🚪 로그아웃</a>
         </li>
       <% } else { %>

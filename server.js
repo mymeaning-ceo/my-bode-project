@@ -59,12 +59,12 @@ async function initApp() {
             mongoUrl: process.env.MONGO_URI || "mongodb://localhost:27017/testdb",
             dbName: process.env.DB_NAME || "testdb",
             collectionName: "sessions",
-            ttl: 60 * 60,
+            ttl: 60 * 60 * 24,
           }),
       cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 1000,
+        maxAge: 60 * 60 * 24 * 1000,
       },
     })
   );
@@ -101,6 +101,7 @@ async function initApp() {
     res.locals.currentUrl = req.originalUrl;
     res.locals.error = req.flash("error");
     res.locals.success = req.flash("success");
+    res.locals.logoutAt = req.session?.cookie?.expires || null;
     next();
   });
 
