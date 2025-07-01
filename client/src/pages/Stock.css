@@ -17,6 +17,29 @@
   white-space: nowrap;
 }
 
+.action-form form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+}
+
+@media (max-width: 575.98px) {
+  .action-form {
+    flex-wrap: wrap;
+  }
+  .action-form form {
+    flex: 1 1 100%;
+  }
+  .btn-upload,
+  .btn-reset {
+    width: 100%;
+  }
+  .action-form input[type='file'] {
+    width: 100%;
+  }
+}
+
 .stock-table {
   width: 100%;
   table-layout: fixed;
