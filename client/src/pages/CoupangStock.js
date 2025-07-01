@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CoupangStock.css';
+import { useQueryClient } from '@tanstack/react-query';
+import useDebounce from '../hooks/useDebounce';
+import useCoupangStocks from '../hooks/useCoupangStocks';
 
 const BRANDS = ['트라이', 'BYC', '제임스딘'];
 
 function CoupangStock() {
   const pageSize = 50;
-  const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState('');
@@ -14,27 +16,25 @@ function CoupangStock() {
   const [sortDir, setSortDir] = useState('asc');
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileRef = useRef(null);
+  const queryClient = useQueryClient();
   const totalPages = Math.ceil(total / pageSize) || 1;
   const [adSummary, setAdSummary] = useState([]);
 
-  const loadData = async () => {
-    const params = new URLSearchParams({
-      page: String(page),
-      limit: String(pageSize),
-      keyword,
-      brand,
-      sort: sortCol,
-      order: sortDir,
-    });
-    const res = await fetch(`/api/coupang?${params.toString()}`, {
-      credentials: 'include',
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setRows(data.data || []);
+  const debouncedKeyword = useDebounce(keyword, 300);
+
+  const { data, isFetching } = useCoupangStocks({
+    page,
+    keyword: debouncedKeyword,
+    brand,
+    sort: sortCol,
+    order: sortDir,
+  });
+
+  useEffect(() => {
+    if (data) {
       setTotal(data.total || 0);
     }
-  };
+  }, [data]);
 
   const loadAdSummary = async () => {
     const res = await fetch('/api/coupang-add/summary/date', { credentials: 'include' });
@@ -65,7 +65,7 @@ function CoupangStock() {
         alert('업로드 완료');
         fileRef.current.value = '';
         setPage(1);
-        loadData();
+        queryClient.invalidateQueries({ queryKey: ['coupangStock'] });
       } else {
         alert('업로드 실패');
       }
@@ -87,8 +87,8 @@ function CoupangStock() {
     if (res.ok) {
       alert('초기화 완료');
       setPage(1);
-      loadData();
-      loadAdSummary();
+      queryClient.invalidateQueries({ queryKey: ['coupangStock'] });
+
     } else {
       alert('삭제 실패');
     }
@@ -104,13 +104,6 @@ function CoupangStock() {
     setPage(1);
   };
 
-  useEffect(() => {
-    const t = setTimeout(() => {
-      loadData();
-    }, 300);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line
-  }, [page, keyword, brand, sortCol, sortDir]);
 
   useEffect(() => {
     loadAdSummary();
@@ -172,7 +165,7 @@ function CoupangStock() {
             type="button"
             onClick={() => {
               setPage(1);
-              loadData();
+              queryClient.invalidateQueries({ queryKey: ['coupangStock'] });
             }}
             className="btn btn-primary text-nowrap"
           >
@@ -210,7 +203,7 @@ function CoupangStock() {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, idx) => (
+          {(data?.data || []).map((row, idx) => (
             <tr key={idx}>
               <td>{row['Option ID']}</td>
               <td className="text-start">{row['Product name']}</td>
