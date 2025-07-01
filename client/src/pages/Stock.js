@@ -117,8 +117,15 @@ function Stock() {
           ref={excelFormRef}
           encType="multipart/form-data"
           onSubmit={handleUpload}
+          className="d-flex gap-2 flex-nowrap align-items-end"
         >
-          <input type="file" name="excelFile" accept=".xlsx,.xls" className="form-control" required />
+          <input
+            type="file"
+            name="excelFile"
+            accept=".xlsx,.xls"
+            className="form-control"
+            required
+          />
           <button type="submit" className="btn btn-success btn-upload">업로드</button>
         </form>
         <button onClick={handleRefresh} className="btn btn-danger btn-reset">초기화</button>
