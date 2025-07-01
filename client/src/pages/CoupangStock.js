@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CoupangStock.css';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '../react-query-lite';
 import useDebounce from '../hooks/useDebounce';
 import useCoupangStocks from '../hooks/useCoupangStocks';
 
