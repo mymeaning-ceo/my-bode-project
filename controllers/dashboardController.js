@@ -8,7 +8,7 @@ exports.getDailyAdCost = asyncHandler(async (req, res) => {
     {
       $group: {
         _id: '$date',
-        totalCost: { $sum: '$cost' },
+        totalCost: { $sum: { $toDouble: '$cost' } },
       },
     },
     { $sort: { _id: 1 } },
