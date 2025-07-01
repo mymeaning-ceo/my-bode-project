@@ -21,6 +21,8 @@ function CoupangAdd() {
   const [keyword, setKeyword] = useState('');
   const [file, setFile] = useState(null);
   const [viewMode, setViewMode] = useState('detail'); // detail, product, date
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const loadData = async () => {
     const params = new URLSearchParams({ start: '0', length: '1000', search: keyword });
@@ -90,6 +92,28 @@ function CoupangAdd() {
     return Array.from(map.entries()).map(([date, v]) => ({ 날짜: date, 광고비: v.광고비 }));
   }, [rows]);
 
+  const sortedRows = useMemo(() => {
+    if (!sortField) return rows;
+    const sorted = [...rows].sort((a, b) => {
+      const av = a[sortField];
+      const bv = b[sortField];
+      if (typeof av === 'number' && typeof bv === 'number') {
+        return av - bv;
+      }
+      return String(av).localeCompare(String(bv));
+    });
+    return sortOrder === 'asc' ? sorted : sorted.reverse();
+  }, [rows, sortField, sortOrder]);
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -97,7 +121,7 @@ function CoupangAdd() {
   return (
     <div className="container">
       <h2>쿠팡 매출/광고비</h2>
-      <form onSubmit={handleUpload} className="mb-3 d-flex gap-2">
+      <form onSubmit={handleUpload} className="mb-3 d-flex gap-2 flex-nowrap">
         <input
           type="file"
           className="form-control"
@@ -150,14 +174,19 @@ function CoupangAdd() {
           <thead>
             <tr>
               {Object.keys(initialForm).map((key) => (
-                <th key={key} style={{ whiteSpace: 'nowrap' }}>
+                <th
+                  key={key}
+                  style={{ whiteSpace: 'nowrap', cursor: 'pointer' }}
+                  onClick={() => handleSort(key)}
+                >
                   {key}
+                  {sortField === key && (sortOrder === 'asc' ? ' ▲' : ' ▼')}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {rows
+            {sortedRows
               .filter((row) => row['광고집행 상품명'].includes(keyword))
               .map((row, idx) => (
                 <tr key={idx}>
@@ -175,10 +204,10 @@ function CoupangAdd() {
           <thead>
             <tr>
               <th style={{ whiteSpace: 'nowrap' }}>상품명</th>
-              <th>노출수 합</th>
-              <th>클릭수 합</th>
-              <th>광고비 합</th>
-              <th>클릭률(%)</th>
+              <th style={{ whiteSpace: 'nowrap' }}>노출수 합</th>
+              <th style={{ whiteSpace: 'nowrap' }}>클릭수 합</th>
+              <th style={{ whiteSpace: 'nowrap' }}>광고비 합</th>
+              <th style={{ whiteSpace: 'nowrap' }}>클릭률(%)</th>
             </tr>
           </thead>
           <tbody>
@@ -202,7 +231,7 @@ function CoupangAdd() {
             <thead>
               <tr>
                 <th style={{ whiteSpace: 'nowrap' }}>날짜</th>
-                <th>광고비 합</th>
+                <th style={{ whiteSpace: 'nowrap' }}>광고비 합</th>
               </tr>
             </thead>
             <tbody>
