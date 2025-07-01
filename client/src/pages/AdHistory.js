@@ -72,13 +72,11 @@ function AdHistory() {
       loadData();
     }, 300);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, keyword]);
 
   useEffect(() => {
     if (viewMode === 'product') fetchProductSummary();
     if (viewMode === 'date') fetchDateSummary();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
 
   const handleUpload = async (e) => {
