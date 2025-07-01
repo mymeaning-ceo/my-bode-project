@@ -242,6 +242,17 @@ exports.uploadExcel = asyncHandler(async (req, res) => {
         row[f] = f === '클릭률' ? Number(num.toFixed(2)) : num;
       }
     });
+
+    const dateVal = row['날짜'];
+    if (dateVal instanceof Date) {
+      row['날짜'] = dateVal.toISOString().slice(0, 10);
+    } else if (typeof dateVal === 'string') {
+      const d = new Date(dateVal);
+      if (!Number.isNaN(d.getTime())) {
+        row['날짜'] = d.toISOString().slice(0, 10);
+      }
+    }
+
     return normalizeItemFields(row);
   });
 
@@ -271,6 +282,17 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
         row[f] = f === '클릭률' ? Number(num.toFixed(2)) : num;
       }
     });
+
+    const dateVal = row['날짜'];
+    if (dateVal instanceof Date) {
+      row['날짜'] = dateVal.toISOString().slice(0, 10);
+    } else if (typeof dateVal === 'string') {
+      const d = new Date(dateVal);
+      if (!Number.isNaN(d.getTime())) {
+        row['날짜'] = d.toISOString().slice(0, 10);
+      }
+    }
+
     return normalizeItemFields(row);
   });
 
