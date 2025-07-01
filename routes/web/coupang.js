@@ -93,6 +93,13 @@ router.get("/stock", (req, res) => {
   res.sendFile(reactIndex);
 });
 
+// React page for /coupang/sales-amount
+router.get("/sales-amount", (req, res) => {
+  const path = require("path");
+  const reactIndex = path.join(__dirname, "..", "..", "client", "public", "index.html");
+  res.sendFile(reactIndex);
+});
+
 // ✅ 엑셀 업로드
 router.post("/upload", upload.single("excelFile"), async (req, res) => {
   const db = req.app.locals.db;
