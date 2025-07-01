@@ -167,6 +167,21 @@ const getMonthlyWeatherFromDb = asyncHandler(async (req, res) => {
   res.json(docs);
 });
 
+// Fetch weather records for an entire year from DB
+const getYearlyWeatherFromDb = asyncHandler(async (req, res) => {
+  const { year } = req.query;
+  if (!year) {
+    return res.status(400).json({ message: "year query required" });
+  }
+  const prefix = `${year}`;
+  const docs = await req.app.locals.db
+    .collection("weather")
+    .find({ _id: { $regex: `^${prefix}` } })
+    .sort({ _id: 1 })
+    .toArray();
+  res.json(docs);
+});
+
 // Calculate average temperature for a specific day
 const getAverageTemperature = asyncHandler(async (req, res) => {
   const { year, month, day } = req.query;
@@ -311,6 +326,7 @@ module.exports = {
   getSameDay,
   getMonthlyWeather,
   getMonthlyWeatherFromDb,
+  getYearlyWeatherFromDb,
   getAverageTemperature,
   upload,
   uploadExcelApi,
