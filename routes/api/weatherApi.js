@@ -8,6 +8,7 @@ router.get('/daily', ctrl.getDailyWeather);
 router.get('/same-day', ctrl.getSameDay);
 router.get('/monthly', ctrl.getMonthlyWeather);
 router.get('/monthly-db', ctrl.getMonthlyWeatherFromDb);
+router.get('/yearly-db', ctrl.getYearlyWeatherFromDb);
 router.get('/average', ctrl.getAverageTemperature);
 router.post('/record', ctrl.createRecord);
 router.get('/record/:id', ctrl.getRecord);

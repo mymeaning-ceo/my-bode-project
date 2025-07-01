@@ -1,5 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import MonthlyWeatherChart from '../MonthlyWeatherChart';
+import YearlyWeatherChart from '../YearlyWeatherChart';
+import WeatherNow from '../Weather';
 
 function Weather() {
   const now = new Date();
@@ -13,6 +15,9 @@ function Weather() {
   const [dbYear, setDbYear] = useState(now.getFullYear());
   const [dbMonth, setDbMonth] = useState(now.getMonth() + 1);
   const [records, setRecords] = useState([]);
+  const [yearlyYear, setYearlyYear] = useState(now.getFullYear());
+  const [sortField, setSortField] = useState('date');
+  const [sortDir, setSortDir] = useState('asc');
 
   const handleSearch = async () => {
     setError(null);
@@ -63,9 +68,29 @@ function Weather() {
     }
   };
 
+  const changeSort = (field) => {
+    if (sortField === field) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+  };
+
+  const sortedRecords = useMemo(() => {
+    return [...records].sort((a, b) => {
+      const aVal = sortField === 'temperature' ? Number(a.temperature) : (a.date || a._id);
+      const bVal = sortField === 'temperature' ? Number(b.temperature) : (b.date || b._id);
+      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [records, sortField, sortDir]);
+
   return (
     <div className="container">
       <h2>날씨 조회</h2>
+      <WeatherNow />
       <div className="row g-2 mb-3">
         <div className="col-auto">
           <input
@@ -100,7 +125,7 @@ function Weather() {
       )}
       <hr />
       <h2>엑셀 업로드</h2>
-      <form onSubmit={handleUpload} className="d-flex gap-2 mb-3" encType="multipart/form-data">
+      <form onSubmit={handleUpload} className="d-flex gap-2 flex-nowrap mb-3" encType="multipart/form-data">
         <input type="file" ref={fileRef} className="form-control" accept=".xlsx,.xls" />
         <button type="submit" className="btn btn-success">업로드</button>
       </form>
@@ -127,6 +152,18 @@ function Weather() {
         </div>
       </div>
       <MonthlyWeatherChart year={year} month={month} />
+      <h2 className="mt-4">연간 날씨</h2>
+      <div className="row g-2 mb-3">
+        <div className="col">
+          <input
+            type="number"
+            className="form-control"
+            value={yearlyYear}
+            onChange={(e) => setYearlyYear(e.target.value)}
+          />
+        </div>
+      </div>
+      <YearlyWeatherChart year={yearlyYear} />
       <h2 className="mt-4">업로드 데이터 조회</h2>
       <div className="row g-2 mb-3">
         <div className="col">
@@ -157,12 +194,24 @@ function Weather() {
         <table className="table">
           <thead>
             <tr>
-              <th>날짜</th>
-              <th>기온</th>
+              <th
+                className="text-nowrap"
+                role="button"
+                onClick={() => changeSort('date')}
+              >
+                날짜 {sortField === 'date' && (sortDir === 'asc' ? '▲' : '▼')}
+              </th>
+              <th
+                className="text-nowrap"
+                role="button"
+                onClick={() => changeSort('temperature')}
+              >
+                기온 {sortField === 'temperature' && (sortDir === 'asc' ? '▲' : '▼')}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {records.map((r) => (
+            {sortedRecords.map((r) => (
               <tr key={r._id}>
                 <td>{r.date || r._id}</td>
                 <td>{r.temperature ?? '-'}</td>
