@@ -365,6 +365,7 @@ function AdHistory() {
           </table>
         </>
       )}
+      {totalPages > 1 && (
       <nav className="d-flex justify-content-center my-3">
         <ul className="pagination">
           <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
@@ -399,6 +400,7 @@ function AdHistory() {
           </li>
         </ul>
       </nav>
+      )}
     </div>
   );
 }

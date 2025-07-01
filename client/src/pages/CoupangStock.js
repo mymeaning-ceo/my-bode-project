@@ -18,6 +18,7 @@ function CoupangStock() {
   const fileRef = useRef(null);
   const queryClient = useQueryClient();
   const totalPages = Math.ceil(total / pageSize) || 1;
+  const [adSummary, setAdSummary] = useState([]);
 
   const debouncedKeyword = useDebounce(keyword, 300);
 
@@ -34,6 +35,14 @@ function CoupangStock() {
       setTotal(data.total || 0);
     }
   }, [data]);
+
+  const loadAdSummary = async () => {
+    const res = await fetch('/api/coupang-add/summary/date', { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      setAdSummary(data);
+    }
+  };
 
   const handleUpload = (e) => {
     e.preventDefault();
@@ -66,6 +75,7 @@ function CoupangStock() {
       alert('업로드 실패');
     };
     xhr.send(formData);
+    loadAdSummary();
   };
 
   const handleDeleteAll = async () => {
@@ -78,6 +88,7 @@ function CoupangStock() {
       alert('초기화 완료');
       setPage(1);
       queryClient.invalidateQueries({ queryKey: ['coupangStock'] });
+
     } else {
       alert('삭제 실패');
     }
@@ -93,6 +104,10 @@ function CoupangStock() {
     setPage(1);
   };
 
+
+  useEffect(() => {
+    loadAdSummary();
+  }, []);
 
   return (
     <div className="container">
@@ -202,6 +217,7 @@ function CoupangStock() {
           ))}
         </tbody>
       </table>
+      {totalPages > 1 && (
       <nav className="d-flex justify-content-center my-3">
         <ul className="pagination">
           <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
@@ -236,6 +252,28 @@ function CoupangStock() {
           </li>
         </ul>
       </nav>
+      )}
+      {adSummary.length > 0 && (
+        <div className="mt-4">
+          <h3>쿠팡 광고비 내역</h3>
+          <table className="table table-bordered text-center mt-2">
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>광고비 합</th>
+              </tr>
+            </thead>
+            <tbody>
+              {adSummary.map((row) => (
+                <tr key={row.날짜}>
+                  <td>{row.날짜}</td>
+                  <td>{Number(row.광고비).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
