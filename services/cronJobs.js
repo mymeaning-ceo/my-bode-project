@@ -5,7 +5,8 @@ async function updateInventory(db) {
   const ids = await db.collection('coupang').distinct('Option ID');
   for (const id of ids) {
     try {
-      const path = `/v2/providers/openapi/apis/api/v1/marketplace/vendor-items/${id}`;
+      const vendorId = process.env.CP_VENDOR_ID;
+      const path = `/v2/providers/openapi/apis/api/v1/vendors/${vendorId}/marketplace/vendor-items/${id}`;
       const data = await coupangRequest('GET', path);
       const item = {
         optionId: id,
