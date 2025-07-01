@@ -6,6 +6,7 @@ import "./Header.css";
 function Header({ onToggleSidebar }) {
   const [user, setUser] = useState(null);
   const [weather, setWeather] = useState(null);
+  const [logoutAt, setLogoutAt] = useState(null);
 
   const skyMap = { 1: "맑음", 3: "구름많음", 4: "흐림" };
   useEffect(() => {
@@ -20,6 +21,13 @@ function Header({ onToggleSidebar }) {
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
         setWeather(data);
+      })
+      .catch(() => {});
+
+    fetch("/api/auth/session", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        setLogoutAt(data.expiresAt);
       })
       .catch(() => {});
   }, []);
@@ -50,6 +58,17 @@ function Header({ onToggleSidebar }) {
           날씨
         </Link>
         {user && <span className="me-3">{user.name || user.username}</span>}
+        {logoutAt && (
+          <span className="me-3 text-muted">
+            로그아웃
+            {" "}
+            {new Date(logoutAt).toLocaleTimeString("ko-KR", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            })}
+          </span>
+        )}
         <button type="button" className="btn btn-link" onClick={handleLogout}>
           로그아웃
         </button>

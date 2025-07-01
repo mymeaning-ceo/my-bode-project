@@ -69,3 +69,9 @@ exports.register = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.sessionInfo = (req, res) => {
+  const { cookie } = req.session || {};
+  const expires = cookie?.expires || new Date(Date.now() + (cookie?.maxAge || 0));
+  res.json({ expiresAt: expires });
+};
