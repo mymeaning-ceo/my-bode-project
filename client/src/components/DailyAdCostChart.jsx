@@ -19,12 +19,23 @@ ChartJS.register(
 
 function DailyAdCostChart() {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
     fetch('/api/dashboard/ad-cost-daily', { credentials: 'include' })
-      .then((res) => (res.ok ? res.json() : []))
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
       .then((d) => setData(d))
-      .catch(() => {});
+      .catch(() => {
+        setError('데이터를 불러오지 못했습니다.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const sliced = data.slice(0, 50);
@@ -63,9 +74,13 @@ function DailyAdCostChart() {
   return (
     <div>
       <h3>쿠팡 광고비 (일자별)</h3>
-      <div style={{ height: '300px' }}>
-        <Bar options={options} data={chartData} />
-      </div>
+      {loading && <p>Loading…</p>}
+      {error && !loading && <p role="alert">{error}</p>}
+      {!loading && !error && (
+        <div style={{ height: '300px' }}>
+          <Bar options={options} data={chartData} />
+        </div>
+      )}
     </div>
   );
 }
