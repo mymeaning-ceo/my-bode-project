@@ -304,7 +304,7 @@ exports.updateItem = asyncHandler(async (req, res) => {
   res.json({ success: true });
 });
 
-// Get product summary (top 50)
+// Get product summary
 exports.getProductSummary = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
   const rows = await db.collection('coupangAdd').aggregate([
@@ -339,13 +339,12 @@ exports.getProductSummary = asyncHandler(async (req, res) => {
         }
       }
     },
-    { $sort: { 노출수: -1 } },
-    { $limit: 50 }
+    { $sort: { 노출수: -1 } }
   ]).toArray();
   res.json(rows);
 });
 
-// Get date summary (top 50)
+// Get date summary
 exports.getDateSummary = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
   const rows = await db.collection('coupangAdd').aggregate([
@@ -358,12 +357,17 @@ exports.getDateSummary = asyncHandler(async (req, res) => {
     {
       $project: {
         _id: 0,
-        날짜: '$_id',
+        날짜: {
+          $cond: [
+            { $eq: [{ $type: '$_id' }, 'date'] },
+            { $dateToString: { format: '%Y-%m-%d', date: '$_id' } },
+            '$_id'
+          ]
+        },
         광고비: 1
       }
     },
-    { $sort: { 날짜: 1 } },
-    { $limit: 50 }
+    { $sort: { 날짜: 1 } }
   ]).toArray();
   res.json(rows);
 });
