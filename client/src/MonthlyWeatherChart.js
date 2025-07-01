@@ -29,14 +29,27 @@ function MonthlyWeatherChart({ year, month }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch(`/api/weather/monthly?year=${year}&month=${month}`, {
+        // 먼저 외부 API 호출 시도
+        let res = await fetch(`/api/weather/monthly?year=${year}&month=${month}`, {
           credentials: 'include',
         });
-        if (!res.ok) throw new Error('Failed to fetch');
-        const json = await res.json();
+        if (!res.ok) throw new Error('failed');
+
+        let json = await res.json();
         setData(json.filter((d) => !d.error));
-      } catch (e) {
-        setError('데이터 없음');
+      } catch (_) {
+        // 실패 시 DB에 저장된 데이터 조회 시도
+        try {
+          const res = await fetch(
+            `/api/weather/monthly-db?year=${year}&month=${month}`,
+            { credentials: 'include' },
+          );
+          if (!res.ok) throw new Error('failed');
+          const json = await res.json();
+          setData(json.filter((d) => !d.error));
+        } catch (err) {
+          setError('데이터 없음');
+        }
       }
     }
     fetchData();
