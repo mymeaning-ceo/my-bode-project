@@ -124,6 +124,41 @@ async function saveCityTemperatures(db) {
   }
 }
 
+async function saveDailyAdCost(db) {
+  const rows = await db
+    .collection('coupangAdd')
+    .aggregate([
+      {
+        $group: {
+          _id: '$날짜',
+          cost: { $sum: '$광고비' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          date: {
+            $cond: [
+              { $eq: [{ $type: '$_id' }, 'date'] },
+              { $dateToString: { format: '%Y%m%d', date: '$_id' } },
+              '$_id',
+            ],
+          },
+          cost: 1,
+        },
+      },
+    ])
+    .toArray();
+
+  for (const row of rows) {
+    await db.collection('adHistory').updateOne(
+      { date: row.date },
+      { $set: { cost: row.cost, updatedAt: new Date() } },
+      { upsert: true },
+    );
+  }
+}
+
 function startCronJobs(db) {
   // Update inventory every hour
   setInterval(() => updateInventory(db), 60 * 60 * 1000);
@@ -153,6 +188,16 @@ function startCronJobs(db) {
     calcAdMetrics(db);
     setInterval(() => calcAdMetrics(db), 24 * 60 * 60 * 1000);
   }, firstRun - now);
+
+  // Save daily ad cost at 00:40
+  const costRun = new Date(now);
+  costRun.setHours(0, 40, 0, 0);
+  if (costRun <= now) costRun.setDate(costRun.getDate() + 1);
+
+  setTimeout(() => {
+    saveDailyAdCost(db);
+    setInterval(() => saveDailyAdCost(db), 24 * 60 * 60 * 1000);
+  }, costRun - now);
 }
 
 module.exports = { startCronJobs };

@@ -209,6 +209,18 @@ The algorithm derives average daily sales from recent conversions, applies an
 ad spend multiplier, and subtracts current stock to determine how many units
 to reorder.
 
+### Updating ad history
+
+Daily advertising costs from the `coupangAdd` collection can be aggregated into
+`adHistory` using a helper script. The script respects `MONGO_URI` and `DB_NAME`
+and upserts one document per day with `{ date: 'YYYYMMDD', cost: <number> }`.
+
+```bash
+node scripts/update_ad_history.js
+```
+
+Schedule this command in `cron` to keep the `adHistory` collection up to date.
+
 ## DataTable helper
 
 Client pages use a helper `createDataTable()` located in `public/js/common-dt.js`.
