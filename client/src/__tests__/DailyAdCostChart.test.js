@@ -15,7 +15,7 @@ test('renders bar chart with fetched data', async () => {
       ok: true,
       json: () =>
         Promise.resolve([
-          { date: '2023-01-01', totalCost: 100 },
+          { date: '2023-01-01', totalCost: '1,234' },
         ]),
     })
   );
@@ -30,7 +30,7 @@ test('renders bar chart with fetched data', async () => {
 
   const data = JSON.parse(screen.getByTestId('bar-props').textContent);
   expect(data.labels).toEqual(['2023-01-01']);
-  expect(data.datasets[0].data).toEqual([100]);
+  expect(data.datasets[0].data).toEqual([1234]);
 });
 
 test('shows error message on fetch failure', async () => {

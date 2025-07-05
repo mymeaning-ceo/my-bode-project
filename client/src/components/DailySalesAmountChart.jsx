@@ -33,7 +33,9 @@ function DailySalesAmountChart() {
     datasets: [
       {
         label: '정산금액',
-        data: data.map((d) => d.payoutAmount),
+        data: data.map((d) =>
+          Number(String(d.payoutAmount).replace(/,/g, ''))
+        ),
         backgroundColor: 'rgba(153,102,255,0.6)',
         borderColor: 'rgba(153,102,255,1)',
       },
