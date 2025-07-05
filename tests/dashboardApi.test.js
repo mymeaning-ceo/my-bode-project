@@ -3,7 +3,15 @@ jest.setTimeout(60000);
 const mockCollection = {
   aggregate: jest.fn().mockReturnThis(),
   toArray: jest.fn().mockResolvedValue([]),
+  find: jest.fn().mockReturnThis(),
+  sort: jest.fn().mockReturnThis(),
+  limit: jest.fn().mockReturnThis(),
+  next: jest.fn().mockResolvedValue(null),
+  updateOne: jest.fn().mockResolvedValue({}),
 };
+
+jest.mock('node-fetch');
+const mockFetch = require('node-fetch');
 
 jest.mock('../config/db', () => {
   const mockDb = { collection: jest.fn(() => mockCollection) };
@@ -23,6 +31,15 @@ beforeAll(async () => {
   process.env.MONGO_URI = 'mongodb://127.0.0.1:27017/testdb';
   process.env.DB_NAME = 'testdb';
   process.env.SESSION_SECRET = 'testsecret';
+  mockFetch.mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      hourly: {
+        time: ['2024-06-27T10:00'],
+        temperature_2m: [21.2],
+      },
+    }),
+  });
   app = await initApp();
 });
 
@@ -44,4 +61,19 @@ test('GET /api/dashboard/ad-cost-daily returns aggregated data', async () => {
   ]);
   expect(app.locals.db.collection).toHaveBeenCalledWith('adHistory');
   expect(mockCollection.aggregate).toHaveBeenCalled();
+});
+
+test('GET /api/dashboard/city-temp returns data from db', async () => {
+  mockCollection.next.mockResolvedValueOnce(null);
+  mockCollection.toArray.mockResolvedValueOnce([
+    { time: '2024-06-27T10:00', temperature: 21.2 },
+  ]);
+
+  const res = await request(app).get('/api/dashboard/city-temp?city=seoul');
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toEqual([
+    { time: '2024-06-27T10:00', temperature: 21.2 },
+  ]);
+  expect(app.locals.db.collection).toHaveBeenCalledWith('cityWeather');
+  expect(mockCollection.find).toHaveBeenCalled();
 });

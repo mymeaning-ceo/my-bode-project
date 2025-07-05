@@ -1,5 +1,6 @@
 const { coupangRequest } = require('../lib/coupangApiClient');
 const { fetchDaily } = require('../controllers/weatherController');
+const { fetchCityTemp } = require('../controllers/dashboardController');
 
 async function updateInventory(db) {
   const ids = await db.collection('coupang').distinct('Option ID');
@@ -81,9 +82,37 @@ async function saveTodayWeather(db) {
   }
 }
 
+async function saveHourlyCityTemps(db) {
+  const cities = Object.entries({
+    seoul: { lat: 37.5665, lon: 126.978 },
+    busan: { lat: 35.1796, lon: 129.0756 },
+    daegu: { lat: 35.8722, lon: 128.6025 },
+    incheon: { lat: 37.4563, lon: 126.7052 },
+    gwangju: { lat: 35.1595, lon: 126.8526 },
+    daejeon: { lat: 36.3504, lon: 127.3845 },
+  });
+
+  for (const [city, coords] of cities) {
+    try {
+      const { time, temperature } = await fetchCityTemp(coords);
+      await db.collection('cityWeather').updateOne(
+        { city, time },
+        { $set: { temperature, updatedAt: new Date() } },
+        { upsert: true },
+      );
+    } catch (err) {
+      console.error('❌ City weather fetch failed:', city, err.message);
+    }
+  }
+}
+
 function startCronJobs(db) {
   // Update inventory every hour
   setInterval(() => updateInventory(db), 60 * 60 * 1000);
+
+  // Save city weather hourly
+  saveHourlyCityTemps(db);
+  setInterval(() => saveHourlyCityTemps(db), 60 * 60 * 1000);
 
   // Save today's weather at 00:10
   const nowWeather = new Date();
