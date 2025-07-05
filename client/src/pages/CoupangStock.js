@@ -3,6 +3,7 @@ import './CoupangStock.css';
 import { useQueryClient } from '../react-query-lite';
 import useDebounce from '../hooks/useDebounce';
 import useCoupangStocks from '../hooks/useCoupangStocks';
+import DailyAdCostChart from '../components/DailyAdCostChart';
 
 const BRANDS = ['트라이', 'BYC', '제임스딘'];
 
@@ -37,7 +38,10 @@ function CoupangStock() {
   }, [data]);
 
   const loadAdSummary = async () => {
-    const res = await fetch('/api/coupang-add/summary/date', { credentials: 'include' });
+    const res = await fetch('/api/ad-history/update', {
+      method: 'POST',
+      credentials: 'include',
+    });
     if (res.ok) {
       const data = await res.json();
       setAdSummary(data);
@@ -256,6 +260,7 @@ function CoupangStock() {
       {adSummary.length > 0 && (
         <div className="mt-4">
           <h3>쿠팡 광고비 내역</h3>
+          <DailyAdCostChart />
           <table className="table table-bordered text-center mt-2">
             <thead>
               <tr>
