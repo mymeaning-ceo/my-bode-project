@@ -149,10 +149,12 @@ function Header({ onToggleSidebar }) {
         </Link>
         {user ? (
           <>
-            <span className="me-3">{user.name || user.username}</span>
+            <Link to="/profile" className="me-3">
+              {user.name || user.username}
+            </Link>
             {timeLeft !== null && (
               <span className="me-3 text-muted">
-                시간연장 {String(Math.floor(timeLeft / 3600000)).padStart(2, "0")}:
+                {String(Math.floor(timeLeft / 3600000)).padStart(2, "0")}:
                 {String(Math.floor((timeLeft % 3600000) / 60000)).padStart(2, "0")}:
                 {String(Math.floor((timeLeft % 60000) / 1000)).padStart(2, "0")}
               </span>
