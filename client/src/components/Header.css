@@ -35,4 +35,6 @@
 
 .weather-select {
   min-width: 5rem;
+  width: auto;
+  display: inline-block;
 }

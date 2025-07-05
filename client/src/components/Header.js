@@ -21,6 +21,21 @@ function Header({ onToggleSidebar }) {
     { label: "천안", nx: 67, ny: 110 },
     { label: "서울", nx: 60, ny: 127 },
     { label: "부산", nx: 98, ny: 76 },
+    { label: "대구", nx: 89, ny: 90 },
+    { label: "인천", nx: 55, ny: 124 },
+    { label: "광주", nx: 58, ny: 74 },
+    { label: "대전", nx: 67, ny: 100 },
+    { label: "울산", nx: 102, ny: 84 },
+    { label: "세종", nx: 66, ny: 103 },
+    { label: "경기", nx: 60, ny: 120 },
+    { label: "강원", nx: 73, ny: 134 },
+    { label: "충북", nx: 69, ny: 107 },
+    { label: "충남", nx: 68, ny: 100 },
+    { label: "전북", nx: 63, ny: 89 },
+    { label: "전남", nx: 51, ny: 67 },
+    { label: "경북", nx: 91, ny: 106 },
+    { label: "경남", nx: 91, ny: 77 },
+    { label: "제주", nx: 52, ny: 38 },
   ];
 
   const skyMap = { 1: "맑음", 3: "구름많음", 4: "흐림" };
@@ -89,6 +104,16 @@ function Header({ onToggleSidebar }) {
     }
   };
 
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    setUser(null);
+    setLogoutAt(null);
+    setTimeLeft(null);
+  };
+
   return (
     <header className="app-header shadow-sm">
       <button type="button" className="btn menu-btn" onClick={onToggleSidebar}>
@@ -122,17 +147,37 @@ function Header({ onToggleSidebar }) {
         <Link to="/weather" className="me-3">
           날씨
         </Link>
-        {user && <span className="me-3">{user.name || user.username}</span>}
-        {timeLeft !== null && (
-          <span className="me-3 text-muted">
-            시간연장 {String(Math.floor(timeLeft / 3600000)).padStart(2, "0")}:
-            {String(Math.floor((timeLeft % 3600000) / 60000)).padStart(2, "0")}:
-            {String(Math.floor((timeLeft % 60000) / 1000)).padStart(2, "0")}
-          </span>
+        {user ? (
+          <>
+            <span className="me-3">{user.name || user.username}</span>
+            {timeLeft !== null && (
+              <span className="me-3 text-muted">
+                시간연장 {String(Math.floor(timeLeft / 3600000)).padStart(2, "0")}:
+                {String(Math.floor((timeLeft % 3600000) / 60000)).padStart(2, "0")}:
+                {String(Math.floor((timeLeft % 60000) / 1000)).padStart(2, "0")}
+              </span>
+            )}
+            <button
+              type="button"
+              className="btn btn-link me-2"
+              onClick={handleExtend}
+            >
+              시간연장
+            </button>
+            <button type="button" className="btn btn-link" onClick={handleLogout}>
+              로그아웃
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className="me-3">
+              로그인
+            </Link>
+            <Link to="/register" className="me-3">
+              회원가입
+            </Link>
+          </>
         )}
-        <button type="button" className="btn btn-link" onClick={handleExtend}>
-          시간연장
-        </button>
       </div>
     </header>
   );
