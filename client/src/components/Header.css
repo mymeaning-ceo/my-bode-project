@@ -1,37 +1,4 @@
-.app-header {
-  background: #fff;
-  padding: 0.5rem 1rem;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #dee2e6;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3rem;
-  z-index: 1000;
-}
-.app-header .menu-btn {
-  font-size: 1.25rem;
-  border: none;
-  background: transparent;
-}
-
-.brand-link {
-  text-decoration: none;
-  color: #333;
-}
-
-.user-info {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-}
-
-.weather-info {
-  margin-left: 1rem;
-  font-size: 0.9rem;
-}
+/* header styles are now provided by Bootstrap */
 
 .weather-select {
   min-width: 5rem;
