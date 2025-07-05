@@ -44,7 +44,9 @@ function DailyAdCostChart() {
     datasets: [
       {
         label: '광고비',
-        data: sliced.map((d) => d.totalCost),
+        data: sliced.map((d) =>
+          Number(String(d.totalCost).replace(/,/g, ''))
+        ),
         backgroundColor: 'rgba(75,192,192,0.6)',
         borderColor: 'rgba(75,192,192,1)',
       },
