@@ -4,6 +4,7 @@ const multer = multerImport.default || multerImport;
 const xlsx = require('xlsx');
 const fs = require('fs');
 const asyncHandler = require('../middlewares/asyncHandler');
+const { saveDailyAdCost } = require('../services/cronJobs');
 
 // Multer storage
 const storage = multer.diskStorage({
@@ -259,6 +260,7 @@ exports.uploadExcel = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
   await db.collection('coupangAdd').deleteMany({});
   if (data.length > 0) await db.collection('coupangAdd').insertMany(data);
+  await saveDailyAdCost(db);
 
   fs.unlink(filePath, () => {});
   if (req.flash) req.flash('성공메시지', '✅ 업로드 완료');
@@ -299,6 +301,7 @@ exports.uploadExcelApi = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
   await db.collection('coupangAdd').deleteMany({});
   if (data.length > 0) await db.collection('coupangAdd').insertMany(data);
+  await saveDailyAdCost(db);
 
   fs.unlink(filePath, () => {});
   res.json({ status: 'success' });

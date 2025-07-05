@@ -200,4 +200,4 @@ function startCronJobs(db) {
   }, costRun - now);
 }
 
-module.exports = { startCronJobs };
+module.exports = { startCronJobs, saveDailyAdCost };

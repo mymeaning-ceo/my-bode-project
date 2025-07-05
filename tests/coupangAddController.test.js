@@ -16,6 +16,7 @@ const mockCollection = {
         .map((d) => ({ 날짜: d, 광고비: summary[d] }));
     })
   })),
+  updateOne: jest.fn().mockResolvedValue(),
 };
 
 jest.mock('../config/db', () => {
@@ -72,5 +73,7 @@ test('upload normalizes date formats and date summary aggregates', async () => {
   ]);
 
   fs.unlinkSync(tmpFile);
+  expect(app.locals.db.collection).toHaveBeenCalledWith('adHistory');
+  expect(mockCollection.updateOne).toHaveBeenCalledTimes(2);
 });
 
