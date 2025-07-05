@@ -1,4 +1,21 @@
 const asyncHandler = require('../middlewares/asyncHandler');
+const { fetchDaily } = require('./weatherController');
+
+function getDefaultBaseDateTime() {
+  const now = new Date();
+  let baseDateObj = new Date(now);
+  let hour = now.getHours();
+  if (now.getMinutes() < 40) {
+    hour -= 1;
+    if (hour < 0) {
+      hour = 23;
+      baseDateObj = new Date(now.getTime() - 86400000);
+    }
+  }
+  const baseDate = baseDateObj.toISOString().slice(0, 10).replace(/-/g, '');
+  const baseTime = `${String(hour).padStart(2, '0')}00`;
+  return { baseDate, baseTime };
+}
 
 // GET /api/dashboard/ad-cost-daily
 // Return daily sum of Coupang ad cost
@@ -25,35 +42,48 @@ exports.getDailyAdCost = asyncHandler(async (req, res) => {
 });
 
 // GET /api/dashboard/city-temp
-// Return hourly temperature for a given city (past 24 hours)
+// Return hourly temperature for a given city from DB
 exports.getCityTempHistory = asyncHandler(async (req, res) => {
   const city = (req.query.city || 'seoul').toLowerCase();
-  const cityCoords = {
-    seoul: { lat: 37.5665, lon: 126.978 },
-    busan: { lat: 35.1796, lon: 129.0756 },
-    daegu: { lat: 35.8722, lon: 128.6025 },
-    incheon: { lat: 37.4563, lon: 126.7052 },
-    gwangju: { lat: 35.1595, lon: 126.8526 },
-    daejeon: { lat: 36.3504, lon: 127.3845 },
+
+  const pipeline = [
+    { $match: { city } },
+    { $project: { _id: 0, time: 1, temperature: 1 } },
+    { $sort: { time: 1 } },
+  ];
+
+  const db = req.app.locals.db;
+  const data = await db.collection('cityWeather').aggregate(pipeline).toArray();
+  res.json(data);
+});
+
+// POST /api/dashboard/city-temp
+// Fetch latest temperature from KMA and store in DB
+exports.saveCityTemp = asyncHandler(async (req, res) => {
+  const city = (req.body.city || req.query.city || 'seoul').toLowerCase();
+
+  const coordsMap = {
+    seoul: { nx: '60', ny: '127' },
+    busan: { nx: '98', ny: '76' },
+    daegu: { nx: '89', ny: '90' },
+    incheon: { nx: '55', ny: '124' },
+    gwangju: { nx: '58', ny: '74' },
+    daejeon: { nx: '67', ny: '100' },
   };
-  const coords = cityCoords[city];
-  if (!coords) {
-    return res.status(400).json({ message: 'Unknown city' });
-  }
-  const params = new URLSearchParams({
-    latitude: coords.lat,
-    longitude: coords.lon,
-    hourly: 'temperature_2m',
-    timezone: 'Asia/Seoul',
-    past_days: '1',
-  });
-  const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
-  if (!response.ok) {
-    return res.status(502).json({ message: 'Weather API error' });
-  }
-  const data = await response.json();
-  const times = data.hourly.time || [];
-  const temps = data.hourly.temperature_2m || [];
-  const result = times.map((t, idx) => ({ time: t, temperature: temps[idx] }));
-  res.json(result);
+  const coords = coordsMap[city];
+  if (!coords) return res.status(400).json({ message: 'Unknown city' });
+
+  const { baseDate, baseTime } = getDefaultBaseDateTime();
+  const { temperature } = await fetchDaily(baseDate, baseTime, coords.nx, coords.ny);
+
+  const isoTime = `${baseDate.slice(0, 4)}-${baseDate.slice(4, 6)}-${baseDate.slice(6, 8)}T${baseTime.slice(0, 2)}:00`;
+
+  const db = req.app.locals.db;
+  await db.collection('cityWeather').updateOne(
+    { city, time: isoTime },
+    { $set: { temperature, updatedAt: new Date() } },
+    { upsert: true },
+  );
+
+  res.json({ city, time: isoTime, temperature });
 });
