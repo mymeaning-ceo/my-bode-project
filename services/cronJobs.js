@@ -97,15 +97,10 @@ async function saveTodayWeather(db) {
   }
 }
 
+const cityCoords = require('../data/cityCoords.json');
+
 async function saveCityTemperatures(db) {
-  const cities = {
-    seoul: { nx: '60', ny: '127' },
-    busan: { nx: '98', ny: '76' },
-    daegu: { nx: '89', ny: '90' },
-    incheon: { nx: '55', ny: '124' },
-    gwangju: { nx: '58', ny: '74' },
-    daejeon: { nx: '67', ny: '100' },
-  };
+  const cities = cityCoords;
 
   const { baseDate, baseTime } = getDefaultBaseDateTime();
   const isoTime = `${baseDate.slice(0, 4)}-${baseDate.slice(4, 6)}-${baseDate.slice(6, 8)}T${baseTime.slice(0, 2)}:00`;

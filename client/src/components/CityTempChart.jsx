@@ -17,19 +17,16 @@ ChartJS.register(
   Legend,
 );
 
+import cityCoords from '../../../data/cityCoords.json';
+
 function CityTempChart() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const cityLabels = {
-    seoul: '서울',
-    busan: '부산',
-    daegu: '대구',
-    incheon: '인천',
-    gwangju: '광주',
-    daejeon: '대전',
-  };
+  const cityLabels = Object.fromEntries(
+    Object.entries(cityCoords).map(([k, v]) => [k, v.label]),
+  );
 
   const fetchData = () => {
     setLoading(true);

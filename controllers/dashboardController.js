@@ -1,5 +1,6 @@
 const asyncHandler = require('../middlewares/asyncHandler');
 const { fetchDaily } = require('./weatherController');
+const cityCoords = require('../data/cityCoords.json');
 
 function getDefaultBaseDateTime() {
   const now = new Date();
@@ -85,15 +86,7 @@ exports.getCityTempHistory = asyncHandler(async (req, res) => {
 exports.saveCityTemp = asyncHandler(async (req, res) => {
   const city = (req.body.city || req.query.city || 'seoul').toLowerCase();
 
-  const coordsMap = {
-    seoul: { nx: '60', ny: '127' },
-    busan: { nx: '98', ny: '76' },
-    daegu: { nx: '89', ny: '90' },
-    incheon: { nx: '55', ny: '124' },
-    gwangju: { nx: '58', ny: '74' },
-    daejeon: { nx: '67', ny: '100' },
-  };
-  const coords = coordsMap[city];
+  const coords = cityCoords[city];
   if (!coords) return res.status(400).json({ message: 'Unknown city' });
 
   const { baseDate, baseTime } = getDefaultBaseDateTime();
