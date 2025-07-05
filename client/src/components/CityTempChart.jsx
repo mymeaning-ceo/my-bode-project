@@ -17,7 +17,7 @@ ChartJS.register(
   Legend,
 );
 
-import cityCoords from '../../../data/cityCoords.json';
+import cityCoords from '../data/cityCoords.json';
 
 function CityTempChart() {
   const [data, setData] = useState([]);
