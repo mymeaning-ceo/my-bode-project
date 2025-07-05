@@ -74,10 +74,15 @@ function DailyAdCostChart() {
       },
     },
     plugins: {
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ctx.parsed.y.toLocaleString(),
+        },
+      },
       datalabels: {
         anchor: 'end',
         align: 'end',
-        formatter: (v) => v.toLocaleString(),
+        formatter: (v) => Math.ceil(v / 10000).toLocaleString(),
       },
     },
   };
