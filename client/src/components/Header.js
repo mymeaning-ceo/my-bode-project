@@ -6,10 +6,37 @@ import "./Header.css";
 function Header({ onToggleSidebar }) {
   const [user, setUser] = useState(null);
   const [weather, setWeather] = useState(null);
+  const [location, setLocation] = useState(() => {
+    try {
+      const saved = localStorage.getItem("weatherLocation");
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [logoutAt, setLogoutAt] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
 
+  const locations = [
+    { label: "천안", nx: 67, ny: 110 },
+    { label: "서울", nx: 60, ny: 127 },
+    { label: "부산", nx: 98, ny: 76 },
+  ];
+
   const skyMap = { 1: "맑음", 3: "구름많음", 4: "흐림" };
+  const fetchWeather = () => {
+    if (!location) return;
+    fetch(
+      `/api/weather/daily?nx=${location.nx}&ny=${location.ny}`,
+      { credentials: "include" },
+    )
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        setWeather(data);
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
     fetch("/api/auth/user", { credentials: "include" })
       .then((res) => res.json())
@@ -18,12 +45,11 @@ function Header({ onToggleSidebar }) {
       })
       .catch(() => {});
 
-    fetch("/api/weather/daily", { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => {
-        setWeather(data);
-      })
-      .catch(() => {});
+    if (!location) {
+      setLocation(locations[0]);
+      return;
+    }
+    fetchWeather();
 
     fetch("/api/auth/session", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
@@ -32,6 +58,14 @@ function Header({ onToggleSidebar }) {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!location) return;
+    localStorage.setItem("weatherLocation", JSON.stringify(location));
+    fetchWeather();
+    const id = setInterval(fetchWeather, 600000); // 10 minutes
+    return () => clearInterval(id);
+  }, [location]);
 
   useEffect(() => {
     if (!logoutAt) return undefined;
@@ -58,11 +92,24 @@ function Header({ onToggleSidebar }) {
         내의미
       </Link>
       {weather && (
-        <div className="weather-info ms-3">
+        <div className="weather-info ms-3 d-flex align-items-center gap-2">
           <span>
-            {weather.temperature ?? "-"}℃{" "}
-            {skyMap[weather.sky] ?? weather.sky ?? "-"}
+            {weather.temperature ?? "-"}℃ {skyMap[weather.sky] ?? weather.sky ?? "-"}
           </span>
+          <select
+            className="form-select form-select-sm weather-select"
+            value={location ? location.label : ""}
+            onChange={(e) => {
+              const loc = locations.find((l) => l.label === e.target.value);
+              if (loc) setLocation(loc);
+            }}
+          >
+            {locations.map((l) => (
+              <option key={l.label} value={l.label}>
+                {l.label}
+              </option>
+            ))}
+          </select>
         </div>
       )}
       <div className="user-info ms-auto">

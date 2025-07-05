@@ -5,11 +5,27 @@ const fs = require("fs");
 const xlsx = require("xlsx");
 const asyncHandler = require("../middlewares/asyncHandler");
 
+function getDefaultBaseDateTime() {
+  const now = new Date();
+  let baseDateObj = new Date(now);
+  let hour = now.getHours();
+  if (now.getMinutes() < 40) {
+    hour -= 1;
+    if (hour < 0) {
+      hour = 23;
+      baseDateObj = new Date(now.getTime() - 86400000);
+    }
+  }
+  const baseDate = baseDateObj.toISOString().slice(0, 10).replace(/-/g, "");
+  const baseTime = `${String(hour).padStart(2, "0")}00`;
+  return { baseDate, baseTime };
+}
+
 // Common helper to fetch weather data for a single day
 // Default coordinates point to Cheonan, Chungcheongnam-do
 async function fetchDaily(
   date,
-  time = "1200",
+  time,
   nx = process.env.WEATHER_NX || "67",
   ny = process.env.WEATHER_NY || "110",
 ) {
@@ -50,9 +66,9 @@ async function fetchDaily(
 
 // Fetch daily weather from KMA API
 const getDailyWeather = asyncHandler(async (req, res) => {
-  const baseDate =
-    req.query.date || new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const baseTime = req.query.time || "1200";
+  const defaults = getDefaultBaseDateTime();
+  const baseDate = req.query.date || defaults.baseDate;
+  const baseTime = req.query.time || defaults.baseTime;
   const nx = req.query.nx || "60";
   const ny = req.query.ny || "127";
 
