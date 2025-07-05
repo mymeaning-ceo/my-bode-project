@@ -67,7 +67,7 @@
           <% if (logoutAt) { %>
             <span id="logout-timer" class="nav-link text-muted pe-2" data-logout-at="<%= logoutAt %>"></span>
           <% } %>
-          <a class="nav-link text-danger" href="/logout">🚪 로그아웃</a>
+          <a id="extend-btn" class="nav-link text-danger" href="#">시간연장</a>
         </li>
       <% } else { %>
         <!-- 비로그인 사용자용 메뉴 -->
@@ -95,17 +95,39 @@
     });
 
     var timerEl = document.getElementById('logout-timer');
+    var extendBtn = document.getElementById('extend-btn');
+    var logoutTime;
+    function updateTimer() {
+      if (!logoutTime) return;
+      var diff = logoutTime - new Date();
+      if (diff < 0) diff = 0;
+      var h = Math.floor(diff / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      timerEl.textContent =
+        '시간연장 ' +
+        String(h).padStart(2, '0') + ':' +
+        String(m).padStart(2, '0') + ':' +
+        String(s).padStart(2, '0');
+    }
     if (timerEl && timerEl.dataset.logoutAt) {
-      var logoutTime = new Date(timerEl.dataset.logoutAt);
-      function updateTimer() {
-        var diff = logoutTime - new Date();
-        if (diff < 0) diff = 0;
-        var m = Math.floor(diff / 60000);
-        var s = Math.floor((diff % 60000) / 1000);
-        timerEl.textContent = '로그아웃 ' + m + ':' + (s < 10 ? '0' : '') + s;
-      }
+      logoutTime = new Date(timerEl.dataset.logoutAt);
       updateTimer();
       setInterval(updateTimer, 1000);
+    }
+    if (extendBtn) {
+      extendBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        fetch('/api/auth/extend', { method: 'POST', credentials: 'include' })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            logoutTime = new Date(data.expiresAt);
+            if (timerEl) {
+              timerEl.dataset.logoutAt = data.expiresAt;
+            }
+            updateTimer();
+          });
+      });
     }
   });
 </script>
