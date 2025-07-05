@@ -75,3 +75,14 @@ exports.sessionInfo = (req, res) => {
   const expires = cookie?.expires || new Date(Date.now() + (cookie?.maxAge || 0));
   res.json({ expiresAt: expires });
 };
+
+exports.extendSession = (req, res) => {
+  if (req.session && req.session.cookie) {
+    const maxAge = req.session.cookie.originalMaxAge || req.session.cookie.maxAge;
+    req.session.cookie.expires = new Date(Date.now() + maxAge);
+    if (typeof req.session.touch === 'function') {
+      req.session.touch();
+    }
+  }
+  res.json({ expiresAt: req.session?.cookie?.expires });
+};

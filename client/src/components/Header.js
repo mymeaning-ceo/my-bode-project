@@ -78,9 +78,15 @@ function Header({ onToggleSidebar }) {
     return () => clearInterval(id);
   }, [logoutAt]);
 
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    window.location.href = "/login";
+  const handleExtend = async () => {
+    const res = await fetch("/api/auth/extend", {
+      method: "POST",
+      credentials: "include",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setLogoutAt(data.expiresAt);
+    }
   };
 
   return (
@@ -119,12 +125,13 @@ function Header({ onToggleSidebar }) {
         {user && <span className="me-3">{user.name || user.username}</span>}
         {timeLeft !== null && (
           <span className="me-3 text-muted">
-            로그아웃 {Math.floor(timeLeft / 60000)}:
+            시간연장 {String(Math.floor(timeLeft / 3600000)).padStart(2, "0")}:
+            {String(Math.floor((timeLeft % 3600000) / 60000)).padStart(2, "0")}:
             {String(Math.floor((timeLeft % 60000) / 1000)).padStart(2, "0")}
           </span>
         )}
-        <button type="button" className="btn btn-link" onClick={handleLogout}>
-          로그아웃
+        <button type="button" className="btn btn-link" onClick={handleExtend}>
+          시간연장
         </button>
       </div>
     </header>
