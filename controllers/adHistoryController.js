@@ -1,5 +1,6 @@
 const { ObjectId } = require('mongodb');
 const asyncHandler = require('../middlewares/asyncHandler');
+const { saveDailyAdCost } = require('../services/cronJobs');
 
 // 광고 내역 목록 조회
 exports.list = asyncHandler(async (req, res) => {
@@ -64,4 +65,16 @@ exports.remove = asyncHandler(async (req, res) => {
   if (result.deletedCount === 0)
     return res.status(404).json({ message: 'Not found' });
   res.json({ success: true });
+});
+
+// coupangAdd 컬렉션을 기반으로 광고비 합산 후 adHistory 갱신
+exports.updateFromCoupangAdd = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+  await saveDailyAdCost(db);
+  const rows = await db
+    .collection('adHistory')
+    .find()
+    .sort({ date: 1 })
+    .toArray();
+  res.json(rows);
 });

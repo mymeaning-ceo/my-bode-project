@@ -58,7 +58,8 @@ function AdHistory() {
   };
 
   const fetchDateSummary = async () => {
-    const res = await fetch('/api/coupang-add/summary/date', {
+    const res = await fetch('/api/ad-history/update', {
+      method: 'POST',
       credentials: 'include',
     });
     if (res.ok) {
