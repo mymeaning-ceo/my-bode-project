@@ -1,48 +1,45 @@
-import React, { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
+import React, { useEffect, useState } from 'react';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Tooltip,
   Legend,
-} from "chart.js";
+} from 'chart.js';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Tooltip,
   Legend,
 );
 
 function CityTempChart() {
-  const [city, setCity] = useState("seoul");
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const cities = [
-    { label: "서울", value: "seoul" },
-    { label: "부산", value: "busan" },
-    { label: "대구", value: "daegu" },
-    { label: "인천", value: "incheon" },
-    { label: "광주", value: "gwangju" },
-    { label: "대전", value: "daejeon" },
-  ];
+  const cityLabels = {
+    seoul: '서울',
+    busan: '부산',
+    daegu: '대구',
+    incheon: '인천',
+    gwangju: '광주',
+    daejeon: '대전',
+  };
 
   const fetchData = () => {
     setLoading(true);
-    fetch(`/api/dashboard/city-temp?city=${city}`, { credentials: "include" })
+    fetch('/api/dashboard/city-temp', { credentials: 'include' })
       .then((res) => {
-        if (!res.ok) throw new Error("failed");
+        if (!res.ok) throw new Error('failed');
         return res.json();
       })
       .then((d) => setData(d))
-      .catch(() => setError("데이터를 불러오지 못했습니다."))
+      .catch(() => setError('데이터를 불러오지 못했습니다.'))
       .finally(() => setLoading(false));
   };
 
@@ -50,17 +47,16 @@ function CityTempChart() {
     fetchData();
     const id = setInterval(fetchData, 10 * 60 * 1000);
     return () => clearInterval(id);
-  }, [city]);
+  }, []);
 
   const chartData = {
-    labels: data.map((d) => d.time.slice(11, 16)),
+    labels: data.map((d) => cityLabels[d.city] || d.city),
     datasets: [
       {
-        label: "기온(℃)",
+        label: '기온(℃)',
         data: data.map((d) => d.temperature),
-        borderColor: "rgba(255,99,132,1)",
-        backgroundColor: "rgba(255,99,132,0.2)",
-        tension: 0.3,
+        backgroundColor: 'rgba(255,99,132,0.6)',
+        borderColor: 'rgba(255,99,132,1)',
       },
     ],
   };
@@ -70,6 +66,7 @@ function CityTempChart() {
     maintainAspectRatio: false,
     scales: {
       y: {
+        beginAtZero: true,
         ticks: { callback: (v) => `${v}°` },
       },
     },
@@ -78,24 +75,11 @@ function CityTempChart() {
   return (
     <div>
       <h3>도시별 기온</h3>
-      <div className="mb-2">
-        <select
-          className="form-select"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-        >
-          {cities.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
-            </option>
-          ))}
-        </select>
-      </div>
       {loading && <p>Loading…</p>}
       {error && !loading && <p role="alert">{error}</p>}
       {!loading && !error && (
-        <div style={{ height: "300px" }}>
-          <Line options={options} data={chartData} />
+        <div style={{ height: '300px' }}>
+          <Bar options={options} data={chartData} />
         </div>
       )}
     </div>

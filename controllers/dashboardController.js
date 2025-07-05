@@ -42,19 +42,42 @@ exports.getDailyAdCost = asyncHandler(async (req, res) => {
 });
 
 // GET /api/dashboard/city-temp
-// Return hourly temperature for a given city from DB
+// Return latest hourly temperature. If ?city is provided, return history for that city.
 exports.getCityTempHistory = asyncHandler(async (req, res) => {
-  const city = (req.query.city || 'seoul').toLowerCase();
+  const { city } = req.query;
+  const db = req.app.locals.db;
+
+  if (!city || city === 'all') {
+    const cutoff = `${new Date(Date.now() - 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 13)}:00`;
+    const pipeline = [
+      { $match: { time: { $gte: cutoff } } },
+      { $sort: { time: -1 } },
+      {
+        $group: {
+          _id: '$city',
+          time: { $first: '$time' },
+          temperature: { $first: '$temperature' },
+        },
+      },
+      { $project: { _id: 0, city: '$_id', time: 1, temperature: 1 } },
+      { $sort: { city: 1 } },
+    ];
+    const data = await db
+      .collection('cityWeather')
+      .aggregate(pipeline)
+      .toArray();
+    return res.json(data);
+  }
 
   const pipeline = [
-    { $match: { city } },
+    { $match: { city: city.toLowerCase() } },
     { $project: { _id: 0, time: 1, temperature: 1 } },
     { $sort: { time: 1 } },
   ];
-
-  const db = req.app.locals.db;
   const data = await db.collection('cityWeather').aggregate(pipeline).toArray();
-  res.json(data);
+  return res.json(data);
 });
 
 // POST /api/dashboard/city-temp
