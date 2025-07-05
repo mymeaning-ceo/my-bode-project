@@ -103,3 +103,48 @@ exports.saveCityTemp = asyncHandler(async (req, res) => {
 
   res.json({ city, time: isoTime, temperature });
 });
+
+// GET /api/dashboard/sales-ad-summary
+// Return daily sum of sales and ad cost
+exports.getDailySalesAdSummary = asyncHandler(async (req, res) => {
+  const db = req.app.locals.db;
+
+  const sales = await db
+    .collection('coupangSales')
+    .aggregate([
+      {
+        $group: {
+          _id: '$startDate',
+          totalSales: {
+            $sum: {
+              $toDouble: {
+                $replaceAll: { input: '$payoutAmount', find: ',', replacement: '' },
+              },
+            },
+          },
+        },
+      },
+      { $project: { _id: 0, date: '$_id', totalSales: 1 } },
+    ])
+    .toArray();
+
+  const ads = await db
+    .collection('adHistory')
+    .aggregate([
+      { $group: { _id: '$date', totalAdCost: { $sum: { $toDouble: '$cost' } } } },
+      { $project: { _id: 0, date: '$_id', totalAdCost: 1 } },
+    ])
+    .toArray();
+
+  const map = {};
+  sales.forEach((s) => {
+    map[s.date] = { date: s.date, sales: s.totalSales, adCost: 0 };
+  });
+  ads.forEach((a) => {
+    if (map[a.date]) map[a.date].adCost = a.totalAdCost;
+    else map[a.date] = { date: a.date, sales: 0, adCost: a.totalAdCost };
+  });
+
+  const data = Object.values(map).sort((a, b) => a.date.localeCompare(b.date));
+  res.json(data);
+});

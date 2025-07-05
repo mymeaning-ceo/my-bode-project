@@ -21,6 +21,7 @@ import Help from './pages/Help';
 import AdminRoutes from './routes/AdminRoutes';
 import Placeholder from './pages/Placeholder';
 import AdHistory from './pages/AdHistory';
+import Analytics from './pages/Analytics';
 
 function App() {
   return (
@@ -34,10 +35,11 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/board" element={<Board />} />
-          <Route path="/board/:id" element={<PostDetail />} />
-          <Route path="/:shop/board" element={<Board />} />
-          <Route path="/:shop/board/:id" element={<PostDetail />} />
-          <Route path="/sales-amount" element={<SalesAmount />} />
+        <Route path="/board/:id" element={<PostDetail />} />
+        <Route path="/:shop/board" element={<Board />} />
+        <Route path="/:shop/board/:id" element={<PostDetail />} />
+        <Route path="/sales-amount" element={<SalesAmount />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="/sales-volume" element={<SalesVolume />} />
         <Route path="/admin/*" element={<AdminRoutes />} />
         <Route path="/stock" element={<Stock />} />

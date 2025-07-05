@@ -115,73 +115,82 @@ function Header({ onToggleSidebar }) {
   };
 
   return (
-    <header className="app-header shadow-sm">
-      <button type="button" className="btn menu-btn" onClick={onToggleSidebar}>
-        ☰
-      </button>
-      <Link to="/dashboard" className="ms-2 fw-bold brand-link">
-        내의미
-      </Link>
-      {weather && (
-        <div className="weather-info ms-3 d-flex align-items-center gap-2">
-          <span>
-            {weather.temperature ?? "-"}℃ {skyMap[weather.sky] ?? weather.sky ?? "-"}
-          </span>
-          <select
-            className="form-select form-select-sm weather-select"
-            value={location ? location.label : ""}
-            onChange={(e) => {
-              const loc = locations.find((l) => l.label === e.target.value);
-              if (loc) setLocation(loc);
-            }}
-          >
-            {locations.map((l) => (
-              <option key={l.label} value={l.label}>
-                {l.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-      <div className="user-info ms-auto">
-        <Link to="/weather" className="me-3">
-          날씨
+    <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+      <div className="container-fluid">
+        <button type="button" className="btn btn-link me-2 text-decoration-none" onClick={onToggleSidebar}>
+          ☰
+        </button>
+        <Link to="/dashboard" className="navbar-brand fw-bold">
+          내의미
         </Link>
-        {user ? (
-          <>
-            <Link to="/profile" className="me-3">
-              {user.name || user.username}
-            </Link>
-            {timeLeft !== null && (
-              <span className="me-3 text-muted">
-                {String(Math.floor(timeLeft / 3600000)).padStart(2, "0")}:
-                {String(Math.floor((timeLeft % 3600000) / 60000)).padStart(2, "0")}:
-                {String(Math.floor((timeLeft % 60000) / 1000)).padStart(2, "0")}
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar">
+          <span className="navbar-toggler-icon" />
+        </button>
+        <div className="collapse navbar-collapse" id="topNavbar">
+          {weather && (
+            <div className="d-flex align-items-center ms-3 gap-2">
+              <span>
+                {weather.temperature ?? '-'}℃ {skyMap[weather.sky] ?? weather.sky ?? '-'}
               </span>
+              <select
+                className="form-select form-select-sm weather-select"
+                value={location ? location.label : ''}
+                onChange={(e) => {
+                  const loc = locations.find((l) => l.label === e.target.value);
+                  if (loc) setLocation(loc);
+                }}
+              >
+                {locations.map((l) => (
+                  <option key={l.label} value={l.label}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <ul className="navbar-nav ms-auto align-items-lg-center">
+            <li className="nav-item">
+              <Link to="/weather" className="nav-link">날씨</Link>
+            </li>
+            {user ? (
+              <>
+                <li className="nav-item">
+                  <Link to="/profile" className="nav-link">
+                    {user.name || user.username}
+                  </Link>
+                </li>
+                {timeLeft !== null && (
+                  <li className="nav-item text-muted mx-2">
+                    {String(Math.floor(timeLeft / 3600000)).padStart(2, '0')}:
+                    {String(Math.floor((timeLeft % 3600000) / 60000)).padStart(2, '0')}:
+                    {String(Math.floor((timeLeft % 60000) / 1000)).padStart(2, '0')}
+                  </li>
+                )}
+                <li className="nav-item">
+                  <button type="button" className="btn btn-link nav-link" onClick={handleExtend}>
+                    시간연장
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button type="button" className="btn btn-link nav-link" onClick={handleLogout}>
+                    로그아웃
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <Link to="/login" className="nav-link">로그인</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/register" className="nav-link">회원가입</Link>
+                </li>
+              </>
             )}
-            <button
-              type="button"
-              className="btn btn-link me-2"
-              onClick={handleExtend}
-            >
-              시간연장
-            </button>
-            <button type="button" className="btn btn-link" onClick={handleLogout}>
-              로그아웃
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="me-3">
-              로그인
-            </Link>
-            <Link to="/register" className="me-3">
-              회원가입
-            </Link>
-          </>
-        )}
+          </ul>
+        </div>
       </div>
-    </header>
+    </nav>
   );
 }
 
