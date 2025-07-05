@@ -65,9 +65,7 @@
         </li>
         <li class="nav-item d-flex align-items-center">
           <% if (logoutAt) { %>
-            <span class="nav-link text-muted pe-2">
-              로그아웃 <%= new Date(logoutAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }) %>
-            </span>
+            <span id="logout-timer" class="nav-link text-muted pe-2" data-logout-at="<%= logoutAt %>"></span>
           <% } %>
           <a class="nav-link text-danger" href="/logout">🚪 로그아웃</a>
         </li>
@@ -95,5 +93,19 @@
         if (offcanvas) offcanvas.hide();
       });
     });
+
+    var timerEl = document.getElementById('logout-timer');
+    if (timerEl && timerEl.dataset.logoutAt) {
+      var logoutTime = new Date(timerEl.dataset.logoutAt);
+      function updateTimer() {
+        var diff = logoutTime - new Date();
+        if (diff < 0) diff = 0;
+        var m = Math.floor(diff / 60000);
+        var s = Math.floor((diff % 60000) / 1000);
+        timerEl.textContent = '로그아웃 ' + m + ':' + (s < 10 ? '0' : '') + s;
+      }
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    }
   });
 </script>

@@ -7,6 +7,7 @@ function Header({ onToggleSidebar }) {
   const [user, setUser] = useState(null);
   const [weather, setWeather] = useState(null);
   const [logoutAt, setLogoutAt] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(null);
 
   const skyMap = { 1: "맑음", 3: "구름많음", 4: "흐림" };
   useEffect(() => {
@@ -31,6 +32,17 @@ function Header({ onToggleSidebar }) {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!logoutAt) return undefined;
+    function updateTimer() {
+      const diff = new Date(logoutAt) - new Date();
+      setTimeLeft(diff > 0 ? diff : 0);
+    }
+    updateTimer();
+    const id = setInterval(updateTimer, 1000);
+    return () => clearInterval(id);
+  }, [logoutAt]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
@@ -58,15 +70,10 @@ function Header({ onToggleSidebar }) {
           날씨
         </Link>
         {user && <span className="me-3">{user.name || user.username}</span>}
-        {logoutAt && (
+        {timeLeft !== null && (
           <span className="me-3 text-muted">
-            로그아웃
-            {" "}
-            {new Date(logoutAt).toLocaleTimeString("ko-KR", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            })}
+            로그아웃 {Math.floor(timeLeft / 60000)}:
+            {String(Math.floor((timeLeft % 60000) / 1000)).padStart(2, "0")}
           </span>
         )}
         <button type="button" className="btn btn-link" onClick={handleLogout}>
