@@ -38,4 +38,5 @@ test("displays weather info in header", async () => {
   await waitFor(() => screen.getByText(/맑음/));
   expect(screen.getByText("맑음")).toBeInTheDocument();
   expect(screen.getByText("20℃ 맑음")).toBeInTheDocument();
+  expect(screen.getByRole("combobox")).toBeInTheDocument();
 });
