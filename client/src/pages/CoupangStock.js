@@ -221,6 +221,7 @@ function CoupangStock() {
           ))}
         </tbody>
       </table>
+      {isFetching && <div className="text-center py-2">로딩 중...</div>}
       {totalPages > 1 && (
       <nav className="d-flex justify-content-center my-3">
         <ul className="pagination">
