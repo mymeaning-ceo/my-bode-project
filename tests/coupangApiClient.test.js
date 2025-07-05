@@ -30,7 +30,7 @@ test('coupangRequest sends signed request and returns data', async () => {
   const expectedSignature = crypto
     .createHmac('sha256', 'secret')
     .update('1600000000000GET/test?a=1')
-    .digest('base64');
+    .digest('hex');
 
   expect(mockFetch).toHaveBeenCalledWith(
     'https://api.example.com/test?a=1',
