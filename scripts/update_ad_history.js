@@ -36,13 +36,19 @@ async function updateAdHistory() {
       ])
       .toArray();
 
-    for (const row of rows) {
-      await db.collection('adHistory').updateOne(
-        { date: row.date },
-        { $set: { cost: row.cost, updatedAt: new Date() } },
-        { upsert: true },
-      );
-    }
+  for (const row of rows) {
+    await db.collection('adHistory').updateOne(
+      { date: row.date },
+      { $set: { cost: row.cost, updatedAt: new Date() } },
+      { upsert: true },
+    );
+  }
+
+  // 기록용 로그 컬렉션에 실행 내역 저장
+  await db.collection('update_ad_history').insertOne({
+    runAt: new Date(),
+    rows: rows.length,
+  });
 
     console.log(`\u2705 Updated adHistory with ${rows.length} documents`);
   } catch (err) {

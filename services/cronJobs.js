@@ -152,6 +152,12 @@ async function saveDailyAdCost(db) {
       { upsert: true },
     );
   }
+
+  // 실행 내역 기록
+  await db.collection('update_ad_history').insertOne({
+    runAt: new Date(),
+    rows: rows.length,
+  });
 }
 
 function startCronJobs(db) {
