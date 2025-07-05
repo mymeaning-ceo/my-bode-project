@@ -8,8 +8,16 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+  ChartDataLabels,
+);
 
 function DailySalesAmountChart() {
   const [data, setData] = useState([]);
@@ -49,6 +57,13 @@ function DailySalesAmountChart() {
       y: {
         beginAtZero: true,
         ticks: { callback: (v) => Number(v).toLocaleString() },
+      },
+    },
+    plugins: {
+      datalabels: {
+        anchor: 'end',
+        align: 'end',
+        formatter: (v) => v.toLocaleString(),
       },
     },
   };

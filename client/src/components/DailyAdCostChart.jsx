@@ -8,6 +8,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
   CategoryScale,
@@ -15,6 +16,7 @@ ChartJS.register(
   BarElement,
   Tooltip,
   Legend,
+  ChartDataLabels,
 );
 
 function DailyAdCostChart() {
@@ -69,6 +71,13 @@ function DailyAdCostChart() {
         ticks: {
           callback: (v) => v.toLocaleString(),
         },
+      },
+    },
+    plugins: {
+      datalabels: {
+        anchor: 'end',
+        align: 'end',
+        formatter: (v) => v.toLocaleString(),
       },
     },
   };
