@@ -17,7 +17,8 @@ async function updateAdHistory() {
         {
           $group: {
             _id: '$날짜',
-            cost: { $sum: '$광고비' },
+            // ensure cost is numeric before summing
+            cost: { $sum: { $toDouble: '$광고비' } },
           },
         },
         {

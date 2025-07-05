@@ -216,6 +216,7 @@ Daily advertising costs from the `coupangAdd` collection can be aggregated into
 and upserts one document per day with `{ date: 'YYYYMMDD', cost: <number> }`.
 
 ```bash
+# run from the project root so dotenv can load the environment variables
 node scripts/update_ad_history.js
 ```
 
