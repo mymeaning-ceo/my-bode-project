@@ -82,11 +82,13 @@ exports.getStockData = asyncHandler(async (req, res) => {
 
   // 검색 파라미터
   const itemCode = req.query.item_code || "";
+  const itemName = req.query.item_name || "";
   const color = req.query.color || "";
   const size = req.query.size || "";
 
   const query = {};
   if (itemCode) query.item_code = { $regex: itemCode, $options: "i" };
+  if (itemName) query.item_name = { $regex: itemName, $options: "i" };
   if (color) query.color = { $regex: color, $options: "i" };
   if (size) query.size = { $regex: size, $options: "i" };
 

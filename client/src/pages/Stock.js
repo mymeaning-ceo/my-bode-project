@@ -20,6 +20,8 @@ const columnIndex = columns.reduce(
 
 function Stock() {
   const [searchItemCode, setSearchItemCode] = useState('');
+  const [searchItemName, setSearchItemName] = useState('');
+  const [searchFullName, setSearchFullName] = useState('');
   const [searchColor, setSearchColor] = useState('');
   const [searchSize, setSearchSize] = useState('');
   const excelFormRef = useRef(null);
@@ -41,6 +43,7 @@ function Stock() {
       'order[0][column]': columnIndex[sortCol],
       'order[0][dir]': sortDir,
       item_code: searchItemCode.trim(),
+      item_name: searchItemName.trim(),
       color: searchColor.trim(),
       size: searchSize.trim(),
     });
@@ -61,7 +64,7 @@ function Stock() {
     }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line
-  }, [page, sortCol, sortDir, searchItemCode, searchColor, searchSize]);
+  }, [page, sortCol, sortDir, searchItemCode, searchItemName, searchColor, searchSize]);
 
 
   const handleSearch = () => {
@@ -71,6 +74,8 @@ function Stock() {
 
   const handleRefresh = () => {
     setSearchItemCode('');
+    setSearchItemName('');
+    setSearchFullName('');
     setSearchColor('');
     setSearchSize('');
     setPage(0);
@@ -96,6 +101,18 @@ function Stock() {
   };
 
   const totalPages = Math.ceil(total / pageSize);
+
+  const parseProductName = (name) => {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 3) {
+      return {
+        code: parts[0],
+        color: parts[parts.length - 1],
+        item: parts.slice(1, -1).join(' '),
+      };
+    }
+    return { code: '', item: '', color: '' };
+  };
 
   const changeSort = (col) => {
     if (sortCol === col) {
@@ -151,6 +168,31 @@ function Stock() {
               setPage(0);
             }}
           />
+        </div>
+        <div className="col-md-3">
+          <label htmlFor="itemName" className="form-label">상품명</label>
+          <div className="input-group">
+            <input
+              type="text"
+              id="itemName"
+              className="form-control"
+              placeholder="전체 상품명 입력"
+              value={searchFullName}
+              onChange={(e) => setSearchFullName(e.target.value)}
+            />
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => {
+                const { code, item, color } = parseProductName(searchFullName);
+                setSearchItemCode(code);
+                setSearchItemName(item);
+                setSearchColor(color);
+              }}
+            >
+              파싱
+            </button>
+          </div>
         </div>
         <div className="col-md-3">
           <label htmlFor="color" className="form-label">
