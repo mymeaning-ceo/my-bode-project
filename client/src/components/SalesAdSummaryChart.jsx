@@ -62,8 +62,6 @@ function SalesAdSummaryChart({ data }) {
   );
 }
 
-export default SalesAdSummaryChart;
-
 SalesAdSummaryChart.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
@@ -73,3 +71,5 @@ SalesAdSummaryChart.propTypes = {
     }),
   ).isRequired,
 };
+
+export default SalesAdSummaryChart;
