@@ -38,14 +38,18 @@ afterAll(async () => {
 
 describe('GET /api/coupang/detail/:id', () => {
   it('returns detail data when item exists', async () => {
+    mockCollection.findOne.mockResolvedValueOnce(null); // logo lookup
     mockCollection.findOne.mockResolvedValueOnce({
       'Option ID': '123',
       'Product name': 'Prod',
     });
-    mockCollection.toArray.mockResolvedValueOnce([
-      { 'Option ID': '123' },
-      { 'Option ID': '456' },
-    ]);
+    mockCollection.toArray
+      .mockResolvedValueOnce([]) // banner lookup
+      .mockResolvedValueOnce([
+        { 'Option ID': '123' },
+        { 'Option ID': '456' },
+      ])
+      .mockResolvedValueOnce([]); // sales lookup
     const res = await request(app).get('/api/coupang/detail/123');
     expect(res.statusCode).toBe(200);
     expect(res.body.item['Option ID']).toBe('123');
