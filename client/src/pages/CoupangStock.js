@@ -3,7 +3,6 @@ import './CoupangStock.css';
 import { useQueryClient } from '../react-query-lite';
 import useDebounce from '../hooks/useDebounce';
 import useCoupangStocks from '../hooks/useCoupangStocks';
-import DailyAdCostChart from '../components/DailyAdCostChart';
 
 const BRANDS = ['트라이', 'BYC', '제임스딘'];
 
@@ -19,7 +18,6 @@ function CoupangStock() {
   const fileRef = useRef(null);
   const queryClient = useQueryClient();
   const totalPages = Math.ceil(total / pageSize) || 1;
-  const [adSummary, setAdSummary] = useState([]);
 
   const debouncedKeyword = useDebounce(keyword, 300);
 
@@ -37,16 +35,6 @@ function CoupangStock() {
     }
   }, [data]);
 
-  const loadAdSummary = async () => {
-    const res = await fetch('/api/ad-history/update', {
-      method: 'POST',
-      credentials: 'include',
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setAdSummary(data);
-    }
-  };
 
   const handleUpload = (e) => {
     e.preventDefault();
@@ -79,7 +67,6 @@ function CoupangStock() {
       alert('업로드 실패');
     };
     xhr.send(formData);
-    loadAdSummary();
   };
 
   const handleDeleteAll = async () => {
@@ -109,9 +96,6 @@ function CoupangStock() {
   };
 
 
-  useEffect(() => {
-    loadAdSummary();
-  }, []);
 
   return (
     <div className="container">
@@ -257,28 +241,6 @@ function CoupangStock() {
           </li>
         </ul>
       </nav>
-      )}
-      {adSummary.length > 0 && (
-        <div className="mt-4">
-          <h3>쿠팡 광고비 내역</h3>
-          <DailyAdCostChart />
-          <table className="table table-bordered text-center mt-2">
-            <thead>
-              <tr>
-                <th>날짜</th>
-                <th>광고비 합</th>
-              </tr>
-            </thead>
-            <tbody>
-              {adSummary.map((row) => (
-                <tr key={row.날짜}>
-                  <td>{row.날짜}</td>
-                  <td>{Number(row.광고비).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       )}
     </div>
   );
