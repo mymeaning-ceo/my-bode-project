@@ -183,8 +183,8 @@ function AdHistory() {
   const sortedDateSummary = useMemo(() => {
     const arr = [...dateSummary];
     arr.sort((a, b) => {
-      const av = a.날짜;
-      const bv = b.날짜;
+      const av = a.date;
+      const bv = b.date;
       if (av < bv) return dateSortDir === 'asc' ? -1 : 1;
       if (av > bv) return dateSortDir === 'asc' ? 1 : -1;
       return 0;
@@ -355,9 +355,9 @@ function AdHistory() {
             </thead>
             <tbody>
               {sortedDateSummary.map((row) => (
-                <tr key={row.날짜}>
-                  <td>{row.날짜}</td>
-                  <td>{row.광고비.toLocaleString()}</td>
+                <tr key={row.date}>
+                  <td>{row.date}</td>
+                  <td>{Number(row.cost || 0).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
