@@ -3,6 +3,7 @@ import './CoupangStock.css';
 import { useQueryClient } from '../react-query-lite';
 import useDebounce from '../hooks/useDebounce';
 import useCoupangStocks from '../hooks/useCoupangStocks';
+import CoupangDetailModal from '../components/CoupangDetailModal';
 
 const BRANDS = ['트라이', 'BYC', '제임스딘'];
 
@@ -15,6 +16,7 @@ function CoupangStock() {
   const [sortCol, setSortCol] = useState('Product name');
   const [sortDir, setSortDir] = useState('asc');
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [detailData, setDetailData] = useState(null);
   const fileRef = useRef(null);
   const queryClient = useQueryClient();
   const totalPages = Math.ceil(total / pageSize) || 1;
@@ -93,6 +95,16 @@ function CoupangStock() {
       setSortDir('asc');
     }
     setPage(1);
+  };
+
+  const handleRowClick = async (optionId) => {
+    const res = await fetch(`/api/coupang/detail/${optionId}`, {
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const detail = await res.json();
+      setDetailData(detail);
+    }
   };
 
 
@@ -192,7 +204,7 @@ function CoupangStock() {
         </thead>
         <tbody>
           {(data?.data || []).map((row, idx) => (
-            <tr key={idx}>
+            <tr key={idx} onClick={() => handleRowClick(row['Option ID'])} style={{ cursor: 'pointer' }}>
               <td>{row['Option ID']}</td>
               <td className="text-start">{row['Product name']}</td>
               <td className="text-start">{row['Option name']}</td>
@@ -242,6 +254,7 @@ function CoupangStock() {
         </ul>
       </nav>
       )}
+      <CoupangDetailModal data={detailData} onClose={() => setDetailData(null)} />
     </div>
   );
 }
