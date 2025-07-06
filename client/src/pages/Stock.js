@@ -10,10 +10,13 @@ const columns = [
   { key: 'allocation', label: '할당' },
 ];
 
-const columnIndex = columns.reduce((acc, col, idx) => {
-  acc[col.key] = idx + 1;
-  return acc;
-}, {});
+const columnIndex = columns.reduce(
+  (acc, col, idx) => {
+    acc[col.key] = idx + 1;
+    return acc;
+  },
+  { seq: 0 },
+);
 
 function Stock() {
   const [searchItemCode, setSearchItemCode] = useState('');
@@ -198,7 +201,10 @@ function Stock() {
           <table className="table table-bordered shadow-sm rounded bg-white align-middle text-center stock-table">
             <thead className="table-light">
               <tr>
-                <th># 순번</th>
+                <th onClick={() => changeSort('seq')} role="button" className="no-wrap">
+                  # 순번{' '}
+                  {sortCol === 'seq' && (sortDir === 'asc' ? '▲' : '▼')}
+                </th>
                 {columns.map((col) => (
                   <th
                     key={col.key}

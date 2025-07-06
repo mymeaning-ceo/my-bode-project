@@ -4,6 +4,61 @@ const multer = require("multer");
 const { spawn } = require("child_process");
 const asyncHandler = require("../middlewares/asyncHandler"); // ★ 상단에 한 번만
 
+// ───────────────────────────────────────────
+//  데이터 변환 유틸리티
+// ───────────────────────────────────────────
+
+const itemCodeMapper = (code) => {
+  const mapping = {
+    TMDROM6: "TMDROMA",
+    TMDROM7: "TMDROMB",
+  };
+  return mapping[code] || code;
+};
+
+const itemNameMapper = (name) => {
+  const mapping = {
+    "OM)TRY즈로즈#06": "OM)TRY즈로즈#0A",
+    "OM)TRY즈로즈#07": "OM)TRY즈로즈#0B",
+  };
+  return mapping[name] || name;
+};
+
+const colorToKorean = (colorCode) => {
+  const mapping = {
+    GA: "회색",
+    UD: "네이비",
+    BK: "검정",
+    AD: "진회색",
+  };
+  const prefix = colorCode.substring(0, 2);
+  return mapping[prefix] || colorCode;
+};
+
+const groupAndSumRows = (rows) => {
+  const grouped = {};
+  rows.forEach((row) => {
+    const item_code = itemCodeMapper(row.item_code);
+    const item_name = itemNameMapper(row.item_name);
+    const color = colorToKorean(row.color);
+    const key = `${item_code}-${item_name}-${color}-${row.size}-${row.allocation}`;
+
+    if (grouped[key]) {
+      grouped[key].qty += Number(row.qty);
+    } else {
+      grouped[key] = {
+        item_code,
+        item_name,
+        color,
+        size: row.size,
+        qty: Number(row.qty) || 0,
+        allocation: row.allocation,
+      };
+    }
+  });
+  return Object.values(grouped);
+};
+
 // Multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
@@ -37,6 +92,7 @@ exports.getStockData = asyncHandler(async (req, res) => {
 
   // 정렬 파라미터
   const columns = {
+    0: "_id",
     1: "item_code",
     2: "item_name",
     3: "color",
@@ -48,22 +104,21 @@ exports.getStockData = asyncHandler(async (req, res) => {
   const orderDir = req.query["order[0][dir]"] === "desc" ? -1 : 1;
   const sortOption = { [orderCol]: orderDir };
 
-  const [rows, total] = await Promise.all([
-    db
-      .collection("stock")
-      .find(query)
-      .sort(sortOption)
-      .skip(start)
-      .limit(length)
-      .toArray(),
-    db.collection("stock").countDocuments(query),
-  ]);
+  const allRows = await db
+    .collection("stock")
+    .find(query)
+    .sort(sortOption)
+    .toArray();
+
+  const groupedRows = groupAndSumRows(allRows);
+  const total = groupedRows.length;
+  const paginated = groupedRows.slice(start, start + length);
 
   res.json({
     draw,
     recordsTotal: total,
     recordsFiltered: total,
-    data: rows,
+    data: paginated,
   });
 });
 
