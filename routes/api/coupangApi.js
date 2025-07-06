@@ -97,6 +97,35 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
   }
 });
 
+// 상세 데이터 조회 API
+router.get("/detail/:optionId", async (req, res) => {
+  const db = req.app.locals.db;
+  const { optionId } = req.params;
+  try {
+    const item = await db
+      .collection("coupang")
+      .findOne({ "Option ID": optionId });
+    if (!item) return res.status(404).json({ message: "Not found" });
+
+    const options = await db
+      .collection("coupang")
+      .find({ "Product name": item["Product name"] })
+      .toArray();
+
+    const sales = await db
+      .collection("coupangSales")
+      .find({ productName: item["Product name"] })
+      .sort({ startDate: -1 })
+      .limit(5)
+      .toArray();
+
+    res.json({ item, options, sales });
+  } catch (err) {
+    console.error("GET /api/coupang/detail 오류:", err);
+    res.status(500).json({ status: "error", message: "조회 실패" });
+  }
+});
+
 router.delete("/", async (req, res) => {
   const db = req.app.locals.db;
   try {
