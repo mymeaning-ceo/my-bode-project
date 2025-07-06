@@ -2,18 +2,9 @@ const { coupangRequest } = require('../lib/coupangApiClient');
 const { fetchDaily } = require('../controllers/weatherController');
 
 function getDefaultBaseDateTime() {
-  const now = new Date();
-  let baseDateObj = new Date(now);
-  let hour = now.getHours();
-  if (now.getMinutes() < 40) {
-    hour -= 1;
-    if (hour < 0) {
-      hour = 23;
-      baseDateObj = new Date(now.getTime() - 86400000);
-    }
-  }
-  const baseDate = baseDateObj.toISOString().slice(0, 10).replace(/-/g, '');
-  const baseTime = `${String(hour).padStart(2, '0')}00`;
+  const now = new Date(Date.now() - 60 * 60 * 1000); // 1 hour earlier
+  const baseDate = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const baseTime = `${String(now.getHours()).padStart(2, '0')}00`;
   return { baseDate, baseTime };
 }
 
