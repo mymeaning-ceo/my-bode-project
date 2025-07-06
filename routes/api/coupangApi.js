@@ -33,6 +33,7 @@ router.get("/", async (req, res) => {
       ? req.query.sort
       : "Product name";
     const sortOrder = req.query.order === "desc" ? -1 : 1;
+    const shortageOnly = req.query.shortage === "1";
 
     const conditions = [];
     if (keyword) {
@@ -50,6 +51,7 @@ router.get("/", async (req, res) => {
     }
 
     const query = conditions.length ? { $and: conditions } : {};
+    if (shortageOnly) query["Shortage quantity"] = { $gt: 0 };
 
     const [rows, total] = await Promise.all([
       db

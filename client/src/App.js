@@ -7,6 +7,7 @@ import Stock from './pages/Stock';
 import Coupang from './pages/Coupang';
 import CoupangAdd from './pages/CoupangAdd';
 import CoupangStock from './pages/CoupangStock';
+import CoupangInboundRequest from './pages/CoupangInboundRequest';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import RegisterSuccess from './pages/RegisterSuccess';
@@ -45,10 +46,12 @@ function App() {
         <Route path="/stock" element={<Stock />} />
         <Route path="/coupang" element={<Coupang />} />
         <Route path="/coupang/stock" element={<CoupangStock />} />
+        <Route path="/coupang/inbound-request" element={<CoupangInboundRequest />} />
         <Route path="/coupang-add" element={<CoupangAdd />} />
         <Route path="/ad-history" element={<AdHistory />} />
         <Route path="/:shop/ad-history" element={<AdHistory />} />
         <Route path="/weather" element={<Weather />} />
+        <Route path="/:shop/inbound-request" element={<CoupangInboundRequest />} />
         <Route path="/:shop/:section" element={<Placeholder />} />
         </Route>
       </Routes>
