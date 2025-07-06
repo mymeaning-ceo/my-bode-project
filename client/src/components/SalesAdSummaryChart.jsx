@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -62,3 +63,13 @@ function SalesAdSummaryChart({ data }) {
 }
 
 export default SalesAdSummaryChart;
+
+SalesAdSummaryChart.propTypes = {
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      date: PropTypes.string.isRequired,
+      sales: PropTypes.number.isRequired,
+      adCost: PropTypes.number.isRequired,
+    }),
+  ).isRequired,
+};

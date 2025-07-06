@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 class QueryClient {
   constructor() {
@@ -50,6 +51,11 @@ function QueryClientProvider({ client, children }) {
     <QueryClientContext.Provider value={client}>{children}</QueryClientContext.Provider>
   );
 }
+
+QueryClientProvider.propTypes = {
+  client: PropTypes.instanceOf(QueryClient).isRequired,
+  children: PropTypes.node.isRequired,
+};
 
 function useQueryClient() {
   return useContext(QueryClientContext);
