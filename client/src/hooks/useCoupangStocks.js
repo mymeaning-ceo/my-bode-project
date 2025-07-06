@@ -2,7 +2,7 @@ import { useQuery } from '../react-query-lite';
 
 const pageSize = 50;
 
-async function fetchCoupangStocks({ page, keyword, brand, sort, order }) {
+async function fetchCoupangStocks({ page, keyword, brand, sort, order, shortage }) {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(pageSize),
@@ -10,6 +10,7 @@ async function fetchCoupangStocks({ page, keyword, brand, sort, order }) {
     brand,
     sort,
     order,
+    shortage: shortage ? '1' : undefined,
   });
   const res = await fetch(`/api/coupang?${params.toString()}`, {
     credentials: 'include',
