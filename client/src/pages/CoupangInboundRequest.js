@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { exportToExcel } from '../utils/exportToExcel';
 import useDebounce from '../hooks/useDebounce';
 import useCoupangStocks from '../hooks/useCoupangStocks';
 import './CoupangStock.css';
@@ -8,6 +9,7 @@ function CoupangInboundRequest() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [threshold, setThreshold] = useState(0);
+  const [restockList, setRestockList] = useState([]);
   const [sortCol, setSortCol] = useState('Sales in the last 30 days');
   const [sortDir, setSortDir] = useState('desc');
   const debouncedThreshold = useDebounce(threshold, 300);
@@ -23,6 +25,24 @@ function CoupangInboundRequest() {
     if (data) setTotal(data.total || 0);
   }, [data]);
 
+  useEffect(() => {
+    if (!data?.data) {
+      setRestockList([]);
+      return;
+    }
+    const list = data.data
+      .map((row) => ({
+        옵션ID: row['Option ID'],
+        상품명: row['Product name'],
+        옵션명: row['Option name'],
+        상품상태: row['Offer condition'],
+        재고량: Number(row['Orderable quantity (real-time)'] || 0),
+        부족재고량: Number(row['Shortage quantity'] || 0),
+      }))
+      .filter((r) => r.부족재고량 > Number(debouncedThreshold));
+    setRestockList(list);
+  }, [data, debouncedThreshold]);
+
   const totalPages = Math.ceil(total / pageSize) || 1;
 
   const changeSort = (col) => {
@@ -33,6 +53,14 @@ function CoupangInboundRequest() {
       setSortDir('asc');
     }
     setPage(1);
+  };
+
+  const handleExcelExport = () => {
+    if (restockList.length === 0) {
+      alert('출력할 데이터가 없습니다.');
+      return;
+    }
+    exportToExcel(restockList);
   };
 
   return (
@@ -52,6 +80,13 @@ function CoupangInboundRequest() {
             onChange={(e) => setThreshold(e.target.value)}
           />
         </div>
+        <button
+          type="button"
+          onClick={handleExcelExport}
+          className="btn btn-success"
+        >
+          엑셀로 출력하기
+        </button>
       </div>
       <table className="table table-bordered text-center auto-width coupang-stock-table">
         <thead>
